@@ -832,7 +832,25 @@
   .grammar-page-card .gp-label-rest { font-weight: 500; color: var(--text-muted); }
   .grammar-page-card .gp-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
   .grammar-page-card .gp-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-  .gp-lvl-2 { color: #e88a4d; } .gp-lvl-3 { color: #26a69a; }
+  /* Reading passages (L4, 2026-11-04) */
+  .rp-passage { background: var(--surface, #1a1a1a); border: 1px solid var(--border, #2a2a2a); border-radius: 12px; padding: 14px 16px; margin: 10px 0; }
+  .rp-title { font-size: 13px; color: var(--text-dim, #888); margin-bottom: 8px; }
+  .rp-line { padding: 6px 0; cursor: pointer; border-bottom: 1px dashed rgba(127,127,127,0.18); }
+  .rp-line:last-child { border-bottom: none; }
+  .rp-jp { font-size: 20px; line-height: 1.5; }
+  .rp-ro { font-size: 13px; color: var(--text-dim, #888); }
+  .rp-en { font-size: 13px; color: var(--text-muted, #aaa); font-style: italic; }
+  .rp-claims { margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
+  .rp-claim { border: 1px solid var(--border, #2a2a2a); border-radius: 10px; padding: 10px 12px; }
+  .rp-claim.rp-right { border-color: rgba(76,175,80,0.6); }
+  .rp-claim.rp-wrong { border-color: rgba(229,115,115,0.6); }
+  .rp-claim-en { font-size: 15px; margin-bottom: 8px; }
+  .rp-tf { display: flex; gap: 8px; }
+  .rp-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border, #333); background: transparent; color: inherit; font-size: 14px; cursor: pointer; }
+  .rp-btn.active { border-color: var(--accent, #e8c468); color: var(--accent, #e8c468); }
+  .rp-btn:disabled { cursor: default; opacity: 0.8; }
+  .rp-verdict { font-size: 13px; margin-top: 6px; color: var(--text-muted, #aaa); }
+  .gp-lvl-2 { color: #e88a4d; } .gp-lvl-3 { color: #26a69a; } .gp-lvl-4 { color: #9575cd; }
   .gp-lvl { flex-shrink: 0; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 7px; border: 1px solid currentColor; opacity: 0.85; }
   .tile-group-heading.first { border-top: none; padding-top: 0; margin-top: 0; }
   .sk-reveal { font-size: 56px; line-height: 1.2; }
@@ -1248,6 +1266,7 @@
   #vocab-level-filter-row.showing-theme-colours #level-pill-1:not(.active) { color: #4d88e5; border-color: rgba(77,136,229,0.4); }
   #vocab-level-filter-row.showing-theme-colours #level-pill-2:not(.active) { color: #e88a4d; border-color: rgba(232,138,77,0.4); }
   #vocab-level-filter-row.showing-theme-colours #level-pill-3:not(.active) { color: #26a69a; border-color: rgba(38,166,154,0.4); }
+  #vocab-level-filter-row.showing-theme-colours #level-pill-4:not(.active) { color: #9575cd; border-color: rgba(149,117,205,0.4); }
   /* Tourist / Untaught (second row, 2026-10-15) take the colours their words'
      card edges already use: curated (tourist) purple, encountered green. */
   #vocab-optional-filter-row.showing-theme-colours #level-pill-tourist:not(.active) { color: #9b59d0; border-color: rgba(155,89,208,0.4); }
@@ -1658,7 +1677,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261104.001</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261104.003</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -2181,6 +2200,8 @@
            taught course itself, same as L1/L2), just here and ready so
            lessons can be added the same way L1/L2 always have been. -->
       <button class="level-pill" id="level-pill-3" onclick="setMatchLevel(3)">L3</button>
+      <!-- Level 4 (2026-11-04): the L4 app. Same pattern as L3. -->
+      <button class="level-pill" id="level-pill-4" onclick="setMatchLevel(4)">L4</button>
       <!-- Untaught vocabulary - everything not covered in the taught course
            (Trip vocabulary and Andrew's old "Materials" content merged into
            this single tier 2026-08-31 - see applyShowUntaughtVisibility).
@@ -2283,6 +2304,14 @@
         </div>
         <div class="cat-bar" id="random-verbforms-swatch"></div>
       </div>
+      <!-- Adjective forms (L4, 2026-11-04) - the Verb forms drill for adjectives. -->
+      <div class="group-card cat-tile" data-random-key="adjforms" onclick="selectRandomChoice('adjforms')" style="cursor:pointer;">
+        <div class="cat-tile-top cat-tile-top-stack">
+          <div class="group-name">Adjective forms</div>
+          <div class="random-choice-desc">20 random adjective forms — おもしろくないです, しずかでした, きれいな 〜 — which form is it? Reverse to build the form, Type to write it</div>
+        </div>
+        <div class="cat-bar" id="random-adjforms-swatch"></div>
+      </div>
 
       <div class="group-card cat-tile" data-random-key="particles" onclick="selectRandomChoice('particles')" style="cursor:pointer;">
         <div class="cat-tile-top cat-tile-top-stack">
@@ -2324,6 +2353,13 @@
           <div class="random-choice-desc">20 random words from all Level 3 categories</div>
         </div>
         <div class="cat-bar" id="random-l3-swatch"></div>
+      </div>
+      <div class="group-card cat-tile" data-random-key="L4" onclick="selectRandomChoice('L4')" style="cursor:pointer;">
+        <div class="cat-tile-top cat-tile-top-stack">
+          <div class="group-name">Random – Level 4</div>
+          <div class="random-choice-desc">20 random words from all Level 4 categories</div>
+        </div>
+        <div class="cat-bar" id="random-l4-swatch"></div>
       </div>
       <div class="group-card cat-tile" data-random-key="untaught" id="random-untaught-card" onclick="selectRandomChoice('untaught')" style="cursor:pointer; display:none;">
         <div class="cat-tile-top cat-tile-top-stack">
@@ -6055,7 +6091,7 @@ function toggleSettings() {
   else if (navCurrent !== 'settings') showSettingsScreen();
 }
 function navLabel(id) {
-  if (id === 'match-settings') return ({ theme: 'Groups', random: 'Random', grammar: 'Grammar', 1: 'L1', 2: 'L2', 3: 'L3', tourist: 'Tourist', untaught: 'Untaught', andrew: 'Andrew' })[currentMatchLevel] || 'Vocabulary';
+  if (id === 'match-settings') return ({ theme: 'Groups', random: 'Random', grammar: 'Grammar', 1: 'L1', 2: 'L2', 3: 'L3', 4: 'L4', tourist: 'Tourist', untaught: 'Untaught', andrew: 'Andrew' })[currentMatchLevel] || 'Vocabulary';
   if (id === 'drill') return 'Drill';
   if (id === 'results') return 'Results';
   const t = document.querySelector('#screen-' + id + ' .settings-title');
@@ -7076,7 +7112,7 @@ let appSettings = { theme: 'dark', showKanji: true, showExtra: true, hintPenalty
 // lastSeenChangelog doesn't match this value sees the flag until they open
 // Settings, which clears it (see showSettingsScreen()) - reading the
 // changelog itself is optional, opening Settings is what counts as "noticed".
-const LATEST_CHANGELOG_ENTRY = '2026-11-04-L4';
+const LATEST_CHANGELOG_ENTRY = '2026-11-04-L4c';
 try {
   const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
   if (savedSettings && typeof savedSettings === 'object') {
@@ -8381,8 +8417,9 @@ function refreshRandomView() {
     }
     untestedEl.textContent = txt + ')';
   }
-  [1, 2, 3].forEach(n => setupCatBar(document.getElementById('random-l' + n + '-swatch'), getCategoryBandCounts(scanVocabByTag('L' + n))));
+  [1, 2, 3, 4].forEach(n => setupCatBar(document.getElementById('random-l' + n + '-swatch'), getCategoryBandCounts(scanVocabByTag('L' + n))));
   setupCatBar(document.getElementById('random-verbforms-swatch'), getCategoryBandCounts(verbFormScoreItems()));
+  setupCatBar(document.getElementById('random-adjforms-swatch'), getCategoryBandCounts(adjFormScoreItems()));
   setupCatBar(document.getElementById('random-particles-swatch'), getCategoryBandCounts(particleScoreItems()));
   setupCatBar(document.getElementById('random-sokuon-swatch'), getCategoryBandCounts(sokuonScoreItems()));
   const untaughtCard = document.getElementById('random-untaught-card');
@@ -8425,7 +8462,7 @@ function updateRandomChoiceUI() {
   // Type applies to Verb forms too (reversed: type the form).
   ['drill-mode-toggle-card', 'listen-toggle-card'].forEach(id => {
     const card = document.getElementById(id);
-    if (card) card.classList.toggle('not-for-choice', randomChoice === 'verbforms' || randomChoice === 'particles' || randomChoice === 'sokuon');
+    if (card) card.classList.toggle('not-for-choice', randomChoice === 'verbforms' || randomChoice === 'adjforms' || randomChoice === 'particles' || randomChoice === 'sokuon');
   });
   const typeCard = document.getElementById('type-answer-toggle-card');
   if (typeCard) typeCard.classList.toggle('not-for-choice', randomChoice === 'particles' || randomChoice === 'sokuon');
@@ -8440,9 +8477,10 @@ function startSelectedRandom() {
   else if (randomChoice === 'untaught') startRandomForLevel('untaught');
   else if (randomChoice === 'tourist') startRandomForLevel('tourist');
   else if (randomChoice === 'verbforms') startVerbFormDrill();
+  else if (randomChoice === 'adjforms') startAdjFormDrill();
   else if (randomChoice === 'particles') startParticleDrill();
   else if (randomChoice === 'sokuon') startSokuonDrill();
-  else if (/^L[123]$/.test(randomChoice || '')) startRandomForLevel(+randomChoice.slice(1));
+  else if (/^L[1234]$/.test(randomChoice || '')) startRandomForLevel(+randomChoice.slice(1));
 }
 
 // Reference grids are built once and cached, but scores change as drilling
@@ -9028,7 +9066,7 @@ function renderQuestion() {
   document.getElementById('stat-left').textContent = deck.length - current;
 
   const badge = document.getElementById('q-badge');
-  badge.textContent = q.disp === 'number' ? 'numbers' : q.disp === 'word' ? 'word reading' : q.disp === 'time' ? 'time reading' : q.disp === 'counter' ? 'counter reading' : q.disp === 'verbform' ? 'verb forms' : q.disp === 'particle' ? 'particles' : q.disp === 'sokuon' ? 'small っ' : (BADGE_LABELS[q.groupKey] || q.groupKey);
+  badge.textContent = q.disp === 'number' ? 'numbers' : q.disp === 'word' ? 'word reading' : q.disp === 'time' ? 'time reading' : q.disp === 'counter' ? 'counter reading' : q.disp === 'verbform' ? (q.adj ? 'adjective forms' : 'verb forms') : q.disp === 'particle' ? 'particles' : q.disp === 'sokuon' ? 'small っ' : (BADGE_LABELS[q.groupKey] || q.groupKey);
   let badgeClass = 'base';
   if (q.disp === 'diacritic') badgeClass = 'diacritic';
   else if (q.disp === 'kanji') badgeClass = 'kanji';
@@ -9348,12 +9386,12 @@ function renderVerbFormQuestion(q, charDisplay, container) {
     const len = [...q.char].length;
     charDisplay.style.fontSize = len <= 5 ? '56px' : len <= 8 ? '44px' : '34px';
     charDisplay.innerHTML = markSmallKana(q.char);
-    promptEl.textContent = 'Which form of the verb is this?';
+    promptEl.textContent = `Which form of the ${q.kindWord || 'verb'} is this?`;
   } else {
     charDisplay.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     charDisplay.style.fontSize = '36px';
-    charDisplay.innerHTML = `${VERB_FORM_LABELS[q.verbForm]}<div class="vf-q-verb">${markSmallKana(q.verbJp)}</div><div class="vf-q-en">${q.verbEn}</div>`;
-    promptEl.textContent = q.typed ? 'Type this form of the verb' : 'Which is this form of the verb?';
+    charDisplay.innerHTML = `${q.formLabel || VERB_FORM_LABELS[q.verbForm]}<div class="vf-q-verb">${markSmallKana(q.verbJp)}</div><div class="vf-q-en">${q.verbEn}</div>`;
+    promptEl.textContent = q.typed ? `Type this form of the ${q.kindWord || 'verb'}` : `Which is this form of the ${q.kindWord || 'verb'}?`;
     if (q.typed) {
       renderTypeAnswerInput(container, 'type the form…', raw => chooseTypedVerbForm(raw, q), true);
       return;
@@ -9967,6 +10005,7 @@ function setMatchLevel(level) {
   document.getElementById('level-pill-1').classList.toggle('active', level === 1);
   document.getElementById('level-pill-2').classList.toggle('active', level === 2);
   document.getElementById('level-pill-3').classList.toggle('active', level === 3);
+  document.getElementById('level-pill-4').classList.toggle('active', level === 4);
   document.getElementById('level-pill-theme').classList.toggle('active', level === 'theme');
   const randomPill = document.getElementById('level-pill-random');
   if (randomPill) randomPill.classList.toggle('active', level === 'random');
@@ -9987,7 +10026,7 @@ function setMatchLevel(level) {
   // a new category just needs level:'andrew' or level:'untaught' in VOCAB
   // and shows up automatically, no hand-built card needed. Genki (2026-09-12)
   // joins the same list for the same reason.
-  document.getElementById('match-vocab-view').style.display = (level === 1 || level === 2 || level === 3 || level === 'andrew' || level === 'untaught' || level === 'tourist') ? 'flex' : 'none';
+  document.getElementById('match-vocab-view').style.display = (level === 1 || level === 2 || level === 3 || level === 4 || level === 'andrew' || level === 'untaught' || level === 'tourist') ? 'flex' : 'none';
   document.getElementById('match-theme-view').style.display = level === 'theme' ? 'flex' : 'none';
   document.getElementById('match-random-view').style.display = level === 'random' ? 'flex' : 'none';
   if (level === 'theme') refreshThemeCategorySwatches();
@@ -10749,6 +10788,110 @@ function buildVerbFormDeck(reverse, typed) {
       options: shuffle(VERB_FORM_KEYS.map(k => ({ value: f[k][0], top: f[k][0], sub: f[k][1], jp: true }))),
     });
   });
+}
+// ==== ADJECTIVES (L4, 2026-11-04) ====
+// い-adjectives change their own ending (おもしろくないです, おもしろかったです);
+// な-adjectives work like nouns (しずかじゃありません, しずかでした) and take な
+// before a noun (しずかな まち). A word is a な-adjective when it carries the
+// adj-na tag (vocab.js); every other adjective is an い-adjective. いい (and
+// かっこいい) conjugate from よい: よくないです, よかったです.
+function isAdjItem(item) {
+  return !!(item && item.jp && !/[\s、〜]/.test(item.jp) && (item.tags || []).some(t => /^adjectives(-|$)/.test(t) || t === 'food-adjective' || t === 'adj-na'));
+}
+function isNaAdj(jp) {
+  const it = typeof jp === 'string' ? l3TaughtItem(jp) : jp;
+  if (it && (it.tags || []).includes('adj-na')) return true;
+  return ['きれい', 'すてき'].includes(typeof jp === 'string' ? jp : (it && it.jp));
+}
+function getTaughtAdjectives() {
+  const seen = new Set();
+  return getCoreVocabPool().filter(item => {
+    if (!isAdjItem(item) || !(item.tags || []).includes('taught') || seen.has(item.jp)) return false;
+    seen.add(item.jp);
+    return true;
+  });
+}
+// The い-adjective stem the endings join: おもしろ(い), よ(い) for いい / かっこいい.
+function adjIStem(jp, ro) {
+  if (/いい$/.test(jp)) return [jp.slice(0, -2) + 'よ', ro.replace(/ii$/, 'yo')];
+  return [jp.slice(0, -1), ro.replace(/i$/, '')];
+}
+const ADJ_FORM_KEYS = ['pres', 'presNeg', 'past', 'pastNeg', 'attr'];
+const ADJ_FORM_LABELS = { pres: 'Present', presNeg: 'Present negative', past: 'Past', pastNeg: 'Past negative', attr: 'Before a noun' };
+const adjEnWord = en => String(en || '').split(' / ')[0].split(',')[0].replace(/\s*\(.*\)$/, '').trim();
+// All forms of one adjective item: { key: [jp, romaji, english] }.
+function adjForms(item) {
+  const e = adjEnWord(item.en), na = isNaAdj(item);
+  if (na) return {
+    pres: [item.jp + 'です', item.romaji + ' desu', 'is ' + e],
+    presNeg: [item.jp + 'じゃありません', item.romaji + ' ja arimasen', "isn't " + e],
+    past: [item.jp + 'でした', item.romaji + ' deshita', 'was ' + e],
+    pastNeg: [item.jp + 'じゃありませんでした', item.romaji + ' ja arimasen deshita', "wasn't " + e],
+    attr: [item.jp + 'な 〜', item.romaji + ' na ~', e + ' … (before a noun)'],
+  };
+  const [k, rk] = adjIStem(item.jp, item.romaji);
+  return {
+    pres: [item.jp + 'です', item.romaji + ' desu', 'is ' + e],
+    presNeg: [k + 'くないです', rk + 'kunai desu', "isn't " + e],
+    past: [k + 'かったです', rk + 'katta desu', 'was ' + e],
+    pastNeg: [k + 'くなかったです', rk + 'kunakatta desu', "wasn't " + e],
+    attr: [item.jp + ' 〜', item.romaji + ' ~', e + ' … (before a noun)'],
+  };
+}
+// Kanji spellings of a form (難しくないです), so a keyboard that converts
+// by itself is still marked right when typing.
+function adjFormKanji(item, form) {
+  if (!item.altForm || form === 'attr') return [];
+  const f = adjForms(item)[form][0];
+  if (isNaAdj(item)) return [item.altForm + f.slice(item.jp.length)];
+  if (/いい$/.test(item.jp) || !/い$/.test(item.altForm)) return [];
+  return [item.altForm.slice(0, -1) + f.slice(item.jp.length - 1)];
+}
+// --- Dice page drill: Adjective forms --- the Verb forms drill's twin
+// (same question type, disp 'verbform' with adj: true). Wrong answers are the
+// same adjective's other forms. Scored under 'adjform:…' keys of their own.
+function adjFormScoreItems() {
+  const out = [];
+  getTaughtAdjectives().forEach(a => ADJ_FORM_KEYS.forEach(k => out.push({ jp: 'adjform:' + a.jp, en: k, adj: a, form: k })));
+  return out;
+}
+function buildAdjFormDeck(reverse, typed) {
+  const picks = weightedSampleWithoutReplacement(adjFormScoreItems(), 20,
+    it => selectionWeight(decayedScore(kanaScores[it.jp + '|' + it.en])));
+  return picks.map(({ adj, form }) => {
+    const f = adjForms(adj);
+    const kind = isNaAdj(adj) ? 'な-adjective' : 'い-adjective';
+    const base = {
+      disp: 'verbform', adj: true, kindWord: 'adjective', groupKey: 'adj-forms', verbForm: form, reverse: !!reverse,
+      formLabel: ADJ_FORM_LABELS[form],
+      scoreKey: 'adjform:' + adj.jp + '|' + form,
+      verbJp: adj.jp, verbRomaji: adj.romaji, verbEn: adj.en + ' · ' + kind, formJp: f[form][0], formRomaji: f[form][1],
+      formKanji: adjFormKanji(adj, form),
+      typed: !!(reverse && typed && form !== 'attr'),
+      hint: f[form][1] + ' — ' + f[form][2] + ' (' + kind + ')',
+    };
+    if (!reverse) {
+      return Object.assign(base, {
+        char: f[form][0], answer: ADJ_FORM_LABELS[form],
+        options: ADJ_FORM_KEYS.map(k => ({ value: ADJ_FORM_LABELS[k], top: ADJ_FORM_LABELS[k] })),
+      });
+    }
+    return Object.assign(base, {
+      char: ADJ_FORM_LABELS[form] + ' · ' + adj.jp, answer: f[form][0],
+      options: shuffle(ADJ_FORM_KEYS.map(k => ({ value: f[k][0], top: f[k][0], sub: f[k][1], jp: true }))),
+    });
+  });
+}
+function startAdjFormDrill() {
+  if (!getTaughtAdjectives().length) return;
+  lastSettingsScreen = 'match-settings';
+  const reverse = !!vocabReversed;
+  const typed = !!typeAnswerMode;
+  lastDeckBuilder = () => buildAdjFormDeck(reverse, typed);
+  deck = lastDeckBuilder();
+  current = 0; score = 0; wrong = 0; hints = 0; answered = false; missed = []; missedItems = [];
+  showScreen('drill');
+  renderQuestion();
 }
 // ==== PARTICLE DRILL (2026-10-07) ====
 // Dice page. A sentence from the daily-sentence engine (sgGenerate) with one
@@ -11698,7 +11841,7 @@ function renderGrammarPage() {
   if (!view) return;
   view.innerHTML = '';
   const all = [];
-  [3, 2].forEach(lvl => ((GRAMMAR.hubs[lvl] || {}).entries || []).forEach((e, i) => all.push(Object.assign({ lvl, order: all.length }, e))));
+  [4, 3, 2].forEach(lvl => ((GRAMMAR.hubs[lvl] || {}).entries || []).forEach((e, i) => all.push(Object.assign({ lvl, order: all.length }, e))));
   const head = text => { const h = document.createElement('div'); h.className = 'grammar-page-head'; h.textContent = text; view.appendChild(h); };
   const card = (label, lvl, onclick, sub) => {
     const c = document.createElement('div');
@@ -11755,7 +11898,7 @@ function renderBuildPage() {
   // (2026-10-23, Andrew) The references first, a fine line, then the two
   // ways to practise - the builder (free) and the challenge (tested), with
   // the challenge's part scores under it.
-  [3, 2].forEach(lvl => ((GRAMMAR.hubs[lvl] || {}).entries || []).filter(e => e.top).forEach(e =>
+  [4, 3, 2].forEach(lvl => ((GRAMMAR.hubs[lvl] || {}).entries || []).filter(e => e.top).forEach(e =>
     card(e.label, lvl, e.card ? () => showGrammarCard(e.card) : () => { const fn = window[e.fn]; if (typeof fn === 'function') fn(); })));
   card('Desk sheets', null, showDeskSheets, 'Printable word lists for putting sentences together yourself');
   view.insertAdjacentHTML('beforeend', '<div class="section-divider build-divider"></div>');
@@ -11763,7 +11906,9 @@ function renderBuildPage() {
   card('Sentence challenge', null, () => showSentenceBuilder(true), 'An English sentence to build in Japanese, checked part by part');
   const partsHtml = sbPartsPanelHtml(false);
   if (partsHtml) view.insertAdjacentHTML('beforeend', partsHtml);
+  card('Answer it', null, () => showSentenceBuilder('answer'), 'A question in Japanese, like the ones in class — build your answer');
   card('Reading challenge', null, () => showSentenceBuilder('reverse'), 'A Japanese sentence to read: pick the English for each part');
+  card('Reading passage', null, showReadingPassage, 'A short diary of someone\'s day to read, then true or false — like the handouts');
   const partsHtmlR = sbPartsPanelHtml(true);
   if (partsHtmlR) view.insertAdjacentHTML('beforeend', partsHtmlR);
 }
@@ -11964,17 +12109,20 @@ const L3C_SLOTS = {
   ],
   // Being (2026-10-24): "X is Y". Slots 2-4 aren't used; 5 is what they are
   // / what it's like, always there; the verb is です and its endings.
+  // L4 (2026-11-04): slot 2 is とても / あまり, slot 4 a describing word before
+  // a noun (しんせつな ひと) - both off until tapped.
   being: [
-    { role: 'Topic (who / what)', particle: 'は', q: ['だれ', 'dare', 'が', 'ga'], note: 'a person — or a thing to describe' },
+    { role: 'Topic (who / what)', particle: 'は', q: ['だれ', 'dare', 'が', 'ga'], note: 'a person — or a thing or place to describe' },
     { role: 'Time (when)', note: 'いま, きょねん, らいねん — no particle; goes with jobs (きょねん → でした)' },
+    { role: 'How much (とても / あまり)', note: 'とても = very · あまり + a negative = not very' },
     { role: '', hidden: true, note: '' },
-    { role: '', hidden: true, note: '' },
-    { role: '', hidden: true, note: '' },
+    { role: 'Describing word (+ a noun)', particle: 'な', note: 'before a noun: しんせつな ひと, にぎやかな まち — な-words add な, い-words don\'t' },
     { role: 'What they are / what it\'s like', fixed: true, note: 'a job, a nationality (〜じん) or a describing word — then です' },
-    { role: 'です', note: 'です / じゃありません / でした / じゃありませんでした — tap for か' },
+    { role: 'です', note: 'です / じゃありません / でした / じゃありませんでした — い-words: 〜くないです, 〜かったです — tap for か' },
   ],
 };
 let l3cMode = 'do';
+let l3cBeingDegree = 'とても'; // Being's slot 2 when on: とても or あまり (L4)
 let l3SentStates = ['on', 'on', 'off', 'on', 'on', 'on', 'stmt'];
 let l3FreqIdx = 0;
 let l3SentWords = null;
@@ -12025,7 +12173,8 @@ function showL3SentenceOrderReference() {
   l3Note(list, 'Giving can say how, too (Lesson 6): <strong>メールで</strong> レポートを おくります, <strong>にほんごで</strong> てがみを かきます, <strong>スマホで</strong> でんわを かけます. Tap the "With what" row to add it.');
   l3Note(list, 'Put the companion after the topic: わたしは あねと デパートへ いきます, never ✗ わたしと あねは… The time word sets the tense: きのう → いきました, あした → いきます ("going to").');
   l3Note(list, 'Giving &amp; receiving: <strong>who → when → how often → to / from whom に → what を → verb</strong>. に means "to" with あげます, かします, おしえます, かきます, おくります and でんわを かけます, and "from" with もらいます, かります, ならいます. Nobody あげます to わたし — say it the other way round with もらいます: わたしは ともだちに はなを もらいました.');
-  l3Note(list, 'Being — "X is Y": <strong>who / what は → (when) → what they are / what it\'s like → です</strong>. A job (あには いしゃです), a nationality (〜じん) or a describing word (えいがは おもしろいです). です changes for the tense: じゃありません (isn\'t), でした (was), じゃありませんでした (wasn\'t). い-words like おもしろい only take です for now — their own past and negative come later.');
+  l3Note(list, 'Being, Level 4 (Lesson 8): い-words change their own ending — おもしろ<strong>くない</strong>です (isn\'t), おもしろ<strong>かった</strong>です (was), いい → <strong>よくない</strong>です. Before a noun, な-words add な: <strong>しずかな</strong> まち, <strong>しんせつな</strong> ひと; い-words don\'t: おもしろい ひと. とても = very; あまり + a negative = not very: あまり おもしろくないです. Tap the How much and Describing rows to add them.');
+  l3Note(list, 'Being — "X is Y": <strong>who / what は → (when) → what they are / what it\'s like → です</strong>. A job (あには いしゃです), a nationality (〜じん) or a describing word (えいがは おもしろいです). です changes for the tense: じゃありません (isn\'t), でした (was), じゃありませんでした (wasn\'t). い-words like おもしろい change their own ending instead (see the Level 4 note above).');
   l3Note(list, 'Going somewhere also uses きます (come) where "come" fits — to my house, to school, to a party: たなかさんは うちに きます. Invitations always use いきます.');
   l3Note(list, 'Romaji: を is written "o" here, as it\'s said. Level 2 wrote it "wo", as it was taught then — same particle, same sound.');
 
@@ -12058,7 +12207,8 @@ function renderL3ModeRow() {
       if (key === 'give') l3SentStates[4] = 'off';
       else if (before === L3C_SLOTS.give && l3SentStates[4] === 'off') l3SentStates[4] = 'on';
       if (l3cMou() && (key === 'being')) l3SentStates[6] = 'stmt';
-      if (key === 'being') { l3SentStates[5] = 'on'; if (l3SentStates[1] === 'q') l3SentStates[1] = 'on'; }
+      if (key === 'being') { l3SentStates[5] = 'on'; l3SentStates[2] = 'off'; l3SentStates[4] = 'off'; if (l3SentStates[1] === 'q') l3SentStates[1] = 'on'; }
+      else if (before === L3C_SLOTS.being) { l3SentStates[2] = 'off'; l3SentStates[4] = key === 'give' ? 'off' : 'on'; }
       if ((key === 'give' || key === 'being') && l3cInviting()) l3SentStates[6] = 'stmt';
       renderL3ModeRow(); shuffleL3SentenceExample();
     };
@@ -12102,7 +12252,7 @@ function pickFreshL3SentenceWords() {
   const inviting = l3cInviting();
   for (let tries = 0; tries < 120; tries++) {
     const tense = inviting ? 'fut' : l3cMou() ? 'past' : freqOn ? 'hab' : sgPick(['hab', 'hab', 'past', 'fut']);
-    const w = l3cMode === 'being' ? beingPick({ needTime: l3SentStates[1] === 'on' && sgChance(0.7), person: l3SentStates[0] === 'q' })
+    const w = l3cMode === 'being' ? beingPick({ needTime: l3SentStates[1] === 'on' && l3SentStates[2] !== 'on' && sgChance(0.7), person: l3SentStates[0] === 'q', adjNoun: l3SentStates[4] === 'on', degree: l3SentStates[2] === 'on' ? l3cBeingDegree : null })
       : l3cMode === 'do' ? l3cPickDo(tense, freq) : l3cMode === 'give' ? l3cPickGive(tense, freq) : l3cPickGo(tense, freq);
     if (w && l3cMou() && w.mode !== 'being') { if (w.V && w.V.once) continue; w.time = l3cMouTime(w); if (!w.time) continue; }
     if (w && !(l3cIsQ() && w.subj.me) && l3cComeOk(w) && l3cPhoneOk(w)) { l3SentWords = w; return; }
@@ -12403,6 +12553,10 @@ function renderL3SentenceRows() {
       stateLabel = `(${f.en}${f.neg ? ' — verb goes negative' : ''})`;
     } else if (state === 'q') {
       const q = l3cQOf(idx); badgeText = q[0] + q[2]; badgeClass += ' sentence-particle-badge-q'; stateLabel = '(asked as a question)';
+    } else if (l3cMode === 'being' && idx === 2 && state === 'on') {
+      badgeText = l3cBeingDegree; badgeClass += ' sentence-particle-badge-freq'; stateLabel = l3cBeingDegree === 'あまり' ? '(not very — the ending goes negative)' : '(very)';
+    } else if (l3cMode === 'being' && idx === 4 && state === 'on') {
+      badgeText = w && w.adj && isNaAdj(w.adj.jp) ? 'な' : '∅'; stateLabel = w && w.adj ? (isNaAdj(w.adj.jp) ? '(a な-word: add な)' : '(an い-word: nothing added)') : '';
     } else if (l3cMode === 'being' && (idx === 1 || idx === 5)) {
       badgeText = idx === 1 ? '∅' : '–';
     } else if (idx === 1) {
@@ -12468,6 +12622,16 @@ function cycleL3SentenceSlot(idx) {
     l3FixTimeForFreq();
   } else if (L3C_SLOTS[l3cMode][idx].hidden || L3C_SLOTS[l3cMode][idx].fixed) {
     // not used in this mode / always there
+  } else if (l3cMode === 'being' && idx === 2) {
+    // off -> とても -> あまり -> off
+    if (l3SentStates[2] !== 'on') { l3SentStates[2] = 'on'; l3cBeingDegree = 'とても'; }
+    else if (l3cBeingDegree === 'とても') l3cBeingDegree = 'あまり';
+    else l3SentStates[2] = 'off';
+    if (l3SentStates[2] === 'on') l3SentStates[1] = 'off'; // degree words go with describing words, not jobs + time
+    pickFreshL3SentenceWords();
+  } else if (l3cMode === 'being' && idx === 4) {
+    l3SentStates[4] = l3SentStates[4] === 'on' ? 'off' : 'on';
+    pickFreshL3SentenceWords();
   } else if (l3cMode === 'being' && idx === 1) {
     // Time: on or off. Switching it on wants a time word - jobs and な-words.
     l3SentStates[1] = l3SentStates[1] === 'on' ? 'off' : 'on';
@@ -13047,7 +13211,7 @@ function startRandomForLevel(level) {
   // whatever L3 content lands here next, until that content gets a proper
   // tag of its own the way Untaught just did.
   let allItems;
-  if (level === 1 || level === 2 || level === 3) {
+  if (level === 1 || level === 2 || level === 3 || level === 4) {
     allItems = scanVocabByTag('L' + level);
   } else if (level === 'untaught') {
     allItems = scanVocabByTag(UNTAUGHT_ONLY_QUERY);
@@ -14045,6 +14209,161 @@ function sgMouQA() {
   }
   return [q, a];
 }
+// ADJECTIVES in the daily sentence (L4, 2026-11-04): Being sentences with
+// describing words (beingPick / beingBuild, so the card and the daily
+// sentence agree), and 〜が "but" joining two of them about one thing.
+function sgBeingToLine(ex) {
+  const jp = ex.parts.map(pt => pt.slot === 0 && /.は$/.test(pt.jp) ? pt.jp.replace(/は$/, ' は') : pt.jp).join(' ') + (ex.q ? '' : '。');
+  return { jp: ex.q ? jp.replace(/か$/, ' か。') : jp, ro: sgCap(ex.romaji), en: l3cEnPlain(ex.enM) };
+}
+function sgAdjSentence() {
+  const w = beingPick({ random: true, adjNoun: sgChance(0.35) });
+  if (!w || (w.kind !== 'adj' && w.kind !== 'adjnoun')) return null;
+  return [sgBeingToLine(beingBuild(w, ['on', w.time ? 'on' : 'off', w.degree ? 'on' : 'off', 'off', w.adj ? 'on' : 'off', 'on', 'stmt']))];
+}
+// 〜ですが、〜です: one good thing and one bad thing about the same topic.
+const SG_BUT_GOOD = ['おいしい', 'おもしろい', 'きれい', 'べんり', 'たのしい', 'やすい', 'しずか', 'にぎやか', 'あたらしい', 'ゆうめい', 'いい', 'すてき', 'かわいい'];
+const SG_BUT_BAD = ['たかい', 'むずかしい', 'ふるい', 'ちいさい', 'さむい', 'あつい', 'いそがしい'];
+// Never "new, but old": opposites can't be joined with が.
+const SG_BUT_OPPOSITES = [['あたらしい', 'ふるい'], ['おおきい', 'ちいさい'], ['たかい', 'やすい'], ['しずか', 'にぎやか'], ['むずかしい', 'やさしい'], ['さむい', 'あつい'], ['いい', 'わるい']];
+function sgButSentence() {
+  if (!sgW('〜が')) return null;
+  const groups = BEING_THINGS.map(g => ({ objs: g.objs.filter(o => sgW(o)), good: g.adjs.filter(a => sgW(a) && SG_BUT_GOOD.includes(a)), bad: g.adjs.filter(a => sgW(a) && SG_BUT_BAD.includes(a)), place: g.place }))
+    .filter(g => g.objs.length && g.good.length && g.bad.length);
+  const g = sgPick(groups);
+  if (!g) return null;
+  const o = sgPick(g.objs);
+  const pairs = [];
+  g.good.forEach(x => g.bad.forEach(y => { if (!SG_BUT_OPPOSITES.some(p => p.includes(x) && p.includes(y)) && beingAdjFits(o, x) && beingAdjFits(o, y)) pairs.push([x, y]); }));
+  if (!pairs.length) return null;
+  let [a1, a2] = sgPick(pairs);
+  if (sgChance(0.5)) [a1, a2] = [a2, a1];
+  const topicEn = beingTopicEn(o);
+  const plural = /^the \S.*s$/i.test(topicEn) && !/(ss|us)$/i.test(topicEn);
+  const be = plural ? 'are' : 'is', pron = plural ? 'they' : 'it';
+  const seg = sgSeg(o, 'は', 'wa');
+  const w1 = sgW(a1), w2 = sgW(a2);
+  return [{ jp: `${seg.jp} ${w1.jp}ですが、 ${w2.jp}です。`, ro: sgCap(`${seg.ro} ${w1.ro} desu ga, ${w2.ro} desu.`),
+    en: sgCap(`${topicEn} ${be} ${beingAdjEn(a1)}, but ${pron} ${be} ${beingAdjEn(a2)}.`) }];
+}
+// ==== READING PASSAGES (L4, 2026-11-04) ====
+// Like the handouts' reading tasks: a short diary of one day (four or five
+// linked sentences, all from the engine's own words and rules), then four
+// English statements to mark true or false. Every statement comes from one
+// fact in the passage; a false one changes that single detail.
+function rpEn(jp, fallback) { const it = l3TaughtItem(jp); return it ? beingEnWord(it) : fallback || jp; }
+function rpPassage() {
+  // Day
+  const days = [['きのう', 'yesterday', ''], ['どようび', 'on Saturday', 'に'], ['にちようび', 'on Sunday', 'に'], ['せんしゅうの どようび', 'last Saturday', 'に']]
+    .filter(d => sgW(d[0].split(' ').pop()) && (d[0].indexOf(' ') < 0 || sgW('せんしゅう')));
+  const day = sgPick(days);
+  if (!day) return null;
+  const dayJp = day[0] + (day[2] ? day[2] : ''), dayRo = day[0].split(' ').map(x => sgW(x) ? sgW(x).ro : 'no').join(' ') + (day[2] ? ' ni' : '');
+  // Where: a destination that's also a place where something happens
+  const placeActs = Object.keys(SG_DEST).filter(d => sgW(d) && !['work', 'weekday', 'church'].includes(SG_DEST[d][1]))
+    .map(d => ({ d, acts: SG_OBJECT_VERBS.filter(V => !V.intrans && !V.routine && !V.workObj && sgW(V.v) && V.places.includes(d) && V.objs.some(o => sgW(o[0]))) }))
+    .filter(x => x.acts.length);
+  const pa = sgPick(placeActs);
+  if (!pa) return null;
+  const dest = pa.d, destEn = SG_DEST[dest][0], kind = SG_DEST[dest][1];
+  const V = sgPick(pa.acts), objs = V.objs.filter(o => sgW(o[0])), o = sgPick(objs);
+  const tr = sgPick(SG_TRANSPORT.filter(t => sgW(t[0]) && !t[2]));
+  const comp = sgCompanion({ me: true, segs: [] }, dest, kind === 'bar', false);
+  if (!tr || !comp) return null;
+  const compSegs = comp.segs || [comp.seg];
+  const lines = [], facts = [];
+  const J = segs => segs.map(x => l3cJp(x)).join(' ');
+  const R = segs => segs.map(x => x.ro).join(' ');
+  // 1. went there
+  const go = sgVerb('いきます', 'past', false);
+  lines.push({ jp: `${dayJp} ${J(compSegs)} ${tr[0]}で ${dest}に ${go.jp}。`, ro: sgCap(`${dayRo} ${R(compSegs)} ${sgW(tr[0]).ro} de ${sgW(dest).ro} ni ${go.ro}.`), en: `${sgCap(day[1])}, I went ${destEn} ${comp.en} ${tr[1]}.` });
+  const alt = (list, cur) => sgPick(list.filter(x => x !== cur));
+  const otherTr = alt(SG_TRANSPORT.filter(t => sgW(t[0]) && !t[2]).map(t => t[1]), tr[1]);
+  facts.push({ t: `I went ${destEn} ${tr[1]}.`, f: otherTr && `I went ${destEn} ${otherTr}.` });
+  if (comp.en !== 'on my own') facts.push({ t: `I went ${comp.en}.`, f: 'I went on my own.' });
+  else facts.push({ t: 'I went on my own.', f: 'I went with a friend.' });
+  // 2. did something there
+  const vb = sgVerb(V.v, 'past', false), ph = sgActPhrase(V, o, 'past');
+  lines.push({ jp: `${dest}で ${o[0]}を ${vb.jp}。`, ro: sgCap(`${sgW(dest).ro} de ${sgW(o[0]).ro} o ${vb.ro}.`), en: sgCap(`I ${sgVerbEn(ph, 'past')} ${sgPlaceEnSafe(dest)}.`) });
+  const o2 = alt(objs, o);
+  facts.push({ t: sgCap(`I ${sgVerbEn(ph, 'past')} ${sgPlaceEnSafe(dest)}.`), f: o2 && sgCap(`I ${sgVerbEn(sgActPhrase(V, o2, 'past'), 'past')} ${sgPlaceEnSafe(dest)}.`) });
+  // 3. a comment on it, if there's a describing word for that thing or place
+  const g = BEING_THINGS.find(x => x.objs.includes(o[0])) || BEING_THINGS.find(x => x.objs.includes(dest));
+  if (g) {
+    const thing = g.objs.includes(o[0]) ? o[0] : dest;
+    const adjs = g.adjs.filter(a => sgW(a) && beingAdjFits(thing, a));
+    const a = sgPick(adjs.filter(x => SG_BUT_GOOD.includes(x))) || sgPick(adjs);
+    if (a) {
+      const isI = beingIsI(a), pa2 = isI ? beingIForm(a, sgW(a).ro, 5) : [a, sgW(a).ro];
+      const deg = sgChance(0.4) && sgW('とても');
+      const tEn = beingTopicEn(thing), plural = /^the \S.*s$/i.test(tEn) && !/(ss|us)$/i.test(tEn);
+      lines.push({ jp: `${thing}は ${deg ? 'とても ' : ''}${pa2[0]}${isI ? 'です' : 'でした'}。`, ro: sgCap(`${sgW(thing).ro} wa ${deg ? 'totemo ' : ''}${pa2[1]} ${isI ? 'desu' : 'deshita'}.`), en: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${deg ? 'very ' : ''}${beingAdjEn(a)}.`) });
+      facts.push({ t: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${beingAdjEn(a)}.`), f: sgCap(`${tEn} ${plural ? "weren't" : "wasn't"} ${beingAdjEn(a)}.`) });
+    }
+  }
+  // 4. then something at home, or home
+  const homeActs = SG_OBJECT_VERBS.filter(H => !H.intrans && !H.routine && !H.workObj && sgW(H.v) && H.places.includes('うち') && H !== V && H.objs.some(x => sgW(x[0])));
+  if (sgW('それから') && homeActs.length && sgChance(0.75)) {
+    const H = sgPick(homeActs), ho = sgPick(H.objs.filter(x => sgW(x[0]))), hv = sgVerb(H.v, 'past', false), hph = sgActPhrase(H, ho, 'past');
+    lines.push({ jp: `それから うちで ${ho[0]}を ${hv.jp}。`, ro: `Sorekara uchi de ${sgW(ho[0]).ro} o ${hv.ro}.`, en: sgCap(`After that, I ${sgVerbEn(hph, 'past')} at home.`) });
+    const H2 = sgPick(homeActs.filter(x => x !== H && x.v !== H.v));
+    const ho2 = H2 && sgPick(H2.objs.filter(x => sgW(x[0])));
+    facts.push({ t: sgCap(`After that, I ${sgVerbEn(hph, 'past')} at home.`), f: ho2 && sgCap(`After that, I ${sgVerbEn(sgActPhrase(H2, ho2, 'past'), 'past')} at home.`) });
+  } else if (sgW('かえります')) {
+    const kv = sgVerb('かえります', 'past', false);
+    lines.push({ jp: `${sgW('ごご') ? 'ごご ' : ''}うちに ${kv.jp}。`, ro: sgCap(`${sgW('ごご') ? 'gogo ' : ''}uchi ni ${kv.ro}.`), en: `${sgW('ごご') ? 'In the afternoon, I' : 'I'} went home.` });
+  }
+  // Four statements, each true or false at random.
+  const claims = shuffle(facts.filter(f => f.t && f.f)).slice(0, 4).map(f => { const truth = sgChance(0.5); return { en: truth ? f.t : f.f, truth }; });
+  if (claims.length < 3) return null;
+  return { title: day[0], lines, claims };
+}
+const sgPlaceEnSafe = p => (SG_PLACE_EN[p] && SG_PLACE_EN[p][0]) || 'at ' + rpEn(p);
+let rpCur = null, rpShow = { ro: false, en: false }, rpStats = { right: 0, total: 0 };
+function showReadingPassage() {
+  for (let i = 0; i < 30 && !(rpCur = rpPassage()); i++);
+  rpShow = { ro: false, en: false };
+  const list = l3RefOpen('Reading passage');
+  vocabRefBackTarget = 'build';
+  list.className = 'tight-list rp-wrap';
+  rpRender();
+  showScreen('vocab-reference');
+  window.scrollTo(0, 0);
+}
+function rpRender() {
+  const list = document.getElementById('vocab-ref-list');
+  if (!list || !rpCur) return;
+  const done = rpCur.claims.every(c => c.ans !== undefined);
+  const say = t => t.replace(/'/g, '');
+  list.innerHTML = `
+    <div class="verb-conj-note">Read the diary, then decide whether each sentence underneath is true or false. Tap a line to hear it.</div>
+    <div class="rp-passage">
+      <div class="rp-title">${markSmallKana(rpCur.title)}</div>
+      ${rpCur.lines.map(l => `<div class="rp-line" onclick="speakJapanese('${say(l.jp.replace(/\s/g, ''))}')"><div class="rp-jp">${markSmallKana(l.jp)}</div>${rpShow.ro || done ? `<div class="rp-ro">${l.ro}</div>` : ''}${rpShow.en || done ? `<div class="rp-en">${l.en}</div>` : ''}</div>`).join('')}
+    </div>
+    <div class="ds-buttons">
+      <button type="button" class="ds-btn" onclick="speakJapanese('${say(rpCur.lines.map(l => l.jp.replace(/\s/g, '')).join(''))}')">🔊 Hear it all</button>
+      ${done ? '' : `<button type="button" class="ds-btn" onclick="rpShow.ro=!rpShow.ro;rpRender()">${rpShow.ro ? 'Hide' : 'Show'} romaji</button><button type="button" class="ds-btn" onclick="rpShow.en=!rpShow.en;rpRender()">${rpShow.en ? 'Hide' : 'Show'} English</button>`}
+    </div>
+    <div class="rp-claims">
+      ${rpCur.claims.map((c, k) => {
+        const res = c.ans === undefined ? '' : c.ans === c.truth ? ' rp-right' : ' rp-wrong';
+        return `<div class="rp-claim${res}"><div class="rp-claim-en">${k + 1}. ${c.en}</div><div class="rp-tf">
+          <button type="button" class="rp-btn${c.ans === true ? ' active' : ''}" onclick="rpAnswer(${k}, true)" ${c.ans !== undefined ? 'disabled' : ''}>True</button>
+          <button type="button" class="rp-btn${c.ans === false ? ' active' : ''}" onclick="rpAnswer(${k}, false)" ${c.ans !== undefined ? 'disabled' : ''}>False</button></div>
+          ${c.ans !== undefined ? `<div class="rp-verdict">${c.ans === c.truth ? 'Right' : 'Not this time'} — it's ${c.truth ? 'true' : 'false'}.</div>` : ''}</div>`;
+      }).join('')}
+    </div>
+    ${done ? `<div class="sb-verdict${rpCur.claims.every(c => c.ans === c.truth) ? ' good' : ''}">${rpCur.claims.filter(c => c.ans === c.truth).length} of ${rpCur.claims.length} right · this session ${rpStats.right} of ${rpStats.total}</div>` : ''}
+    <div class="ds-buttons"><button type="button" class="ds-btn ds-btn-main" onclick="showReadingPassage()">${done ? 'Next passage →' : 'A different passage'}</button></div>`;
+}
+function rpAnswer(k, val) {
+  const c = rpCur && rpCur.claims[k];
+  if (!c || c.ans !== undefined) return;
+  c.ans = val;
+  rpStats.total++; if (val === c.truth) rpStats.right++;
+  rpRender();
+}
 function sgQA() {
   const kind = sgPick(['what', 'what', 'where', 'where', 'who', 'who', 'when', 'freq', 'freq', 'whattime']);
   const tense = sgPick(['fut', 'past', 'hab']);
@@ -14430,7 +14749,18 @@ function showDeskSheets() {
 // Describing words: い-words (おもしろい) only take です here - their own
 // negative and past (おもしろくない, おもしろかった) aren't taught yet; な-words
 // (きれい, すてき) take all four endings like a noun.
-const BEING_ENDS = [['です', 'desu', 'hab', false], ['じゃありません', 'ja arimasen', 'hab', true], ['でした', 'deshita', 'past', false], ['じゃありませんでした', 'ja arimasen deshita', 'past', true]];
+const BEING_ENDS = [['です', 'desu', 'hab', false], ['じゃありません', 'ja arimasen', 'hab', true], ['でした', 'deshita', 'past', false], ['じゃありませんでした', 'ja arimasen deshita', 'past', true],
+  // L4 (2026-11-04): い-adjectives change their own ending. 4-6 are those, shown
+  // joined to the word (おもしろくない + です). Only right after an い-word.
+  ['くないです', 'kunai desu', 'hab', true, 'i'], ['かったです', 'katta desu', 'past', false, 'i'], ['くなかったです', 'kunakatta desu', 'past', true, 'i']];
+// Ending index for a tense / negative pair: nouns and な-words 0-3, い-words 0 / 4-6.
+const beingEndIdx = (isI, past, neg) => isI ? [0, 4, 5, 6][(past ? 2 : 0) + (neg ? 1 : 0)] : (past ? 2 : 0) + (neg ? 1 : 0);
+// An い-word joined to an ending 4-6: [jp, romaji] without です (おもしろくない).
+function beingIForm(jp, ro, endIdx) {
+  const [k, rk] = adjIStem(jp, ro);
+  const tail = { 4: ['くない', 'kunai'], 5: ['かった', 'katta'], 6: ['くなかった', 'kunakatta'] }[endIdx];
+  return tail ? [k + tail[0], rk + tail[1]] : [jp, ro];
+}
 const BEING_NA = ['きれい', 'すてき'];
 const BEING_SKIP_JOBS = ['きょうし', 'しゃいん']; // two "teacher"s / vague
 const BEING_DEMONYM = { オーストラリア: 'Australian', ブラジル: 'Brazilian', カナダ: 'Canadian', ちゅうごく: 'Chinese', エジプト: 'Egyptian', フランス: 'French',
@@ -14444,11 +14774,37 @@ const BEING_THINGS = [
   { objs: ['ほん', 'えいが', 'ドラマ', 'しんぶん', 'ざっし'], adjs: ['おもしろい', 'いい', 'すごい', 'ながい', 'みじかい', 'ふるい', 'あたらしい'] },
   { objs: ['にんぎょう', 'ぬいぐるみ', 'え'], adjs: ['かわいい', 'きれい', 'すてき', 'ふるい', 'あたらしい'] },
   { objs: ['ビール', 'ジュース', 'みず', 'アイスコーヒー'], adjs: ['つめたい'] },
+  // L4 (Lesson 8 preview, 2026-11-04): places, food, study and work.
+  { objs: ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター', 'まち'], adjs: ['にぎやか', 'しずか', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい', 'ふるい', 'あたらしい', 'いい', 'さむい', 'あつい'], place: true },
+  { objs: ['えき', 'こうえん', 'レストラン', 'デパート', 'がっこう'], adjs: ['にぎやか', 'しずか', 'きれい', 'べんり', 'おおきい', 'ちいさい', 'あたらしい', 'ふるい', 'ゆうめい'] },
+  { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの'], adjs: ['おいしい', 'たかい', 'やすい'] },
+  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'たのしい'] },
 ];
-const BEING_PEOPLE_ADJS = ['おもしろい', 'かっこいい', 'きれい', 'すてき', 'かわいい', 'すごい'];
+const BEING_PEOPLE_ADJS = ['おもしろい', 'かっこいい', 'きれい', 'すてき', 'かわいい', 'すごい', 'しんせつ', 'げんき', 'ひま', 'いそがしい', 'ハンサム', 'ゆうめい'];
+// Describing a person: words whose first English meaning is the wrong one here.
+const BEING_PEOPLE_EN = { やさしい: 'kind', いそがしい: 'busy', げんき: 'well' };
+// Adjective + noun (しんせつな ひと, にぎやかな まち, ゆうめいな いしゃ): [noun, adjectives].
+const BEING_ADJ_NOUN_PEOPLE = ['しんせつ', 'おもしろい', 'げんき', 'いい', 'ゆうめい', 'ハンサム', 'きれい', 'やさしい', 'いそがしい', 'すてき'];
+const BEING_ADJ_NOUN_JOBS = ['ゆうめい', 'いい', 'しんせつ', 'いそがしい'];
+const BEING_ADJ_NOUN_PLACES = ['にぎやか', 'しずか', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい', 'ふるい', 'あたらしい', 'いい'];
+// とても / あまり in the How-much spot (slot 2) - あまり takes a negative.
+const BEING_DEGREE = { とても: { ro: 'totemo', en: 'very' }, あまり: { ro: 'amari', en: 'very', neg: true } };
+// English for an adjective (first meaning, before any comma or slash).
+// Topics whose English isn't "the" + the word list's first meaning.
+const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town' };
+function beingTopicEn(o) {
+  if (BEING_TOPIC_EN[o]) return BEING_TOPIC_EN[o];
+  const g = BEING_THINGS.find(x => x.objs.includes(o));
+  return (g && g.place ? '' : 'the ') + beingEnWord(l3TaughtItem(o) || { en: o }).replace('UK / England', 'the UK');
+}
+// Big cities aren't small or quiet (Tokyo, London, Osaka).
+const BEING_BIG_CITIES = ['とうきょう', 'ロンドン', 'おおさか'];
+const beingAdjFits = (o, a) => !(BEING_BIG_CITIES.includes(o) && ['ちいさい', 'しずか'].includes(a));
+const beingAdjEn = (jp, person) => (person && BEING_PEOPLE_EN[jp]) || adjEnWord((l3TaughtItem(jp) || { en: jp }).en);
 const beingEnWord = it => String(it.en || '').split(' / ')[0].replace(/\s*\(.*\)$/, '').trim();
 const beingArticle = w => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
-const beingIsI = jp => /い$/.test(jp) && !BEING_NA.includes(jp);
+// An い-adjective (not a noun that happens to end in い: がくせい, せんせい, とけい).
+const beingIsI = jp => /い$/.test(jp) && !isNaAdj(jp) && isAdjItem(l3TaughtItem(jp));
 function beingJobs() {
   return (VOCAB_ALL_TAUGHT_CACHE.jobs = VOCAB_ALL_TAUGHT_CACHE.jobs || Object.values(VOCAB).flatMap(v => v.items || [])
     .filter(i => (i.tags || []).includes('taught') && (i.tags || []).some(t => /^occupations/.test(t)) && !BEING_SKIP_JOBS.includes(i.jp))
@@ -14459,11 +14815,11 @@ function beingNations() {
   return Object.keys(BEING_DEMONYM).filter(c => sgW(c)).map(c => ({ jp: c + 'じん', ro: sgW(c).ro + 'jin', en: BEING_DEMONYM[c] }));
 }
 // English: subject + be + complement (+ when).
-function beingEnglish(S, me, you, kind, compEn, tense, neg, q, timeEn, third) {
+function beingEnglish(S, me, you, kind, compEn, tense, neg, q, timeEn, third, marked) {
   // "The shoes ARE lovely" (Andrew, 2026-10-24): a plural thing takes are /
   // were, like "you" - くつ (shoes) and ふく (clothes) so far.
   if (/^the \S.*s$/i.test(l3cEnPlain(String(S))) && !/(ss|us)$/i.test(l3cEnPlain(String(S)))) { third = false; me = false; you = false; }
-  const C = mk(5, compEn), T = timeEn ? ' ' + mk(1, timeEn) : '';
+  const C = marked ? compEn : mk(5, compEn), T = timeEn ? ' ' + mk(1, timeEn) : '';
   if (q) {
     if (tense === 'past') return `${neg ? ((me && !you) || third ? "Wasn't" : "Weren't") : (me && !you ? 'Was' : third ? 'Was' : 'Were')} ${S} ${C}${T}?`.replace(/^Wasn't (you)/, "Weren't $1").replace(/^Was (you)/, 'Were $1');
     if (tense === 'fut') return `${neg ? "Won't" : 'Will'} ${S} be ${C}${T}?`;
@@ -14478,26 +14834,64 @@ function beingEnglish(S, me, you, kind, compEn, tense, neg, q, timeEn, third) {
 // Being sentences in two steps (2026-10-24): beingPick chooses the words,
 // beingBuild lays them out - so the Sentence order card can switch slots on
 // and off and ask questions with the same words, and the challenges use the
-// same pair. opts.needTime: a time word is wanted (jobs and な-words only);
-// opts.person: the topic must be a person (for だれが…?).
+// same pair. opts.needTime: a time word is wanted (jobs only); opts.person:
+// the topic must be a person (for だれが…?). L4 (2026-11-04): opts.adjNoun -
+// an adjective before a noun (しんせつな ひと, slot 4 + slot 5); opts.degree -
+// とても or あまり (slot 2, with a describing word); opts.random - the
+// challenges and the daily sentence choose those themselves.
 function beingPick(opts = {}) {
+  if (opts.random) {
+    if (!opts.needTime && sgChance(0.22)) opts = Object.assign({}, opts, { adjNoun: true });
+    if (!opts.needTime && sgChance(0.25)) opts = Object.assign({}, opts, { degree: sgChance(0.5) ? 'とても' : 'あまり' });
+  }
   const r = sgRand();
-  let kind = r < 0.45 ? 'job' : r < 0.65 ? 'nation' : 'adj';
+  let kind = r < 0.38 ? 'job' : r < 0.55 ? 'nation' : 'adj';
   if (opts.needTime) kind = 'job'; // time words only go with jobs (2026-10-24: "the shirt was lovely last year" read oddly)
-  let subj, topicWord = null, topicEn = null, comp;
-  if (kind === 'adj' && !opts.person && sgChance(0.65)) {
-    const groups = BEING_THINGS.map(g => ({ objs: g.objs.filter(o => sgW(o)), adjs: g.adjs.filter(a => sgW(a) && !(opts.needTime && !BEING_NA.includes(a))) })).filter(g => g.objs.length && g.adjs.length);
+  if (opts.degree && kind !== 'adj') kind = 'adj';
+  if (opts.adjNoun) kind = 'adjnoun';
+  let subj, topicWord = null, topicEn = null, comp, adj = null;
+  if (kind === 'adjnoun') {
+    // A person (+ ひと or their job) or a city (+ まち).
+    if (!opts.person && sgChance(0.35) && sgW('まち')) {
+      const cities = ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター'].filter(c => sgW(c));
+      const c = sgPick(cities), a = sgPick(BEING_ADJ_NOUN_PLACES.filter(x => sgW(x) && beingAdjFits(c, x)));
+      if (!c || !a) return null;
+      topicWord = c; topicEn = beingEnWord(l3TaughtItem(c)).replace('UK / England', 'the UK');
+      subj = { segs: [sgSeg(c, 'は', 'wa')], en: topicEn, third: true, thing: true };
+      adj = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a) };
+      comp = { jp: 'まち', ro: sgW('まち').ro, en: 'town', noun: true };
+    } else {
+      subj = sgSubject({ noTeacher: true });
+      const useJob = sgChance(0.35) && !subj.child;
+      if (useJob) {
+        let jobs = beingJobs();
+        if (subj.elderly) jobs = jobs.filter(j => j.jp !== 'がくせい');
+        const j = sgPick(jobs), a = sgPick(BEING_ADJ_NOUN_JOBS.filter(x => sgW(x)));
+        if (!j || !a) return null;
+        adj = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a, true) };
+        comp = { jp: j.jp, ro: j.romaji, en: beingEnWord(j), jobEn: beingEnWord(j), noun: true };
+      } else {
+        if (!sgW('ひと')) return null;
+        const a = sgPick(BEING_ADJ_NOUN_PEOPLE.filter(x => sgW(x)));
+        if (!a) return null;
+        adj = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a, true) };
+        comp = { jp: 'ひと', ro: 'hito', en: 'person', noun: true };
+      }
+    }
+  } else if (kind === 'adj' && !opts.person && sgChance(0.65)) {
+    const groups = BEING_THINGS.map(g => ({ objs: g.objs.filter(o => sgW(o)), adjs: g.adjs.filter(a => sgW(a) && !(opts.needTime && !isNaAdj(a))), place: g.place })).filter(g => g.objs.length && g.adjs.length);
     if (!groups.length) return null;
-    const g = sgPick(groups), o = sgPick(g.objs), a = sgPick(g.adjs);
-    topicWord = o; topicEn = 'the ' + beingEnWord(l3TaughtItem(o) || { en: o });
+    const g = sgPick(groups), o = sgPick(g.objs), a = sgPick(g.adjs.filter(x => beingAdjFits(o, x)));
+    if (!a) return null;
+    topicWord = o; topicEn = beingTopicEn(o);
     subj = { segs: [sgSeg(o, 'は', 'wa')], en: topicEn, third: true, thing: true };
-    comp = { jp: a, ro: sgW(a).ro, en: beingEnWord(l3TaughtItem(a) || { en: a }) };
+    comp = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a) };
   } else {
     subj = sgSubject({ noTeacher: true });
     if (kind === 'adj') {
-      const a = sgPick(BEING_PEOPLE_ADJS.filter(a => sgW(a) && !(opts.needTime && !BEING_NA.includes(a))));
+      const a = sgPick(BEING_PEOPLE_ADJS.filter(a => sgW(a) && !(opts.needTime && !isNaAdj(a))));
       if (!a) return null;
-      comp = { jp: a, ro: sgW(a).ro, en: beingEnWord(l3TaughtItem(a)) };
+      comp = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a, true) };
     } else if (kind === 'job') {
       let jobs = beingJobs();
       if (subj.child) jobs = jobs.filter(j => j.jp === 'がくせい');
@@ -14511,36 +14905,50 @@ function beingPick(opts = {}) {
       comp = n;
     }
   }
-  const canTime = kind === 'job';
-  let tense = (kind === 'nation' || (kind === 'adj' && !BEING_NA.includes(comp.jp))) ? 'hab' : sgPick(['hab', 'hab', 'hab', 'past']);
+  // Time words: jobs only (with or without a describing word).
+  const canTime = kind === 'job' || (kind === 'adjnoun' && comp.jobEn);
+  const isI = kind === 'adj' && beingIsI(comp.jp);
+  let tense = kind === 'nation' ? 'hab' : sgPick(['hab', 'hab', 'hab', 'past']);
   let time = null;
   if (canTime) {
     const tr = sgRand();
     const opt = [];
     if (sgW('いま')) opt.push({ jp: 'いま', ro: 'ima', en: 'now', tense: 'hab' });
     if (sgW('きょねん')) opt.push({ jp: 'きょねん', ro: 'kyonen', en: 'last year', tense: 'past' });
-    if (sgW('らいねん') && kind === 'job' && !subj.elderly) opt.push({ jp: 'らいねん', ro: 'rainen', en: 'next year', tense: 'fut' });
+    if (sgW('らいねん') && !subj.elderly) opt.push({ jp: 'らいねん', ro: 'rainen', en: 'next year', tense: 'fut' });
     if (opt.length && (opts.needTime || tr < 0.55)) { time = sgPick(opt); tense = time.tense; }
   }
   if (opts.needTime && !time) return null;
-  const neg = (kind !== 'adj' || BEING_NA.includes(comp.jp)) && sgChance(0.25);
-  return { mode: 'being', kind, subj, topicWord, topicEn, comp, time, tense, neg };
+  const degree = opts.degree && (kind === 'adj' || kind === 'adjnoun') ? opts.degree : null;
+  const neg = degree ? !!BEING_DEGREE[degree].neg : sgChance(0.25);
+  if (kind === 'adjnoun' && !time) tense = sgChance(0.2) ? 'past' : 'hab';
+  return { mode: 'being', kind, subj, topicWord, topicEn, comp, adj, degree, time, tense, neg, isI };
 }
-// st: the card's slot states (0 on/off/q, 1 on/off, 6 stmt/q). Returns the
-// engine's {parts, end, jp, romaji, enM} plus endIdx / q for the challenges.
+// st: the card's slot states (0 on/off/q, 1 on/off, 2 degree on/off, 4
+// describing on/off, 6 stmt/q). Returns the engine's {parts, end, jp,
+// romaji, enM} plus endIdx / q for the challenges.
 function beingBuild(w, st) {
   const q = st[6] === 'q' || st[0] === 'q';
   const whoQ = st[0] === 'q';
   const neg = w.neg && !whoQ; // "Who isn't a doctor?" is a strange question
-  const endIdx = (w.tense === 'past' ? 2 : 0) + (neg ? 1 : 0);
+  const isI = w.kind === 'adj' && beingIsI(w.comp.jp);
+  const endIdx = beingEndIdx(isI, w.tense === 'past', neg);
   const e = BEING_ENDS[endIdx];
   const parts = [];
   const topicOn = st[0] === 'on' && w.subj.segs.length;
   if (whoQ) parts.push({ slot: 0, jp: 'だれが', ro: 'dare ga' });
   else if (topicOn) w.subj.segs.forEach(sg => parts.push({ slot: 0, jp: l3cJp(sg), ro: sg.ro }));
   if (st[1] === 'on' && w.time) parts.push({ slot: 1, jp: w.time.jp, ro: w.time.ro });
-  parts.push({ slot: 5, jp: w.comp.jp, ro: w.comp.ro });
-  parts.push({ slot: 6, jp: e[0] + (q ? 'か' : ''), ro: e[1] + (q ? ' ka' : '') });
+  if (w.degree) parts.push({ slot: 2, jp: w.degree, ro: BEING_DEGREE[w.degree].ro });
+  if (w.adj) { const na = isNaAdj(w.adj.jp); parts.push({ slot: 4, jp: w.adj.jp + (na ? 'な' : ''), ro: w.adj.ro + (na ? ' na' : '') }); }
+  if (isI && endIdx >= 4) {
+    const [fj, fr] = beingIForm(w.comp.jp, w.comp.ro, endIdx);
+    parts.push({ slot: 5, jp: fj, ro: fr });
+    parts.push({ slot: 6, jp: 'です' + (q ? 'か' : ''), ro: 'desu' + (q ? ' ka' : '') });
+  } else {
+    parts.push({ slot: 5, jp: w.comp.jp, ro: w.comp.ro });
+    parts.push({ slot: 6, jp: e[0] + (q ? 'か' : ''), ro: e[1] + (q ? ' ka' : '') });
+  }
   parts[0].ro = sgCap(parts[0].ro);
   // English. No topic in a question = "you"; in a statement = "I".
   const me = !whoQ && (!topicOn ? !q : !!w.subj.me);
@@ -14548,20 +14956,32 @@ function beingBuild(w, st) {
   const S = whoQ ? mk(0, 'Who') : topicOn ? mk(0, w.subj.me ? 'I' : w.subj.en) : (q ? 'you' : 'I');
   const third = whoQ || (!me && !you);
   const timeEn = st[1] === 'on' && w.time ? w.time.en : '';
+  const compEn = beingCompEn(w);
   let enM;
   if (whoQ) {
     const be = w.tense === 'past' ? 'was' : w.tense === 'fut' ? 'will be' : 'is';
-    enM = `${S} ${mk(6, be)} ${mk(5, w.comp.en)}${timeEn ? ' ' + mk(1, timeEn) : ''}?`;
-  } else enM = beingEnglish(S, me, you, w.kind, w.comp.en, w.tense, neg, q, timeEn, third);
+    enM = `${S} ${mk(6, be)} ${compEn}${timeEn ? ' ' + mk(1, timeEn) : ''}?`;
+  } else enM = beingEnglish(S, me && !you, you, w.kind, compEn, w.tense, neg, q, timeEn, third, true);
   return { parts, end: q ? ['。', '?'] : ['。', '.'], jp: parts.map(x => x.jp).join(' ') + '。', romaji: parts.map(x => x.ro).join(' ') + (q ? '?' : '.'), enM, endIdx, q };
+}
+// The complement's English, slot-coloured: "very kind" (2 + 5), "a famous
+// doctor" (4 + 5), "a very lively town".
+function beingCompEn(w) {
+  const deg = w.degree ? mk(2, 'very') + ' ' : '';
+  if (w.adj) {
+    const noun = w.comp.jobEn || w.comp.en;
+    const first = (w.degree ? 'very' : w.adj.en);
+    return (/^[aeiou]/i.test(first) ? 'an ' : 'a ') + deg + mk(4, w.adj.en) + ' ' + mk(5, noun);
+  }
+  return deg + mk(5, w.comp.en);
 }
 // A random "X is Y" target for the challenges, in the same shape sbNewTarget returns.
 function sbNewTargetBeing() {
   let w = null;
-  for (let i = 0; i < 20 && !w; i++) w = beingPick();
+  for (let i = 0; i < 20 && !w; i++) w = beingPick({ random: true });
   if (!w) return null;
   const q = sgChance(0.25);
-  const st = ['on', w.time ? 'on' : 'off', 'off', 'off', 'off', 'on', q ? 'q' : 'stmt'];
+  const st = ['on', w.time ? 'on' : 'off', w.degree ? 'on' : 'off', 'off', w.adj ? 'on' : 'off', 'on', q ? 'q' : 'stmt'];
   if (q && w.subj.me) st[0] = 'off'; // "Are you…?", not "Am I…?"
   const ex = beingBuild(w, st);
   const slots = {};
@@ -14574,25 +14994,63 @@ function sbNewTargetBeing() {
     slots[0] = { word: wd, ro: twin ? twin.ro : roFix, en: twin ? twin.en : (w.topicEn || w.subj.en), key: it ? it.jp + '|' + it.en : null };
   }
   if (w.time && st[1] === 'on') { const it = l3TaughtItem(w.time.jp); slots[1] = { word: w.time.jp, ro: w.time.ro, en: w.time.en, key: it ? it.jp + '|' + it.en : null }; }
-  { const it = l3TaughtItem(w.comp.jp); slots[5] = { word: w.comp.jp, ro: w.comp.ro, en: w.kind === 'job' ? w.comp.jobEn : w.comp.en, key: it ? it.jp + '|' + it.en : null }; }
+  if (w.degree) { const it = l3TaughtItem(w.degree); slots[2] = { word: w.degree, ro: BEING_DEGREE[w.degree].ro, en: w.degree === 'とても' ? 'very' : 'not very (+ negative)', key: it ? it.jp + '|' + it.en : null }; }
+  if (w.adj) { const it = l3TaughtItem(w.adj.jp); slots[4] = { word: w.adj.jp, ro: w.adj.ro, en: w.adj.en, key: it ? it.jp + '|' + it.en : null }; }
+  { const it = l3TaughtItem(w.comp.jp); slots[5] = { word: w.comp.jp, ro: w.comp.ro, en: w.comp.jobEn || (w.kind === 'adj' ? w.comp.en : w.comp.en.replace(/^(a|an) /, '')), key: it ? it.jp + '|' + it.en : null }; }
   slots[6] = { word: 'です', ro: 'desu', en: 'is / am / are', key: null, end: ex.endIdx, q: ex.q };
   const say = ex.parts.map((pt, k) => pt.slot === 0 && !(ex.parts[k + 1] && ex.parts[k + 1].slot === 0) ? pt.jp.replace(/は$/, 'わ') : pt.jp).join('');
   return { slots, en: l3cEnPlain(ex.enM), jp: ex.jp, romaji: ex.romaji, meImplied: !ps0.length, say, being: w.kind };
 }
+// Answer it targets. Doing / Going / Giving: the statement about you, asked
+// about one part. Being: "Xは どうですか" (how is it?) or "Xは どんな まちですか"
+// (what kind of town?), answered without the topic - saying it as well is fine.
+function sbNewTargetAnswer() {
+  if (sbMode !== 'being') {
+    for (let i = 0; i < 40; i++) { const t = sbNewTarget({ answer: true }); if (t) return t; }
+    return null;
+  }
+  let w = null;
+  for (let i = 0; i < 40 && !w; i++) {
+    const c = beingPick({ random: true, adjNoun: sgChance(0.4) });
+    if (c && (c.kind === 'adj' || c.kind === 'adjnoun') && c.subj.thing && !c.time) w = c;
+  }
+  if (!w) return null;
+  const st = ['off', 'off', w.degree ? 'on' : 'off', 'off', w.adj ? 'on' : 'off', 'on', 'stmt'];
+  const ex = beingBuild(w, st);
+  ex.enM = beingBuild(w, ['on'].concat(st.slice(1))).enM; // English names the topic ("London isn't…", not "I'm not…")
+  const top = w.subj.segs[0];
+  const tj = l3cJp(top), tro = top.ro;
+  const be = /^the \S.*s$/i.test(w.topicEn) && !/(ss|us)$/i.test(w.topicEn) ? 'are' : 'is';
+  const question = w.adj
+    ? { jp: `${tj} どんな ${w.comp.jp}ですか。`, romaji: sgCap(`${tro} donna ${w.comp.ro} desu ka?`), en: `What kind of ${w.comp.en} ${be} ${w.topicEn}?` }
+    : { jp: `${tj} どうですか。`, romaji: sgCap(`${tro} dou desu ka?`), en: `How ${be} ${w.topicEn}?` };
+  const slots = {};
+  if (w.degree) { const it = l3TaughtItem(w.degree); slots[2] = { word: w.degree, ro: BEING_DEGREE[w.degree].ro, en: w.degree === 'とても' ? 'very' : 'not very (+ negative)', key: it ? it.jp + '|' + it.en : null }; }
+  if (w.adj) { const it = l3TaughtItem(w.adj.jp); slots[4] = { word: w.adj.jp, ro: w.adj.ro, en: w.adj.en, key: it ? it.jp + '|' + it.en : null }; }
+  { const it = l3TaughtItem(w.comp.jp); slots[5] = { word: w.comp.jp, ro: w.comp.ro, en: w.comp.en, key: it ? it.jp + '|' + it.en : null }; }
+  slots[6] = { word: 'です', ro: 'desu', en: 'is / am / are', key: null, end: ex.endIdx, q: false };
+  return { slots, en: l3cEnPlain(ex.enM), jp: ex.jp, romaji: ex.romaji, meImplied: false, optional0: tj.replace(/は$/, ''), say: ex.parts.map(p => p.jp).join(''), being: w.kind, question };
+}
 // Desk-sheet / builder columns for Being.
 function dsBeingColumns(who) {
-  const things = [...new Set(BEING_THINGS.flatMap(g => g.objs))].filter(o => sgW(o)).map(o => dsItem(o, 'the ' + beingEnWord(l3TaughtItem(o) || { en: o })));
-  const whoCol = { role: 'Who / what', particle: 'は', note: 'a person, or a thing to describe', items: dsPick(dsWhoPool(true), ['わたし', 'ともだち', 'はは'], 6).concat(dsPick(things, [], 5)) };
-  const when = { role: 'When', particle: '–', note: 'mostly with jobs · きょねん → でした', items: ['いま', 'きょねん', 'らいねん'].map(j => dsItem(j)).filter(Boolean) };
-  const jobs = dsPick(beingJobs().map(j => ({ jp: j.jp, ro: j.romaji, en: beingEnWord(j) })), ['がくせい', 'いしゃ', 'かいしゃいん'], 10);
-  const nations = dsPick(beingNations(), ['イギリスじん', 'にほんじん'], 5);
-  const adjs = dsPick([...new Set(BEING_THINGS.flatMap(g => g.adjs).concat(BEING_PEOPLE_ADJS))].filter(a => sgW(a)).map(a => ({ jp: a, ro: sgW(a).ro, en: beingEnWord(l3TaughtItem(a)) })), ['おもしろい', 'きれい', 'すてき'], 8);
-  const what = { role: 'What they are / what it\'s like', particle: '–', note: 'then です — い-words (おもしろい) only with です for now', wide: true,
-    groups: [{ verb: { jp: 'しごと', ro: 'shigoto', en: 'jobs' }, items: jobs }, { verb: { jp: '〜じん', ro: '~jin', en: 'nationality' }, items: nations }, { verb: { jp: 'どんな？', ro: 'donna', en: 'describing' }, items: adjs }].filter(g => g.items.length) };
+  const things = [...new Set(BEING_THINGS.flatMap(g => g.objs))].filter(o => sgW(o)).map(o => dsItem(o, beingTopicEn(o)));
+  const whoCol = { role: 'Who / what', particle: 'は', note: 'a person, a place, or a thing to describe', items: dsPick(dsWhoPool(true), ['わたし', 'ともだち', 'はは'], 6).concat(dsPick(things, ['マンチェスター'], 6)) };
+  const when = { role: 'When', particle: '–', note: 'with jobs · きょねん → でした', items: ['いま', 'きょねん', 'らいねん'].map(j => dsItem(j)).filter(Boolean) };
+  const degree = { role: 'How much', particle: '–', note: 'あまり → negative', items: Object.keys(BEING_DEGREE).filter(d => sgW(d)).map(d => ({ jp: d, ro: BEING_DEGREE[d].ro, en: d === 'とても' ? 'very' : 'not very (+ negative)' })) };
+  const allAdjs = [...new Set(BEING_THINGS.flatMap(g => g.adjs).concat(BEING_PEOPLE_ADJS, BEING_ADJ_NOUN_PEOPLE, BEING_ADJ_NOUN_PLACES))].filter(a => sgW(a));
+  const adjCard = a => ({ jp: a, ro: sgW(a).ro, en: beingAdjEn(a) });
+  const describe = { role: 'Describing (+ noun)', particle: 'な', note: 'before a noun: な-words add な (しずかな まち), い-words don\'t (おもしろい ひと)', items: dsPick(allAdjs.map(adjCard), ['しんせつ', 'にぎやか', 'おもしろい', 'ゆうめい'], 9) };
+  const jobs = dsPick(beingJobs().map(j => ({ jp: j.jp, ro: j.romaji, en: beingEnWord(j) })), ['がくせい', 'いしゃ', 'かいしゃいん'], 8);
+  const nations = dsPick(beingNations(), ['イギリスじん', 'にほんじん'], 4);
+  const adjs = dsPick(allAdjs.map(adjCard), ['おもしろい', 'きれい', 'しずか', 'むずかしい'], 10);
+  const nouns = ['ひと', 'まち'].filter(n => sgW(n)).map(n => dsItem(n));
+  const what = { role: 'What they are / what it\'s like', particle: '–', note: 'then です — い-words change their own ending: おもしろくないです', wide: true,
+    groups: [{ verb: { jp: 'しごと', ro: 'shigoto', en: 'jobs' }, items: jobs }, { verb: { jp: '〜じん', ro: '~jin', en: 'nationality' }, items: nations },
+      { verb: { jp: 'どんな？', ro: 'donna', en: 'describing' }, items: adjs }, { verb: { jp: 'ひと・まち', ro: 'hito, machi', en: 'person, town' }, items: nouns }].filter(g => g.items.length) };
   const verb = { role: 'です', particle: '。/か', note: 'です and its endings · か for a question', lead: [{ jp: 'です', ro: 'desu', en: 'is / am / are' }],
-    ends: [['です', 'is / am / are'], ['じゃありません', "isn't"], ['でした', 'was'], ['じゃありませんでした', "wasn't"]] };
-  const cols = [whoCol, when, what, verb];
-  [1, 2, 6, 7].forEach((slot, i) => { cols[i].slot = slot; });
+    ends: [['です', 'is / am / are'], ['じゃありません', "isn't"], ['でした', 'was'], ['じゃありませんでした', "wasn't"], ['〜くないです', "isn't (い-words)"], ['〜かったです', 'was (い-words)'], ['〜くなかったです', "wasn't (い-words)"]] };
+  const cols = [whoCol, when, degree, describe, what, verb];
+  [1, 2, 3, 5, 6, 7].forEach((slot, i) => { cols[i].slot = slot; });
   return cols;
 }
 
@@ -14613,13 +15071,16 @@ let sbMode = 'do', sbChallenge = false, sbCols = [], sbSel = {}, sbEnd = 0, sbQ 
 // answered by picking each part's English. Shares everything else with the
 // challenge; sbReverse switches the card faces and the scores it keeps.
 let sbReverse = false, sbShowKana = false, sbShowRomaji = false;
+// Answer it (L4, 2026-11-04): a question like the ones in class, in Japanese -
+// build your answer. The target is the answer; sbTarget.question is the prompt.
+let sbAnswer = false, sbShowEn = false;
 let sbTarget = null, sbTry = 0, sbDone = false, sbResult = null, sbStats = { right: 0, total: 0 };
 const SB_ENDS = [['ます', 'masu', 'hab', false], ['ません', 'masen', 'hab', true], ['ました', 'mashita', 'past', false], ['ませんでした', 'masendeshita', 'past', true]];
 const sbNorm = s => String(s || '').replace(/\s/g, '');
 // The particle each slot adds after the chosen word, for this mode.
 function sbParticle(slot, it) {
   if (!it) return ['', ''];
-  if (sbMode === 'being') return slot === 0 ? ['は', 'wa'] : ['', ''];
+  if (sbMode === 'being') return slot === 0 ? ['は', 'wa'] : slot === 4 && isNaAdj(it.jp) ? ['な', 'na'] : ['', ''];
   if (slot === 0) return ['は', 'wa'];
   if (slot === 3) return /で$/.test(it.jp) ? ['', ''] : sbMode === 'give' ? ['に', 'ni'] : ['と', 'to'];
   if (slot === 4) return it.jp === 'あるいて' ? ['', ''] : ['で', 'de'];
@@ -14644,7 +15105,7 @@ function sbBuildColumns() {
   });
   if (sbChallenge && sbTarget) {
     cols.forEach(c => {
-      const t = sbTarget.slots[c.slotIdx];
+      const t = sbTarget.slots[c.slotIdx] || (c.slotIdx === 0 && sbTarget.optional0 ? { word: sbTarget.optional0, ro: sgW(sbTarget.optional0) ? sgW(sbTarget.optional0).ro : '', en: '' } : null);
       if (!t) return;
       const list = c.items || [];
       if (!list.some(x => sbNorm(x.jp) === sbNorm(t.word))) {
@@ -14658,7 +15119,7 @@ function sbBuildColumns() {
 }
 // A challenge target from the Sentence order engine. Uses the card's own
 // globals for a moment and puts them back, so an open card isn't disturbed.
-function sbNewTarget() {
+function sbNewTarget(opts = {}) {
   const saved = [l3cMode, l3SentStates.slice(), l3FreqIdx, l3SentWords];
   try {
     l3cMode = sbMode;
@@ -14667,13 +15128,31 @@ function sbNewTarget() {
     const vr = Math.random();
     l3SentStates = [on(), Math.random() < 0.85 ? 'on' : 'off', Math.random() < 0.25 ? 'on' : 'off',
       sbMode === 'give' || Math.random() < 0.55 ? 'on' : 'off', sbMode === 'give' ? (Math.random() < 0.3 ? 'on' : 'off') : (Math.random() < 0.7 ? 'on' : 'off'), 'on',
-      vr < 0.08 ? 'mou' : vr < 0.17 ? 'mouq' : vr < 0.4 ? 'q' : 'stmt'];
+      opts.answer ? 'stmt' : vr < 0.08 ? 'mou' : vr < 0.17 ? 'mouq' : vr < 0.4 ? 'q' : 'stmt'];
+    if (opts.answer) l3SentStates[2] = 'off'; // "How often…?" isn't a question word here
     l3FreqIdx = Math.floor(Math.random() * L3_FREQ_WORDS.filter(f => !(l3SentStates[6] === 'q' && f.neg)).length);
     pickFreshL3SentenceWords();
     l3FixTimeForFreq();
     const w = l3SentWords;
     if (!w) return null;
+    if (opts.answer && !w.subj.me) return null; // the question is to you
     const ex = buildL3SentenceExample();
+    // Answer it: ask one of the parts the answer has (when / with whom / where
+    // or with what / what or where to), as a question to "you" - no topic.
+    let question = null;
+    if (opts.answer) {
+      const askable = [1, 3, 4, 5].filter(i => l3SentStates[i] === 'on' && ex.parts.some(p => p.slot === i));
+      if (!askable.length) return null;
+      // Your own family (おとうとと, ははに) or ひとりで can't be in a question to
+      // someone else - so when they're in the answer, they're what's asked.
+      const own = l3SentStates[3] === 'on' && w.comp && /(^|with |to |from )my |on my own/.test(w.comp.en || '') && askable.includes(3);
+      const qi = own ? 3 : sgPick(askable);
+      const stmt = l3SentStates.slice();
+      l3SentStates = stmt.slice(); l3SentStates[0] = 'off'; l3SentStates[qi] = 'q';
+      const qx = buildL3SentenceExample();
+      l3SentStates = stmt;
+      question = { jp: qx.jp, romaji: qx.romaji, en: qx.en, slot: qi };
+    }
     const slots = {};
     const S = L3C_SLOTS[sbMode];
     [0, 1, 2, 3, 4, 5].forEach(i => {
@@ -14712,7 +15191,7 @@ function sbNewTarget() {
     // "I" with no topic: わたし or nothing are both right.
     const meImplied = !slots[0] && w.subj.me;
     const say = ex.parts.map((pt, k) => pt.slot === 0 && !(ex.parts[k + 1] && ex.parts[k + 1].slot === 0) ? pt.jp.replace(/は$/, 'わ') : pt.jp).join('');
-    return { slots, en: ex.en, jp: ex.jp, romaji: ex.romaji, meImplied, say };
+    return { slots, en: ex.en, jp: ex.jp, romaji: ex.romaji, meImplied, say, question };
   } finally {
     [l3cMode, l3SentStates, l3FreqIdx, l3SentWords] = saved;
   }
@@ -14843,16 +15322,30 @@ function sbEnglishBeing(sel, endIdx, q) {
   const w0 = sel[0], me = !w0 || w0.jp === 'わたし', you = !w0 && q;
   const S = !w0 ? (q ? 'you' : 'I') : w0.jp === 'わたし' ? 'I' : (SB_MY[w0.en] || w0.en);
   const third = !me && !you;
-  const c = sel[5];
-  let compEn = '…', kind = null;
+  const c = sel[5], d = sel[2], a = sel[4];
+  const person = !w0 || !BEING_THINGS.some(g => g.objs.includes(w0.jp)) || (c && (c.jp === 'ひと' || beingJobs().some(j => j.jp === c.jp)));
+  let compEn = mk(5, '…'), kind = null;
+  const deg = d ? mk(2, 'very') + ' ' : '';
   if (c) {
-    if (/じん$/.test(c.jp)) { kind = 'nation'; compEn = c.en; }
-    else if (beingJobs().some(j => j.jp === c.jp)) { kind = 'job'; compEn = beingArticle(c.en); }
-    else { kind = 'adj'; compEn = c.en; }
-    if (kind === 'adj' && beingIsI(c.jp) && endIdx !== 0) notes.push(`${c.jp} is an い-word: only です for now (its own negative and past, like ${c.jp.replace(/い$/, 'くない')}, come later)`);
+    const isNoun = /じん$/.test(c.jp) || beingJobs().some(j => j.jp === c.jp) || ['ひと', 'まち'].includes(c.jp);
+    if (a) {
+      // Adjective + noun: "a (very) kind person", "a famous doctor".
+      kind = 'job';
+      const aEn = beingAdjEn(a.jp, person), nEn = c.jp === 'ひと' ? 'person' : c.jp === 'まち' ? 'town' : String(c.en || '').split(' / ')[0];
+      compEn = (/^[aeiou]/i.test(d ? 'very' : aEn) ? 'an ' : 'a ') + deg + mk(4, aEn) + ' ' + mk(5, nEn);
+      if (!isNoun) notes.push(`${a.jp} describes a noun here — the last word wants to be a noun like ひと or まち`);
+    } else if (/じん$/.test(c.jp)) { kind = 'nation'; compEn = deg + mk(5, c.en); }
+    else if (isNoun) { kind = 'job'; compEn = deg + mk(5, beingArticle(c.jp === 'ひと' ? 'person' : c.jp === 'まち' ? 'town' : c.en)); }
+    else { kind = 'adj'; compEn = deg + mk(5, beingAdjEn(c.jp, person)); }
+    // Which endings go with which words.
+    const isI = !a && beingIsI(c.jp);
+    if (isI && endIdx >= 1 && endIdx <= 3) notes.push(`${c.jp} is an い-word: it changes its own ending — ${beingIForm(c.jp, c.ro, beingEndIdx(true, e[2] === 'past', neg))[0]}です`);
+    if (!isI && endIdx >= 4) notes.push(`〜くない / 〜かった are for い-words — ${c.jp} takes じゃありません / でした`);
   }
-  let enM = beingEnglish(w0 ? mk(0, S) : S, me && !you, you, kind, compEn, tense, neg, q, timeEn, third);
-  enM = enM.replace(/…(\uE001)?\.$/, '…$1');
+  if (d && d.jp === 'あまり' && !neg) notes.push('あまり goes with a negative: あまり おもしろくないです (not very interesting)');
+  if (d && d.jp === 'とても' && neg) notes.push('とても goes with a positive — for "not very", use あまり + a negative');
+  let enM = beingEnglish(w0 ? mk(0, S) : S, me && !you, you, kind, compEn, tense, neg, q, timeEn, third, true);
+  enM = enM.replace(/…()?\.$/, '…$1');
   return { enM, notes };
 }
 
@@ -14865,8 +15358,8 @@ function sbEnglishBeing(sel, endIdx, q) {
 // doesn't need (a frequency word that isn't there) counts against that part.
 const SB_PARTS_KEY = 'jpL4SentenceParts';
 const SB_PART_DEFS = [
-  ['who', 'Who は', 1], ['when', 'When (に)', 2], ['often', 'How often', 3], ['mou', 'もう (already / yet)', 3], ['with', 'With whom と', 4], ['to', 'To / from whom に', 4],
-  ['place', 'Where it happens で', 5], ['tool', 'With what で (tool, language)', 5], ['how', 'How (by) で', 5], ['what', 'What を', 6], ['whereTo', 'Where to に', 6], ['is', 'What it is (…です)', 6],
+  ['who', 'Who は', 1], ['when', 'When (に)', 2], ['often', 'How often', 3], ['mou', 'もう (already / yet)', 3], ['degree', 'とても / あまり', 3], ['with', 'With whom と', 4], ['to', 'To / from whom に', 4],
+  ['place', 'Where it happens で', 5], ['tool', 'With what で (tool, language)', 5], ['describe', 'Describing word (+ な)', 5], ['how', 'How (by) で', 5], ['what', 'What を', 6], ['whereTo', 'Where to に', 6], ['is', 'What it is (…です)', 6],
   ['verb', 'Verb', 7], ['ending', 'Verb ending (+か)', 7],
 ];
 let sbParts = {}, sbPartsR = {};
@@ -14878,7 +15371,7 @@ function saveSbParts() { try { localStorage.setItem(SB_PARTS_KEY, JSON.stringify
 // Slot (0-6) + mode -> part id.
 function sbPartId(slot, mode) {
   return [
-    'who', 'when', 'often', mode === 'give' ? 'to' : 'with', mode === 'go' ? 'how' : 'place', mode === 'go' ? 'whereTo' : mode === 'being' ? 'is' : 'what', 'verb',
+    'who', 'when', mode === 'being' ? 'degree' : 'often', mode === 'give' ? 'to' : 'with', mode === 'go' ? 'how' : mode === 'being' ? 'describe' : 'place', mode === 'go' ? 'whereTo' : mode === 'being' ? 'is' : 'what', 'verb',
   ][slot];
 }
 function sbRecordPart(id, ok) {
@@ -14930,8 +15423,8 @@ function sbPoolCard(slotIdx, jp) {
   return f().filter(Boolean).find(x => sbNorm(x.jp) === sbNorm(jp)) || null;
 }
 function sbNewChallenge() {
-  for (let i = 0; i < 10 && !(sbTarget = sbMode === 'being' ? sbNewTargetBeing() : sbNewTarget()); i++);
-  sbSel = {}; sbEnd = 0; sbQ = false; sbTry = 0; sbDone = false; sbResult = null; sbShowRomaji = false;
+  for (let i = 0; i < 10 && !(sbTarget = sbAnswer ? sbNewTargetAnswer() : sbMode === 'being' ? sbNewTargetBeing() : sbNewTarget()); i++);
+  sbSel = {}; sbEnd = 0; sbQ = false; sbTry = 0; sbDone = false; sbResult = null; sbShowRomaji = false; sbShowEn = false;
   sbBuildColumns();
   sbRender();
 }
@@ -14939,19 +15432,20 @@ function sbNewChallenge() {
 // one screen; the title says which.
 function showSentenceBuilder(challenge) {
   sbReverse = challenge === 'reverse';
+  sbAnswer = challenge === 'answer';
   sbChallenge = !!challenge;
-  sbShowKana = false; sbShowRomaji = false;
+  sbShowKana = false; sbShowRomaji = false; sbShowEn = false;
   // A finished challenge left sbDone set, which locked the builder's cards
   // (Andrew, 2026-10-23) - every entry starts clean.
   sbSel = {}; sbEnd = 0; sbQ = false; sbTarget = null; sbDone = false; sbResult = null; sbTry = 0;
   const t = document.getElementById('sb-title');
-  if (t) t.textContent = sbReverse ? 'Reading challenge' : sbChallenge ? 'Sentence challenge' : 'Sentence builder';
+  if (t) t.textContent = sbReverse ? 'Reading challenge' : sbAnswer ? 'Answer it' : sbChallenge ? 'Sentence challenge' : 'Sentence builder';
   if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbRender(); }
   showScreen('sentence-builder');
   window.scrollTo(0, 0);
 }
 function sbSetMode(m) { if (sbMode === m) return; sbMode = m; sbSel = {}; if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbRender(); } }
-function sbSetChallenge(on) { if (sbChallenge === on) return; sbChallenge = on; sbReverse = false; sbSel = {}; sbEnd = 0; sbQ = false; sbDone = false; sbResult = null; sbTry = 0; if (on) sbNewChallenge(); else { sbTarget = null; sbBuildColumns(); sbRender(); } }
+function sbSetChallenge(on) { if (sbChallenge === on) return; sbChallenge = on; sbReverse = false; sbAnswer = false; sbSel = {}; sbEnd = 0; sbQ = false; sbDone = false; sbResult = null; sbTry = 0; if (on) sbNewChallenge(); else { sbTarget = null; sbBuildColumns(); sbRender(); } }
 function sbShuffle() { if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbSel = {}; sbRender(); } }
 function sbClear() { if (sbDone) return; sbSel = {}; sbEnd = 0; sbQ = false; sbRender(); }
 function sbPick(slotIdx, it, groupVerb) {
@@ -14974,7 +15468,16 @@ function sbBuilt() {
     const it = sbSel[i];
     if (!it) return;
     if (i === 6) {
-      if (sbMode === 'being') { const b = BEING_ENDS[sbEnd]; chunks.push({ slot: 6, jp: b[0] + (sbQ ? 'か' : ''), ro: b[1] + (sbQ ? ' ka' : '') }); return; }
+      if (sbMode === 'being') {
+        const b = BEING_ENDS[sbEnd], c5 = sbSel[5];
+        // An い-word with its own ending: おもしろ|くない + です (the word chunk changes).
+        if (b[4] === 'i' && c5 && beingIsI(c5.jp)) {
+          const last = chunks.find(c => c.slot === 5);
+          if (last) { const [fj, fr] = beingIForm(c5.jp, c5.ro, sbEnd); last.jp = fj; last.ro = fr; }
+          chunks.push({ slot: 6, jp: 'です' + (sbQ ? 'か' : ''), ro: 'desu' + (sbQ ? ' ka' : '') });
+        } else chunks.push({ slot: 6, jp: b[0] + (sbQ ? 'か' : ''), ro: b[1] + (sbQ ? ' ka' : '') });
+        return;
+      }
       const e = SB_ENDS[sbEnd], v = sgW(it.jp) ? sgVerb(it.jp, e[2], e[3]) : { jp: it.jp, ro: it.ro };
       chunks.push({ slot: 6, jp: v.jp + (sbQ ? 'か' : ''), ro: v.ro + (sbQ ? ' ka' : '') });
       return;
@@ -14994,6 +15497,8 @@ function sbSaySlot(i) {
 }
 function sbToggleKana() { sbShowKana = !sbShowKana; sbRender(); }
 function sbToggleRomaji() { sbShowRomaji = !sbShowRomaji; sbRender(); }
+function sbToggleEn() { sbShowEn = !sbShowEn; sbRender(); }
+function sbSayQuestion() { if (sbTarget && sbTarget.question) speakJapanese(sbTarget.question.jp.replace(/[\s。]/g, '')); }
 function sbSay() { const t = sbBuilt().map(sbSayOf).join(''); if (t) speakJapanese(t); }
 function sbSayTarget() { if (sbTarget) speakJapanese(sbTarget.say || sbTarget.jp.replace(/[\s。]/g, '')); }
 // Check a challenge: each slot right / wrong / missing / extra.
@@ -15005,6 +15510,7 @@ function sbCheck() {
     const t = T[i], s = sbSel[i];
     if (sbResult && sbResult[i] === 'right') { res[i] = 'right'; return; }
     if (i === 0 && !t && sbTarget.meImplied) { res[i] = !s || s.jp === 'わたし' ? (s ? 'right' : null) : 'wrong'; return; }
+    if (i === 0 && !t && sbTarget.optional0) { res[i] = !s ? null : sbNorm(s.jp) === sbNorm(sbTarget.optional0) ? 'right' : 'wrong'; return; }
     if (!t && !s) return;
     if (!t) { res[i] = 'extra'; return; }
     if (!s) { res[i] = 'missing'; return; }
@@ -15065,9 +15571,14 @@ function sbRender() {
       + (sbShowRomaji || sbDone ? `<div class="sb-ro sb-prompt-ro">${sbTarget.romaji}</div>` : '');
     html += eng.enM ? `<div class="sb-en sb-en-built">"${l3cEnHtml(eng.enM)}"</div>` : `<div class="sb-empty">Read the sentence, then pick the English for each part — skip the columns it doesn't use.</div>`;
   } else {
-    if (sbChallenge && sbTarget) html += `<div class="sb-prompt">"${sbTarget.en}"</div>`;
+    if (sbAnswer && sbTarget && sbTarget.question) {
+      const Q = sbTarget.question;
+      html += `<div class="sb-prompt-jp" onclick="sbSayQuestion()">${markSmallKana(Q.jp)}</div>`
+        + (sbShowRomaji || sbDone ? `<div class="sb-ro sb-prompt-ro">${Q.romaji}</div>` : '')
+        + (sbShowEn || sbDone ? `<div class="sb-en">"${Q.en}"</div>` : '');
+    } else if (sbChallenge && sbTarget) html += `<div class="sb-prompt">"${sbTarget.en}"</div>`;
     html += built.length ? `<div class="sb-jp">${built.map(c => chunkHtml(c, 'jp')).join(' ')}。</div><div class="sb-ro">${built.map(c => chunkHtml(c, 'ro')).join(' ')}</div>` + (sbChallenge ? '' : enLine)
-      : `<div class="sb-empty">${sbChallenge ? 'Tap a word in each column you need — skip the ones you don\'t.' : 'Tap a word from each column to build a sentence.'}</div>`;
+      : `<div class="sb-empty">${sbAnswer ? 'Answer the question about yourself — build the whole sentence.' : sbChallenge ? 'Tap a word in each column you need — skip the ones you don\'t.' : 'Tap a word from each column to build a sentence.'}</div>`;
   }
   if (!sbChallenge || sbReverse) html += notesHtml;
   if (sbChallenge && sbResult) {
@@ -15077,7 +15588,7 @@ function sbRender() {
     if (sbDone) {
       const n = Object.keys(sbTarget.slots).length, r = Object.keys(sbTarget.slots).filter(i => sbResult[i] === 'right').length;
       html += (sbReverse ? `<div class="sb-answer"><div class="sb-en sb-en-answer">"${sbTarget.en}"</div></div>`
-        : `<div class="sb-answer" onclick="sbSayTarget()"><div class="sb-jp">${markSmallKana(sbTarget.jp)}</div><div class="sb-ro">${sbTarget.romaji}</div></div>`)
+        : `<div class="sb-answer" onclick="sbSayTarget()"><div class="sb-jp">${markSmallKana(sbTarget.jp)}</div><div class="sb-ro">${sbTarget.romaji}</div>${sbAnswer ? `<div class="sb-en">"${sbTarget.en}"</div>` : ''}</div>`)
         + `<div class="sb-verdict ${r === n ? 'good' : ''}">${r === n ? (sbTry === 1 ? 'All right first time!' : 'All right on the second go.') : `${r} of ${n} parts right — the answer is above.`}</div>`;
     } else {
       const bits = [wrongN ? `${wrongN} part${wrongN === 1 ? '' : 's'} not right (taken off)` : '', endingMsg, missing.length ? 'missing: ' + missing.join(', ') : ''].filter(Boolean);
@@ -15090,6 +15601,10 @@ function sbRender() {
     html += btn('🔊 Hear it', 'sbSayTarget()');
     if (!sbDone) html += btn(sbShowRomaji ? 'Hide romaji' : 'Show romaji', 'sbToggleRomaji()');
     html += btn(sbShowKana ? 'Hide kana on cards' : 'Kana on cards', 'sbToggleKana()');
+  } else if (sbAnswer) {
+    html += btn('🔊 Hear the question', 'sbSayQuestion()');
+    if (!sbDone) html += btn(sbShowRomaji ? 'Hide romaji' : 'Show romaji', 'sbToggleRomaji()') + btn(sbShowEn ? 'Hide English' : 'Show English', 'sbToggleEn()');
+    if (built.length) html += btn('🔊 Hear my answer', 'sbSay()');
   } else if (built.length) html += btn('🔊 Hear it', 'sbSay()');
   if (sbChallenge) html += sbDone ? btn('Next →', 'sbNewChallenge()', true) : btn(sbTry ? 'Check again' : 'Check', 'sbCheck()', true) + btn('Clear', 'sbClear()');
   else html += btn('Clear', 'sbClear()') + btn('Shuffle words', 'sbShuffle()');
@@ -15136,9 +15651,11 @@ function sbRender() {
       ends.className = 'sb-ends';
       // Reading: the endings by meaning first, the Japanese small.
       const being = sbMode === 'being';
-      const REV_EN = being ? ['is / will be', "isn't / won't be", 'was', "wasn't"] : ['does / will', "doesn't / won't", 'did', "didn't"];
-      const ENDS = being ? BEING_ENDS : SB_ENDS, tilde = being ? '' : '〜';
-      ends.innerHTML = ENDS.map((e, k) => `<button type="button" class="sb-end${sbEnd === k ? ' active' : ''}" onclick="sbSetEnd(${k})">${sbReverse ? `${REV_EN[k]} <span class="sb-end-jp">${tilde}${e[0]}</span>` : tilde + e[0]}</button>`).join('')
+      const REV_EN = being ? ['is / will be', "isn't / won't be", 'was', "wasn't", "isn't (い-word)", 'was (い-word)', "wasn't (い-word)"] : ['does / will', "doesn't / won't", 'did', "didn't"];
+      const ENDS = being ? BEING_ENDS : SB_ENDS;
+      // い-word endings show as 〜くないです (they replace the word's own い).
+      const tl = e => !being ? '〜' : e[4] === 'i' ? '〜' : '';
+      ends.innerHTML = ENDS.map((e, k) => `<button type="button" class="sb-end${being && e[4] === 'i' ? ' sb-end-i' : ''}${sbEnd === k ? ' active' : ''}" onclick="sbSetEnd(${k})">${sbReverse ? `${REV_EN[k]} <span class="sb-end-jp">${tl(e)}${e[0]}</span>` : tl(e) + e[0]}</button>`).join('')
         + `<button type="button" class="sb-end sb-end-q${sbQ ? ' active' : ''}" onclick="sbToggleQ()">${sbReverse ? 'a question <span class="sb-end-jp">か</span>' : '＋か (question)'}</button>`;
       col.appendChild(ends);
     }
@@ -15149,7 +15666,7 @@ function sbRender() {
 function sgGenerate() {
   const makers = [[sgObjectSentence, 4], [sgMotionSentence, 3], [sgRoutineSentence, 1], [sgJobProfile, 1], [sgMeetSentence, 1], [sgQA, 3],
     [sgDonnaQA, 1.5], [sgWhereDeQA, 1.5], [sgWhatAtQA, 1.5], [sgInviteQA, 1.5], [sgMeetPlanQA, 1], [sgGiftQA, 0.75],
-    [sgGiveSentence, 2], [sgGiveQA, 1], [sgMouQA, 2]];
+    [sgGiveSentence, 2], [sgGiveQA, 1], [sgMouQA, 2], [sgAdjSentence, 3], [sgButSentence, 1.5]];
   const total = makers.reduce((a, m) => a + m[1], 0);
   for (let tries = 0; tries < 50; tries++) {
     let r = sgRand() * total, fn = makers[0][0];
