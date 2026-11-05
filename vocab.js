@@ -3327,4 +3327,41 @@ window.JP_DRILL_GROUPS = {
     chars: 'パチンコ 全台 計数機…',
     tagQuery: { all: ['entertainment'], none: ['tourist'] },
   },
+  // L1/L2 MERGED GROUPS (2026-11-05) - shown only on the L1/L2 pill (show:'l12'),
+  // in the order JP_DRILL_L12_LIST gives. Taught words carrying an L1 or L2 tag
+  // (some:, so later L3 words with the same topic tag stay out); a line between parts.
+  'theme-l12-things': {
+    show: 'l12',
+    label: 'Everyday things & transport',
+    chars: 'かさ ほん くるま でんしゃ…',
+    tagQuery: { any: ['objects', 'transport'], all: ['taught'], some: ['L1', 'L2'] },
+  },
+  'theme-l12-places': {
+    show: 'l12',
+    label: 'Places',
+    chars: 'うち じむしょ こうえん えいがかん…',
+    tagQuery: { any: ['places', 'places-to-go'], all: ['taught'], some: ['L1', 'L2'] },
+  },
+  'theme-l12-world': {
+    show: 'l12',
+    label: 'Around the world',
+    chars: 'にほん パリ ロンドン…',
+    tagQuery: { any: ['countries', 'cities', 'places-uk'], all: ['taught'], some: ['L1', 'L2'] },
+  },
+  'theme-l12-grammar': {
+    show: 'l12',
+    label: 'Verbs, adjectives & question words',
+    chars: 'たべます ながい どこ…',
+    tagQuery: { any: ['verbs-l2', 'adjectives-l2', 'question-location'], all: ['taught'], some: ['L1', 'L2'] },
+  },
 };
+
+// The L1/L2 pill's list, in order (2026-11-05). Plain categories keep their own
+// screens (reference cards, number/calendar order, Colours' colour tiles);
+// Time and calendar lists and Family stay on their own on purpose.
+window.JP_DRILL_L12_LIST = [
+  'vocab-greetings', 'vocab-occupations', 'vocab-family-l2', 'vocab-food-drink-l2',
+  'theme-l12-things', 'vocab-colours', 'vocab-animals-l2', 'theme-l12-places',
+  'theme-l12-world', 'theme-l12-grammar', 'vocab-general-l2', 'vocab-numbers',
+  'vocab-time-l2', 'vocab-days-l2', 'vocab-months-l2', 'vocab-days-of-month-l2',
+];

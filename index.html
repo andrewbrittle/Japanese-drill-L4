@@ -850,7 +850,9 @@
   .rp-btn.active { border-color: var(--accent, #e8c468); color: var(--accent, #e8c468); }
   .rp-btn:disabled { cursor: default; opacity: 0.8; }
   .rp-verdict { font-size: 13px; margin-top: 6px; color: var(--text-muted, #aaa); }
-  .gp-lvl-2 { color: #e88a4d; } .gp-lvl-3 { color: #26a69a; } .gp-lvl-4 { color: #9575cd; }
+  .gp-lvl-1 { color: #5b9bff; } .gp-lvl-2 { color: #ff9a52; } .gp-lvl-3 { color: #2ec4b6; } .gp-lvl-4 { color: #a888f0; }
+  .cat-lvl-badges { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: 1px; }
+  .cat-lvl-badges .gp-lvl { font-size: 10px; padding: 0 6px; }
   .gp-lvl { flex-shrink: 0; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 7px; border: 1px solid currentColor; opacity: 0.85; }
   .tile-group-heading.first { border-top: none; padding-top: 0; margin-top: 0; }
   .sk-reveal { font-size: 56px; line-height: 1.2; }
@@ -1263,14 +1265,16 @@
      in that context - the rest of the time these pills look like normal
      unselected pills. :not(.active) so the existing gold .active state still
      wins once a pill is the one currently selected. */
-  #vocab-level-filter-row.showing-theme-colours #level-pill-1:not(.active) { color: #4d88e5; border-color: rgba(77,136,229,0.4); }
-  #vocab-level-filter-row.showing-theme-colours #level-pill-2:not(.active) { color: #e88a4d; border-color: rgba(232,138,77,0.4); }
-  #vocab-level-filter-row.showing-theme-colours #level-pill-3:not(.active) { color: #26a69a; border-color: rgba(38,166,154,0.4); }
-  #vocab-level-filter-row.showing-theme-colours #level-pill-4:not(.active) { color: #9575cd; border-color: rgba(149,117,205,0.4); }
+  /* (2026-11-05) L1/L2 merged into one pill; its two halves are always in
+     their own colours, as the key for the blue/orange word edges. */
+  #level-pill-12 .pk-1 { color: #5b9bff; } #level-pill-12 .pk-2 { color: #ff9a52; }
+  #vocab-level-filter-row.showing-theme-colours #level-pill-12:not(.active) { border-color: rgba(255,255,255,0.22); }
+  #vocab-level-filter-row.showing-theme-colours #level-pill-3:not(.active) { color: #2ec4b6; border-color: rgba(46,196,182,0.45); }
+  #vocab-level-filter-row.showing-theme-colours #level-pill-4:not(.active) { color: #a888f0; border-color: rgba(168,136,240,0.45); }
   /* Tourist / Untaught (second row, 2026-10-15) take the colours their words'
      card edges already use: curated (tourist) purple, encountered green. */
-  #vocab-optional-filter-row.showing-theme-colours #level-pill-tourist:not(.active) { color: #9b59d0; border-color: rgba(155,89,208,0.4); }
-  #vocab-optional-filter-row.showing-theme-colours #level-pill-untaught:not(.active) { color: #43a047; border-color: rgba(67,160,71,0.45); }
+  #vocab-optional-filter-row.showing-theme-colours #level-pill-tourist:not(.active) { color: #a5865f; border: 1px dashed rgba(165,134,95,0.7); }
+  #vocab-optional-filter-row.showing-theme-colours #level-pill-untaught:not(.active) { color: #6b7a88; border: 1px dashed rgba(107,122,136,0.75); }
   #vocab-level-filter-row.showing-theme-colours #level-pill-random:not(.active) { color: var(--green); border-color: rgba(111,207,151,0.4); }
   .latest-range-row { justify-content: center; gap: 6px; flex-wrap: nowrap; }
   .latest-range-row .level-pill { padding-left: 12px; padding-right: 12px; white-space: nowrap; }
@@ -1677,7 +1681,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261104.003</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261105.001</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -2193,8 +2197,9 @@
            toggles and a Start button. Monochrome SVG die, currentColor, so it
            matches the other pills rather than a colour emoji. -->
       <button class="level-pill level-pill-icon" id="level-pill-random" onclick="setMatchLevel('random')" title="Random drills" aria-label="Random drills"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"></rect><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" stroke="none"></circle></svg></button>
-      <button class="level-pill" id="level-pill-1" onclick="setMatchLevel(1)">L1</button>
-      <button class="level-pill" id="level-pill-2" onclick="setMatchLevel(2)">L2</button>
+      <!-- L1 and L2 merged into one pill (2026-11-05): its list is JP_DRILL_L12_LIST
+           in vocab.js - the old lists plus a few merged Groups (show:'l12'). -->
+      <button class="level-pill" id="level-pill-12" onclick="setMatchLevel('l12')"><span class="pk-1">L1</span>/<span class="pk-2">L2</span></button>
       <!-- Level 3 (2026-09-28) - the class starts tomorrow; no content yet,
            always visible (not gated like Untaught below - this is the
            taught course itself, same as L1/L2), just here and ready so
@@ -4217,6 +4222,7 @@ function validatePrivateVocabPack(pack) {
 // from several VOCAB categories into one drillable screen without copying
 // them; its word list is worked out fresh each time (see getThemePool).
 const THEMES = window.JP_DRILL_GROUPS || {};
+const L12_LIST = window.JP_DRILL_L12_LIST || [];
 
 // Every source category above is Level 2 or Trip - itemTierVisible
 // below is the single gate that applies to any tier an item's tags
@@ -4263,6 +4269,10 @@ function tagQueryMatches(itemTags, query) {
   // Used to keep tourist words out of the Untaught pill's cards.
   if (query && typeof query === 'object' && !Array.isArray(query) && query.none &&
       query.none.some(tag => itemTags.includes(tag))) return false;
+  // `some` (2026-11-05): at least one of these tags as well - e.g. some:['L1','L2']
+  // for the L1/L2 pill's Groups, so words also tagged forward to L3 still count.
+  if (query && typeof query === 'object' && !Array.isArray(query) && query.some &&
+      !query.some.some(tag => itemTags.includes(tag))) return false;
   if (query && typeof query === 'object' && !Array.isArray(query) && !query.any) {
     return (query.all || []).every(tag => itemTags.includes(tag));
   }
@@ -5333,7 +5343,10 @@ const COLOUR_HUES = {
 // ruled out above for the same reasons Genki's pick avoided them).
 // (2026-10-15) L3 changed brown -> teal: next to L2's orange on the Grammar page the
 // two read as one colour, brighter and darker. Brown went to the Grammar pill.
-const LEVEL_BORDER_COLORS = { 1: '#4d88e5', 2: '#e88a4d', 3: '#26a69a', curated: '#9b59d0', encountered: '#43a047', genki: '#d1568f' };
+// (2026-11-05) Taught levels a touch brighter and drawn 2px; L4 added (it had no
+// edge at all). Tourist (curated) bronze and Untaught (encountered) slate are
+// deliberately dimmer and drawn dashed - see applyLevelTileEdge.
+const LEVEL_BORDER_COLORS = { 1: '#5b9bff', 2: '#ff9a52', 3: '#2ec4b6', 4: '#a888f0', curated: '#a5865f', encountered: '#6b7a88', genki: '#d1568f' };
 
 // Resolves which LEVEL_BORDER_COLORS key applies to a pooled item. Untaught
 // items carry `encountered`/`curated` as a real tag now (not inferred from
@@ -5342,12 +5355,31 @@ const LEVEL_BORDER_COLORS = { 1: '#4d88e5', 2: '#e88a4d', 3: '#26a69a', curated:
 // before. Pooled items always carry their own `tags` array intact (see
 // buildCategoryItems - Object.assign spreads the raw VOCAB item over the
 // synthesized level/groupKey fields, so `.tags` survives untouched).
+// (2026-11-05) Taught words go first: 51 taught words also carry a
+// curated/encountered provenance tag (あき, もみじがり…) and were showing the
+// Tourist/Untaught colour. A taught word now shows the level it was first
+// taught at (lowest L tag), falling back to its category's level.
 function itemColorKey(item) {
-  if (item.tags) {
-    if (item.tags.includes('curated')) return 'curated';
-    if (item.tags.includes('encountered')) return 'encountered';
+  const tags = item.tags || [];
+  if (tags.includes('taught')) {
+    const lv = tags.map(t => /^L(\d)$/.exec(t)).filter(Boolean).map(m => +m[1]);
+    return lv.length ? Math.min(...lv) : item.level;
   }
+  if (tags.includes('curated')) return 'curated';
+  if (tags.includes('encountered')) return 'encountered';
   return item.level;
+}
+
+// Level edge on a pooled tile: 2px in the level colour; Tourist/Untaught
+// (and the private Genki pack) dashed so they read as extras, not levels.
+// Selected tiles drop back to the normal solid accent edge.
+function applyLevelTileEdge(tile, item, selected) {
+  const key = itemColorKey(item);
+  const colour = LEVEL_BORDER_COLORS[key];
+  if (!colour) return;
+  tile.style.borderWidth = '2px';
+  tile.style.borderStyle = (!selected && (key === 'curated' || key === 'encountered' || key === 'genki')) ? 'dashed' : '';
+  if (!selected) tile.style.borderColor = colour;
 }
 
 function interpolateRgb(from, to, t) {
@@ -5792,7 +5824,7 @@ function buildVocabTileGrid(categoryKey) {
       // Same 1px weight as every tile's default border, just coloured.
       // Colour itself comes from itemColorKey (tag-based for untaught,
       // level-based for taught) - see LEVEL_BORDER_COLORS above.
-      if (!isSelected) tile.style.borderColor = LEVEL_BORDER_COLORS[itemColorKey(item)] || '';
+      applyLevelTileEdge(tile, item, isSelected);
     }
     if (isSelected) tile.classList.add('selected');
     if (speakMode) {
@@ -5819,7 +5851,7 @@ function applyRestingTileBorder(categoryKey, item, tileEl) {
     const borderColor = colourBorderStyle(item.en, displayScore(kanaScores[scoreKey]));
     if (borderColor) tileEl.style.borderColor = borderColor;
   } else if (item.level !== undefined) {
-    tileEl.style.borderColor = LEVEL_BORDER_COLORS[itemColorKey(item)] || '';
+    applyLevelTileEdge(tileEl, item, false);
   }
 }
 
@@ -5835,6 +5867,7 @@ function toggleVocabTile(categoryKey, idx, tileEl) {
     set.add(idx);
     tileEl.classList.add('selected');
     tileEl.style.borderColor = '';
+    tileEl.style.borderStyle = '';
   }
   document.getElementById('vocab-tile-drill-btn').disabled = set.size === 0;
   updateSelectAllVocabTilesLabel();
@@ -6091,7 +6124,7 @@ function toggleSettings() {
   else if (navCurrent !== 'settings') showSettingsScreen();
 }
 function navLabel(id) {
-  if (id === 'match-settings') return ({ theme: 'Groups', random: 'Random', grammar: 'Grammar', 1: 'L1', 2: 'L2', 3: 'L3', 4: 'L4', tourist: 'Tourist', untaught: 'Untaught', andrew: 'Andrew' })[currentMatchLevel] || 'Vocabulary';
+  if (id === 'match-settings') return ({ theme: 'Groups', random: 'Random', grammar: 'Grammar', l12: 'L1/L2', 1: 'L1', 2: 'L2', 3: 'L3', 4: 'L4', tourist: 'Tourist', untaught: 'Untaught', andrew: 'Andrew' })[currentMatchLevel] || 'Vocabulary';
   if (id === 'drill') return 'Drill';
   if (id === 'results') return 'Results';
   const t = document.querySelector('#screen-' + id + ' .settings-title');
@@ -7112,7 +7145,7 @@ let appSettings = { theme: 'dark', showKanji: true, showExtra: true, hintPenalty
 // lastSeenChangelog doesn't match this value sees the flag until they open
 // Settings, which clears it (see showSettingsScreen()) - reading the
 // changelog itself is optional, opening Settings is what counts as "noticed".
-const LATEST_CHANGELOG_ENTRY = '2026-11-04-L4c';
+const LATEST_CHANGELOG_ENTRY = '2026-11-05-L4';
 try {
   const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
   if (savedSettings && typeof savedSettings === 'object') {
@@ -10002,8 +10035,8 @@ function setMatchLevel(level) {
   if (level === 'grammar') { showGrammarPage(); return; } // Grammar is its own tab now (2026-10-16)
   if (level === 'tourist' && !appSettings.showTourist) return;
   currentMatchLevel = level;
-  document.getElementById('level-pill-1').classList.toggle('active', level === 1);
-  document.getElementById('level-pill-2').classList.toggle('active', level === 2);
+  if (level === 1 || level === 2) level = currentMatchLevel = 'l12'; // old L1/L2 pills merged (2026-11-05)
+  document.getElementById('level-pill-12').classList.toggle('active', level === 'l12');
   document.getElementById('level-pill-3').classList.toggle('active', level === 3);
   document.getElementById('level-pill-4').classList.toggle('active', level === 4);
   document.getElementById('level-pill-theme').classList.toggle('active', level === 'theme');
@@ -10026,7 +10059,7 @@ function setMatchLevel(level) {
   // a new category just needs level:'andrew' or level:'untaught' in VOCAB
   // and shows up automatically, no hand-built card needed. Genki (2026-09-12)
   // joins the same list for the same reason.
-  document.getElementById('match-vocab-view').style.display = (level === 1 || level === 2 || level === 3 || level === 4 || level === 'andrew' || level === 'untaught' || level === 'tourist') ? 'flex' : 'none';
+  document.getElementById('match-vocab-view').style.display = (level === 'l12' || level === 1 || level === 2 || level === 3 || level === 4 || level === 'andrew' || level === 'untaught' || level === 'tourist') ? 'flex' : 'none';
   document.getElementById('match-theme-view').style.display = level === 'theme' ? 'flex' : 'none';
   document.getElementById('match-random-view').style.display = level === 'random' ? 'flex' : 'none';
   if (level === 'theme') refreshThemeCategorySwatches();
@@ -10198,6 +10231,21 @@ function buildMatchCategoryList() {
       .sort((a, b) => a.label.localeCompare(b.label))
       .forEach(({ key }) => container.appendChild(buildCategoryTile(key)));
     container.appendChild(document.createElement('div')).className = 'section-divider';
+  }
+  // L1/L2 PILL (2026-11-05): one list in the order JP_DRILL_L12_LIST gives -
+  // the old L1 and L2 categories, with a few merged into Groups (show:'l12').
+  // Each card carries small L1/L2 badges for where its words come from.
+  if (currentMatchLevel === 'l12') {
+    L12_LIST.filter(key => VOCAB[key] || THEMES[key]).forEach(key => {
+      const card = buildCategoryTile(key);
+      const lvls = VOCAB[key] ? [VOCAB[key].level || 1]
+        : [...new Set(resolveVocabCategory(key).items.map(itemColorKey))].filter(l => l === 1 || l === 2).sort();
+      const count = card.querySelector('.group-count');
+      if (count && lvls.length) count.insertAdjacentHTML('beforeend',
+        '<span class="cat-lvl-badges">' + lvls.map(l => `<span class="gp-lvl gp-lvl-${l}">L${l}</span>`).join('') + '</span>');
+      container.appendChild(card);
+    });
+    return;
   }
   // TOURIST PILL (2026-10-15): "All tourist words" first, then one card per
   // section in data order (theme-te-* in vocab.js, show:'tourist').
