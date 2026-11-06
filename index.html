@@ -1275,9 +1275,11 @@
      in that context - the rest of the time these pills look like normal
      unselected pills. :not(.active) so the existing gold .active state still
      wins once a pill is the one currently selected. */
-  /* (2026-11-05) L1/L2 merged into one pill; its two halves are always in
-     their own colours, as the key for the blue/orange word edges. */
-  #level-pill-12 .pk-1 { color: #5b9bff; } #level-pill-12 .pk-2 { color: #ff9a52; }
+  /* (2026-11-05) L1/L2 merged into one pill; its two halves take their own
+     colours (the key for the blue/orange word edges) only while Groups is
+     showing, like the other level pills - plain the rest of the time. */
+  #vocab-level-filter-row.showing-theme-colours #level-pill-12:not(.active) .pk-1 { color: #5b9bff; }
+  #vocab-level-filter-row.showing-theme-colours #level-pill-12:not(.active) .pk-2 { color: #ff9a52; }
   #vocab-level-filter-row.showing-theme-colours #level-pill-12:not(.active) { border-color: rgba(255,255,255,0.22); }
   #vocab-level-filter-row.showing-theme-colours #level-pill-3:not(.active) { color: #2ec4b6; border-color: rgba(46,196,182,0.45); }
   #vocab-level-filter-row.showing-theme-colours #level-pill-4:not(.active) { color: #a888f0; border-color: rgba(168,136,240,0.45); }
@@ -1691,7 +1693,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261105.003</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261106.001</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -7155,7 +7157,7 @@ let appSettings = { theme: 'dark', showKanji: true, showExtra: true, hintPenalty
 // lastSeenChangelog doesn't match this value sees the flag until they open
 // Settings, which clears it (see showSettingsScreen()) - reading the
 // changelog itself is optional, opening Settings is what counts as "noticed".
-const LATEST_CHANGELOG_ENTRY = '2026-11-05-L4b';
+const LATEST_CHANGELOG_ENTRY = '2026-11-06-L4';
 try {
   const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
   if (savedSettings && typeof savedSettings === 'object') {
@@ -12039,11 +12041,17 @@ function l3Heading(list, text) {
   d.innerHTML = markSmallKana(text); // innerHTML so っ/ゃ/ゅ/ょ in headings get the small-kana span
   list.appendChild(d);
 }
+// Grammar-card Japanese may carry <strong>/<em> for emphasis (2026-11-06:
+// grammar.js "two" rows showed the tags as text). Only those tags pass
+// through; everything else is escaped as before.
+function markSmallKanaHtml(text) {
+  return String(text ?? '').split(/(<\/?(?:strong|em)>)/).map((part, i) => i % 2 ? part : markSmallKana(part)).join('');
+}
 function l3Example(list, jp, romaji, en) {
   const row = document.createElement('div');
   row.className = 'vocab-ref-row minute-row';
   row.innerHTML = `
-    <div class="vocab-ref-jp minute-jp">${markSmallKana(jp)}</div>
+    <div class="vocab-ref-jp minute-jp">${markSmallKanaHtml(jp)}</div>
     <div class="vocab-ref-romaji minute-romaji">${romaji}${en ? ' — ' + en : ''}</div>
   `;
   list.appendChild(row);
@@ -12054,12 +12062,12 @@ function l3TwoCol(list, leftJp, leftSub, rightJp, rightSub) {
   row.innerHTML = `
     <div class="vocab-ref-col-left">
       <div>
-        <div class="vocab-ref-jp minute-jp">${markSmallKana(leftJp)}</div>
+        <div class="vocab-ref-jp minute-jp">${markSmallKanaHtml(leftJp)}</div>
         <div class="vocab-ref-romaji minute-romaji">${leftSub}</div>
       </div>
     </div>
     <div class="vocab-ref-col-right">
-      <div class="vocab-ref-jp minute-jp qneg-example-jp">${markSmallKana(rightJp)}</div>
+      <div class="vocab-ref-jp minute-jp qneg-example-jp">${markSmallKanaHtml(rightJp)}</div>
       <div class="vocab-ref-romaji minute-romaji">${rightSub}</div>
     </div>
   `;
@@ -12241,7 +12249,7 @@ function showL3SentenceOrderReference() {
   l3Note(list, 'Giving can say how, too (Lesson 6): <strong>メールで</strong> レポートを おくります, <strong>にほんごで</strong> てがみを かきます, <strong>スマホで</strong> でんわを かけます. Tap the "With what" row to add it.');
   l3Note(list, 'Put the companion after the topic: わたしは あねと デパートへ いきます, never ✗ わたしと あねは… The time word sets the tense: きのう → いきました, あした → いきます ("going to").');
   l3Note(list, 'Giving &amp; receiving: <strong>who → when → how often → to / from whom に → what を → verb</strong>. に means "to" with あげます, かします, おしえます, かきます, おくります and でんわを かけます, and "from" with もらいます, かります, ならいます. Nobody あげます to わたし — say it the other way round with もらいます: わたしは ともだちに はなを もらいました.');
-  l3Note(list, 'Being, Level 4 (Lesson 8): い-words change their own ending — おもしろ<strong>くない</strong>です (isn\'t), おもしろ<strong>かった</strong>です (was), いい → <strong>よくない</strong>です. Before a noun, な-words add な: <strong>しずかな</strong> まち, <strong>しんせつな</strong> ひと; い-words don\'t: おもしろい ひと. とても = very; あまり + a negative = not very: あまり おもしろくないです. Tap the How much and Describing rows to add them.');
+  l3Note(list, 'Being, Level 4: い-words change their own ending — おもしろ<strong>くない</strong>です (isn\'t), おもしろ<strong>かった</strong>です (was), いい → <strong>よくない</strong>です. Before a noun, な-words add な: <strong>しずかな</strong> まち, <strong>しんせつな</strong> ひと; い-words don\'t: おもしろい ひと. とても = very; あまり + a negative = not very: あまり おもしろくないです. Tap the How much and Describing rows to add them.');
   l3Note(list, 'Being — "X is Y": <strong>who / what は → (when) → what they are / what it\'s like → です</strong>. A job (あには いしゃです), a nationality (〜じん) or a describing word (えいがは おもしろいです). です changes for the tense: じゃありません (isn\'t), でした (was), じゃありませんでした (wasn\'t). い-words like おもしろい change their own ending instead (see the Level 4 note above).');
   l3Note(list, 'Going somewhere also uses きます (come) where "come" fits — to my house, to school, to a party: たなかさんは うちに きます. Invitations always use いきます.');
   l3Note(list, 'Romaji: を is written "o" here, as it\'s said. Level 2 wrote it "wo", as it was taught then — same particle, same sound.');

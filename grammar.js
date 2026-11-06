@@ -27,7 +27,7 @@ window.JP_DRILL_GRAMMAR = {
       {"label": "だれも/どこも/なにも + negative", "card": "question-negation", "added": "2026-08-13"},
     ] },
     4: { title: "Grammar notes — Level 4", entries: [
-      {"label": "Adjectives — い-words and な-words (Lesson 8)", "card": "adjectives-l4", "added": "2026-11-04b"},
+      {"label": "Adjectives — い-words and な-words", "card": "adjectives-l4", "added": "2026-11-04b"},
       {"label": "とても / あまり, どう / どんな, and 〜が (but)", "card": "adj-extras-l4", "added": "2026-11-04b"},
     ] },
     3: { title: "Grammar notes — Level 3", entries: [
@@ -270,7 +270,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "An occasion takes に as well: たんじょうびに, クリスマスに, ははのひに. So one sentence can have two に — one for when, one for who."],
     ] },
     "adjectives-l4": { title: "Adjectives — い-words and な-words", blocks: [
-      ["note", "<strong>Preview</strong> — added before the class covers it (Minna no Nihongo Lesson 8). Japanese has two kinds of adjective, and the difference is how they end."],
+      ["note", "<strong>Preview</strong> — added before the class covers it. Japanese has two kinds of adjective, and the difference is how they end."],
       ["two", "い-adjectives", "end in い: おおきい, おもしろい, たかい, おいしい", "な-adjectives", "add な before a noun: しずか, きれい, ゆうめい, しんせつ"],
       ["heading", "\"X is …\" — both just add です"],
       ["ex", "この まちは しずかです。", "Kono machi wa shizuka desu.", "This town is quiet."],
@@ -285,10 +285,10 @@ window.JP_DRILL_GRAMMAR = {
       ["two", "しんせつ<strong>な</strong> ひと", "a kind person", "おおきい くるま", "a big car"],
       ["ex", "マンチェスターは にぎやかな まちです。", "Manchesutaa wa nigiyaka na machi desu.", "Manchester is a lively town."],
       ["heading", "Coming later: the past"],
-      ["note", "Lesson 12 in Minna (Lesson 5 in Genki): い-words take <strong>かったです</strong> (たかかったです — was expensive) and <strong>くなかったです</strong>; な-words take でした / じゃありませんでした, like nouns. The app already uses them — the Adjective forms drill on the dice page has all five forms."],
+      ["note", "Coming later in the course: い-words take <strong>かったです</strong> (たかかったです — was expensive) and <strong>くなかったです</strong>; な-words take でした / じゃありませんでした, like nouns. The app already uses them — the Adjective forms drill on the dice page has all five forms."],
     ] },
     "adj-extras-l4": { title: "とても / あまり, どう / どんな, 〜が", blocks: [
-      ["note", "<strong>Preview</strong> (Lesson 8). Three small words that come with adjectives."],
+      ["note", "<strong>Preview</strong> — three small words that come with adjectives."],
       ["heading", "とても (very) and あまり (not very)"],
       ["ex", "にほんごは とても おもしろいです。", "Nihongo wa totemo omoshiroi desu.", "Japanese is very interesting."],
       ["ex", "きょうは あまり さむくないです。", "Kyou wa amari samukunai desu.", "It isn't very cold today."],
@@ -333,7 +333,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "Joining words can make sounds collide, and some words just sound the same. かみ is paper (紙), hair on your head (髪) or a god (神). Hair has two words: かみ for the hair on your head, as a whole; け (毛) for a single hair, body hair or an animal's fur. See Vocabulary → Same sound, different word."],
     ] },
     "mou-mada": { title: "もう / まだ — already, not yet", blocks: [
-      ["note", "<strong>もう + 〜ました</strong> = already: the action is finished. As a question, <strong>もう 〜ましたか</strong> = have you … yet? (Lesson 6, Minna no Nihongo ch.7)"],
+      ["note", "<strong>もう + 〜ました</strong> = already: the action is finished. As a question, <strong>もう 〜ましたか</strong> = have you … yet? (Lesson 6)"],
       ["ex", "もう ばんごはんを たべましたか。", "Mou bangohan o tabemashita ka.", "Have you had dinner yet?"],
       ["ex", "はい、もう たべました。", "Hai, mou tabemashita.", "Yes, I've already eaten."],
       ["ex", "いいえ、まだです。これから たべます。", "Iie, mada desu. Korekara tabemasu.", "Not yet. I'm about to."],
@@ -359,7 +359,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "これ and あれ stand on their own: これは なんですか. この and あの always need a noun after them: この ほんは なんですか."],
     ] },
     "de-five-jobs": { title: "で — all five jobs", blocks: [
-      ["note", "One idea covers them all: で marks <strong>the setting or the means</strong> of an action — where it happens, or what you do it with. The verb is always an action, never です. Lesson 5 (Minna no Nihongo ch.7) adds the last two."],
+      ["note", "One idea covers them all: で marks <strong>the setting or the means</strong> of an action — where it happens, or what you do it with. The verb is always an action, never です. Lesson 5 adds the last two."],
       ["heading", "1. Place — where it happens (どこで)"],
       ["ex", "としょかんで べんきょうします。", "Toshokan de benkyou shimasu.", "I study at the library."],
       ["heading", "2. Transport — how you get there (なんで)"],
