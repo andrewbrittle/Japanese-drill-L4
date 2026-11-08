@@ -1492,9 +1492,14 @@
   .sg-body .sg-li-empty { list-style: none; }
   .sg-body li { margin: 0.25rem 0; }
   .sg-jp { font-family: 'BIZ UDPGothic', sans-serif; }
-  .sg-w { display: inline-block; padding: 0 3px; margin: 1px 1px; border-radius: 5px; background: var(--surface2);
+  /* Word blocks (2026-11-08, second go): an outline as well as the fill - the
+     fill alone was barely visible, so only the coloured particles and
+     endings looked like something to hold. */
+  :root { --sg-fill: rgba(255,255,255,0.07); --sg-line: rgba(255,255,255,0.30); --sg-accent-line: rgba(232,201,122,0.60); }
+  :root[data-theme="light"] { --sg-fill: rgba(0,0,0,0.045); --sg-line: rgba(0,0,0,0.28); --sg-accent-line: rgba(169,116,15,0.60); }
+  .sg-w { display: inline-block; padding: 0 3px; margin: 1px 1px; border-radius: 5px; background: var(--sg-fill); border: 1px solid var(--sg-line);
     line-height: 1.55; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
-  .sg-w.sg-k-particle, .sg-w.sg-k-ending { background: var(--accent-dim); color: var(--accent); }
+  .sg-w.sg-k-particle, .sg-w.sg-k-ending { background: var(--accent-dim); color: var(--accent); border-color: var(--sg-accent-line); }
   .sg-w .sg-end { color: var(--accent); }
   .sg-w.tile-peeking { outline: 2px solid var(--accent); }
   .sg-help-off .sg-w { cursor: default; }
@@ -1726,7 +1731,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261108.002</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261108.003</div>
   </div>
 
   <!-- Katakana settings screen -->
