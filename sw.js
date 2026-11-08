@@ -15,24 +15,40 @@
 // LEVEL 4 APP: its own cache prefix, jpl4-. The Level 3 app (same web
 // address) deletes every cache starting jp-drill- except its own, and this
 // app deletes only jpl4- ones, so neither clears the other's offline copy.
-const CACHE_VERSION = 'jpl4-v261106-001';
+const CACHE_VERSION = 'jpl4-v261108-001';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './vocab.js',
-  './grammar.js',
-  './kana-strokes.js',
-  './instructions.html',
-  './changelog.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-512-maskable.png',
+  './core/core.js',
+  './core/questions.js',
+  './core/text.js',
+  './ja/app.js',
+  './ja/builder.js',
+  './ja/daily.js',
+  './ja/forms.js',
+  './ja/grammar.js',
+  './ja/kana-strokes.js',
+  './ja/kana.js',
+  './ja/kanji.js',
+  './ja/legacy.js',
+  './ja/notes.js',
+  './ja/numbers.js',
+  './ja/questions.js',
+  './ja/reading.js',
+  './ja/sentences.js',
+  './ja/vocab.js',
+  './lang/ja.js',
+  './ui/en.js',
+  './changelog.html',
+  './instructions.html',
+  './japanese-vs-english-notes.html',
+  './sentence-structure-notes.html',
   './icons/apple-touch-icon.png',
-  // Self-hosted now (was a live Google Fonts request) - precaching it here
-  // means it's guaranteed available offline from install, rather than only
-  // getting cached opportunistically after a first successful online load.
+  './icons/icon-192.png',
+  './icons/icon-512-maskable.png',
+  './icons/icon-512.png',
   './fonts/BizUDPGothic-Regular.ttf',
 ];
 
@@ -65,7 +81,7 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((names) => Promise.all(
         names
-          .filter((name) => name.startsWith('jpl4-') && name !== CACHE_VERSION)
+          .filter((name) => name.startsWith('jpl4-') && !name.startsWith('jpl4-core-') && name !== CACHE_VERSION)
           .map((name) => caches.delete(name))
       ))
       .then(() => self.clients.claim())
