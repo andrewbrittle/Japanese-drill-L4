@@ -145,19 +145,47 @@ function sgJp(s) {
   return markSmallKana(String(s));
 }
 
+const SG_TRAIL = /^[。、？！?!）)\].,:;]+/;
+
 function sgRunsHtml(runs) {
   const W = STUDY_GUIDES.words;
+  // Punctuation right after a Japanese run (a closing bracket, a full stop)
+  // is moved onto that run's last block, so it can't start a line alone.
+  runs = runs.map(r => r.slice());
+  for (let i = 1; i < runs.length; i++) {
+    const [x] = runs[i], prev = runs[i - 1][0];
+    if (typeof x === 'string' && Array.isArray(prev) && SG_TRAIL.test(x) && typeof prev[prev.length - 1] === 'string') {
+      const m = x.match(SG_TRAIL)[0];
+      runs[i - 1][0] = prev.concat([{ t: m, ascii: true }]);
+      runs[i][0] = x.slice(m.length);
+    }
+  }
   return runs.map(([x, f]) => {
     let h;
     if (typeof x === 'string') h = sgEsc(x);
     else {
-      h = x.map(it => {
-        if (typeof it !== 'string') return sgJp(it.t);
+      const parts = x.map(it => {
+        if (typeof it !== 'string') return { text: it.t, h: it.ascii ? `<span class="sg-punct">${sgEsc(it.t)}</span>` : sgJp(it.t) };
         const w = W[it];
-        if (!w) return '';
+        if (!w) return { h: '' };
         const inner = w.end && w.stem ? `${sgJp(w.stem)}<span class="sg-end">${sgJp(w.end)}</span>` : sgJp(w.jp);
-        return `<span class="sg-w sg-k-${sgEsc(w.kind)}" data-k="${sgEsc(it)}">${inner}</span>`;
-      }).join('');
+        return { word: true, h: `<span class="sg-w sg-k-${sgEsc(w.kind)}" data-k="${sgEsc(it)}">${inner}</span>` };
+      });
+      // Keep a 〜 with the block after it, and 。、？！ with the block before
+      // it, so neither ends up alone at the start or end of a line.
+      for (let i = 0; i < parts.length; i++) {
+        const t = parts[i].text;
+        if (t && /〜$/.test(t) && parts[i + 1] && parts[i + 1].word) {
+          parts[i + 1].h = `<span class="sg-nb">${parts[i].h}${parts[i + 1].h}</span>`;
+          parts[i].h = '';
+        } else if (t && SG_TRAIL.test(t) && i > 0 && parts[i - 1].word) {
+          const m = t.match(SG_TRAIL)[0];
+          const mh = x[i].ascii ? parts[i].h : sgJp(m);
+          parts[i - 1].h = `<span class="sg-nb">${parts[i - 1].h}${mh}</span>`;
+          parts[i].h = x[i].ascii ? '' : sgJp(t.slice(m.length));
+        }
+      }
+      h = parts.map(q => q.h).join('');
       h = `<span class="sg-jp">${h}</span>`;
     }
     if (f && f.includes('b')) h = `<strong>${h}</strong>`;
@@ -238,6 +266,7 @@ function renderStudyGuide() {
   closeFold();
   body.innerHTML = html;
   body.classList.toggle('sg-help-off', !help);
+  sgMarkWideTables(body);
   if (!help) return;
   body.querySelectorAll('.sg-w').forEach(el => {
     const w = STUDY_GUIDES.words[el.dataset.k];
@@ -294,3 +323,18 @@ function sgFindVocabItem(jp) {
 
 loadStudyGuides();
 document.addEventListener('DOMContentLoaded', updateStudyGuidesStatus);
+
+// A table wider than the screen scrolls sideways: its right edge fades
+// while there's more to see (the skeleton tables keep their left-to-right
+// order rather than being squeezed).
+function sgMarkWideTables(root) {
+  root.querySelectorAll('.sg-table-wrap').forEach(w => {
+    const update = () => w.classList.toggle('sg-more', w.scrollLeft + w.clientWidth < w.scrollWidth - 2);
+    update();
+    if (!w.dataset.sgWatch) { w.dataset.sgWatch = '1'; w.addEventListener('scroll', update, { passive: true }); }
+  });
+}
+window.addEventListener('resize', () => {
+  const body = document.getElementById('study-guide-body');
+  if (body && body.offsetParent) sgMarkWideTables(body);
+});
