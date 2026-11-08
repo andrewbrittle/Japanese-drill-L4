@@ -126,6 +126,8 @@ function renderGrammarPage() {
   };
   const open = e => e.card ? () => showGrammarCard(e.card) : () => { const fn = window[e.fn]; if (typeof fn === 'function') fn(); };
   // Sentence building moved to its own tab, 作文 (2026-10-23) - renderBuildPage.
+  // Study guides first, when their private file is loaded (ja/guides.js).
+  renderStudyGuideCards(view, head, card);
   head('Grammar notes — newest first');
   all.filter(e => !e.top).sort((a, b) => (b.added || '').localeCompare(a.added || '') || a.order - b.order)
     .forEach(e => card(e.label, e.lvl, open(e)));

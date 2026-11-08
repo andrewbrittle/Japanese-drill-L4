@@ -297,7 +297,7 @@
      HTML below for the full story - this switches just that one card from
      .group-card's default horizontal row to a column, so the two buttons
      stack under the description instead of squeezing it. */
-  #backup-scores-card, #private-vocab-card { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+  #backup-scores-card, #private-vocab-card, #study-guides-card { flex-direction: column; align-items: stretch; gap: 0.6rem; }
 
   /* Select all / Random 20 side by side on the tile-selection screen - half
      the vertical space of two full-width cards. When Random 20 is hidden
@@ -1477,6 +1477,36 @@
   .pt-blank { display: inline-block; min-width: 1.4em; border-bottom: 3px solid var(--accent); color: var(--green); text-align: center; }
   .pt-blank.filled { border-bottom-color: var(--green); }
   .vf-q-en { font-size: 14px; font-weight: 400; color: var(--text-dim); margin-top: 2px; }
+  /* STUDY GUIDES (2026-11-08) - ja/guides.js. Each Japanese word a block:
+     a faint background and a small gap so it's clear which word a finger is
+     on (and where Japanese words begin and end); particles and endings in
+     the accent colour. The padding makes the touch area a little bigger
+     than the visible block. */
+  .sg-body { font-size: 15px; line-height: 1.9; color: var(--text); margin: 0.5rem 0 1rem; }
+  .sg-body .sg-h2 { font-size: 19px; margin: 1.4rem 0 0.4rem; color: var(--text); }
+  .sg-body .sg-h3 { font-size: 16px; margin: 1.1rem 0 0.3rem; color: var(--accent); }
+  .sg-body .sg-p { margin: 0.45rem 0; }
+  .sg-body .sg-list { margin: 0.3rem 0 0.6rem; padding-left: 1.3rem; }
+  .sg-body .sg-ol { list-style: none; padding-left: 0.3rem; }
+  .sg-body .sg-sub { padding-left: 1.1rem; margin: 0.1rem 0; }
+  .sg-body .sg-li-empty { list-style: none; }
+  .sg-body li { margin: 0.25rem 0; }
+  .sg-jp { font-family: 'BIZ UDPGothic', sans-serif; }
+  .sg-w { display: inline-block; padding: 0 3px; margin: 1px 1px; border-radius: 5px; background: var(--surface2);
+    line-height: 1.55; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+  .sg-w.sg-k-particle, .sg-w.sg-k-ending { background: var(--accent-dim); color: var(--accent); }
+  .sg-w .sg-end { color: var(--accent); }
+  .sg-w.tile-peeking { outline: 2px solid var(--accent); }
+  .sg-help-off .sg-w { cursor: default; }
+  .sg-table-wrap { overflow-x: auto; margin: 0.4rem 0 0.8rem; }
+  .sg-table { border-collapse: collapse; font-size: 14px; line-height: 1.7; }
+  .sg-table th, .sg-table td { border-bottom: 1px solid var(--border); padding: 4px 8px; text-align: left; vertical-align: top; }
+  .sg-table th { color: var(--text-muted); font-weight: 700; }
+  .sg-fold { border: 1px solid var(--border); border-radius: 10px; padding: 0.35rem 0.8rem; margin: 0.45rem 0; background: var(--surface); }
+  .sg-fold summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+  .sg-fold-body { padding-top: 0.3rem; }
+  #verb-forms-body .sg-end { color: var(--accent); }
+  .sg-forms-btn { display: block; margin: 0 auto 0.9rem; }
   .vf-note { font-size: 12px; color: var(--text-dim); margin: 0.5rem 0 0.9rem; line-height: 1.4; }
   /* Kana stroke-order bubble (2026-10-16, styles from the Kanji Strokes app). */
   .tile-peek-bubble.peek-kana { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -1660,6 +1690,18 @@
       <div class="backup-status-msg" id="private-vocab-msg"></div>
     </div>
 
+    <!-- Study guides (2026-11-08) - see ja/guides.js. -->
+    <div class="group-card" id="study-guides-card" style="cursor:default;">
+      <div class="group-info">
+        <div class="group-name">Study guides</div>
+        <div class="group-count" id="study-guides-status">Load the study guides file to read the class guides here, with help on every Japanese word. Kept on this device only.</div>
+      </div>
+      <button class="start-btn" onclick="triggerStudyGuidesPicker()">Load file</button>
+      <button class="start-btn" id="study-guides-remove-btn" onclick="removeStudyGuides()" style="display:none;">Remove</button>
+      <input type="file" id="study-guides-input" accept="application/json,.json" style="display:none;" onchange="handleStudyGuidesSelected(event)">
+      <div class="backup-status-msg" id="study-guides-msg"></div>
+    </div>
+
     <!-- Share card (2026-10-06): QR for this app + links to the sister apps.
          Kanji cards linked 2026-10-15 at Andrew's request (its cards stay
          behind that app's own password). -->
@@ -1684,7 +1726,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261108.001</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261108.002</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -2434,6 +2476,22 @@
     <div id="match-grammar-view" style="display:flex;"></div>
   </div>
 
+  <!-- STUDY GUIDES (2026-11-08): one class study guide, every Japanese word
+       a block to hold for its romaji (slide for the meaning). See ja/guides.js. -->
+  <div class="screen" id="screen-study-guide">
+    <div class="settings-title" id="study-guide-title">Study guide</div>
+    <div class="settings-sub">Hold any Japanese word for its romaji; slide towards the bubble and let go for the meaning.</div>
+    <div class="group-card selected" id="study-guide-help-card" onclick="toggleStudyGuideHelp()" style="cursor:pointer;">
+      <div class="group-info">
+        <div class="group-name">Help</div>
+        <div class="group-count">Switch off to test yourself on a guide you've been through</div>
+      </div>
+      <div class="toggle"></div>
+    </div>
+    <div class="sg-body" id="study-guide-body"></div>
+    <button class="btn-secondary" onclick="navBack()">← Back</button>
+  </div>
+
   <!-- DESK SHEETS (2026-10-13): two printable A4 landscape pages - the
        sentence skeleton across the top, word cards under each slot. See
        buildDeskSheets(). -->
@@ -2490,6 +2548,7 @@ window.LANG = ja;
 <script defer src="ja/sentences.js"></script>
 <script defer src="ja/builder.js"></script>
 <script defer src="ja/daily.js"></script>
+<script defer src="ja/guides.js"></script>
 <script defer src="ja/kana.js"></script>
 <script defer src="ja/kanji.js"></script>
 <script defer src="ja/legacy.js"></script>

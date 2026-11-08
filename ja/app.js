@@ -37,6 +37,7 @@ window.APP = {
     'kanji-selection': { home: 'kanji-index', onShow: () => KANJI_SECTION_KEYS.forEach(key => refreshKanaScoreShading('kanji-grid-' + key)) },
     'counter-quiz-selection': { home: 'numbers', onShow: () => buildCounterQuizSelectionList() },
     'desk-sheets': { home: 'build' },
+    'study-guide': { home: 'grammar' },
     'sentence-builder': { home: 'build' },
   },
   // Random's own drills beside All / Weakest / Untested: each level, Untaught
@@ -146,8 +147,9 @@ window.APP = {
   onPeekHide: () => { peekStrokeToken++; },
   // Holding a word: its reading (or a kana drawn stroke by stroke); on a
   // verb, slide towards the bubble and let go for every form (2026-10-07).
-  peekFill: (b, item) => jaPeekFill(b, item),
-  peekSlide: item => isVerbItem(item) ? () => showVerbFormsPopup(item) : null,
+  // A study guide's word: its romaji, then slide for the meaning (ja/guides.js).
+  peekFill: (b, item) => item.guideWord ? studyGuidePeekFill(b, item) : jaPeekFill(b, item),
+  peekSlide: item => item.guideWord ? () => showStudyGuideWord(item.guideWord) : isVerbItem(item) ? () => showVerbFormsPopup(item) : null,
   latestWordsDefault: '1w',
   // Private word lists (the Genki file): its format, and what a word must have.
   privateVocab: { format: 'jp-drill-private-vocab', wordOk: it => typeof it.jp === 'string' && typeof it.romaji === 'string' },
