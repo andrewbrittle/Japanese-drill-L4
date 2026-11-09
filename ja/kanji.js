@@ -16,13 +16,15 @@ Object.assign(DATA, {
     {char:'九',answer:'nine',disp:'survival'},
     {char:'十',answer:'ten',disp:'survival'},
     {char:'円',answer:'yen',disp:'survival'},
-    {char:'月',answer:'Monday / month',disp:'survival'},
-    {char:'火',answer:'Tuesday',disp:'survival',altForm:'火曜日'},
-    {char:'水',answer:'Wednesday',disp:'survival',altForm:'水曜日'},
-    {char:'木',answer:'Thursday',disp:'survival',altForm:'木曜日'},
-    {char:'金',answer:'Friday / gold',disp:'survival'},
-    {char:'土',answer:'Saturday / earth',disp:'survival'},
-    {char:'日',answer:'Sunday',disp:'survival',altForm:'日曜日'},
+    // The days of the week as whole words (2026-11-09): each kanji on its
+    // own is one card with Kanji Cards' meaning ("Fire (Tuesday)"), in Nature.
+    {char:'月曜日',answer:'Monday',disp:'survival'},
+    {char:'火曜日',answer:'Tuesday',disp:'survival'},
+    {char:'水曜日',answer:'Wednesday',disp:'survival'},
+    {char:'木曜日',answer:'Thursday',disp:'survival'},
+    {char:'金曜日',answer:'Friday',disp:'survival'},
+    {char:'土曜日',answer:'Saturday',disp:'survival'},
+    {char:'日曜日',answer:'Sunday',disp:'survival'},
     {char:'一月',answer:'January',disp:'survival'},
     {char:'二月',answer:'February',disp:'survival'},
     {char:'三月',answer:'March',disp:'survival'},
@@ -56,6 +58,7 @@ Object.assign(DATA, {
   ],
   'kanji-nature-body': [
     {char:'日',answer:'sun / day',disp:'kanji'},
+    {char:'月',answer:'moon',disp:'kanji'},
     {char:'山',answer:'mountain',disp:'kanji'},
     {char:'川',answer:'river',disp:'kanji'},
     {char:'水',answer:'water',disp:'kanji'},
@@ -64,6 +67,8 @@ Object.assign(DATA, {
     {char:'小',answer:'small',disp:'kanji'},
     {char:'火',answer:'fire',disp:'kanji'},
     {char:'木',answer:'tree / wood',disp:'kanji'},
+    {char:'金',answer:'gold',disp:'kanji'},
+    {char:'土',answer:'earth',disp:'kanji'},
     {char:'口',answer:'mouth',disp:'kanji'},
     {char:'目',answer:'eye',disp:'kanji'},
     {char:'耳',answer:'ear',disp:'kanji'},
@@ -273,6 +278,7 @@ const KANJI_SECTION_KEYS = Object.keys(KANJI_SECTIONS);
 // as groupKey (via Object.assign below), same convention buildRandomKanjiPool
 // already uses, so the drill badge shows where a verb actually belongs.
 function getKanjiSectionPool(sectionKey) {
+  if (KANJI_SECTIONS[sectionKey] && KANJI_SECTIONS[sectionKey].pool) return KANJI_SECTIONS[sectionKey].pool; // the 500's sets
   if (sectionKey !== 'verbs') return DATA[KANJI_SECTIONS[sectionKey].dataKey];
   const pool = [];
   KANJI_KEYS.forEach(k => {
@@ -297,6 +303,7 @@ function showKanjiIndex() {
 function refreshKanjiIndexSwatches() {
   KANJI_SECTION_KEYS.forEach(key => setupCatBar(document.getElementById('kanji-index-swatch-' + key), getCategoryBandCountsKanji(getKanjiSectionPool(key))));
   setupCatBar(document.getElementById('kanji-index-swatch-all'), getCategoryBandCountsKanji(getAllKanjiFlat()));
+  setupCatBar(document.getElementById('kanji-index-swatch-500'), getCategoryBandCountsKanji(KANJI_500.map(kanjiCardItem)));
 }
 
 // One set's selection screen - entered with a fixed section, like
@@ -305,7 +312,14 @@ function refreshKanjiIndexSwatches() {
 function showKanjiSectionSelection(sectionKey) {
   activeKanjiSection = sectionKey || activeKanjiSection;
   showScreen('kanji-selection');
-  KANJI_SECTION_KEYS.forEach(key => {
+  // A set of the 500 gets its grid made the first time it's opened.
+  if (!document.getElementById('kanji-grid-' + activeKanjiSection)) {
+    const div = document.createElement('div');
+    div.id = 'kanji-grid-' + activeKanjiSection;
+    document.getElementById('kanji-hiragana-answers-card').before(div);
+  }
+  Object.keys(KANJI_SECTIONS).forEach(key => {
+    if (!document.getElementById('kanji-grid-' + key)) return;
     buildKanjiTileGrid(key);
     refreshKanaScoreShading('kanji-grid-' + key);
     const el = document.getElementById('kanji-grid-' + key);
@@ -333,7 +347,7 @@ function buildKanjiTileGrid(sectionKey) {
     const tile = document.createElement('div');
     tile.className = 'kana-ref-card';
     tile.innerHTML = `<span class="kana-ref-char">${markSmallKana(item.char)}</span><span class="kana-ref-rom">${item.answer}</span>`;
-    const scoreKey = item.char + '|' + item.answer;
+    const scoreKey = kanjiScoreKey(item);
     tile.dataset.scoreKey = scoreKey;
     const scoreClass = kanaScoreClass(scoreKey);
     if (scoreClass) tile.classList.add(scoreClass);
@@ -391,13 +405,15 @@ function updateSelectAllKanjiLabel() {
 // something genuinely drillable in its own right, not an invented phrase
 // with no backing anywhere else in the app.
 function buildKanjiOptionsFromPool(item, pool) {
+  // A small set (a part group of three) borrows its other choices from the 500.
+  if (pool.length < 4 && KANJI_500.length) pool = pool.concat(shuffle(KANJI_500.map(kanjiCardItem)).slice(0, 12));
   const candidates = pool.filter(w => !(w.char === item.char && w.answer === item.answer));
   const distractorItems = shuffle(candidates).slice(0, 3);
   const allItems = shuffle([item, ...distractorItems]);
   return allItems.map(w => ({
     en: w.answer,
     jp: w.char,
-    rd: KANJI_ROMAJI[w.char + '|' + w.answer] || '',
+    rd: KANJI_ROMAJI[w.char + '|' + w.answer] || (w.cardN ? kanjiCardRomaji(KANJI_CARD_BY_N[w.cardN]) : ''),
   }));
 }
 
@@ -431,7 +447,7 @@ function buildRandomKanjiPool() {
   // same weighted draw as buildVocabReadingDeck, keyed the kanji way
   // (char+answer, matching getScoreKey/getItemsAverageScoreKanji), always
   // reading the decayed score regardless of the colours setting.
-  const pool = weightedSampleWithoutReplacement(allKanji, 20, item => selectionWeight(decayedScore(kanaScores[item.char + '|' + item.answer])));
+  const pool = weightedSampleWithoutReplacement(allKanji, 20, item => selectionWeight(decayedScore(kanaScores[kanjiScoreKey(item)])));
   return pool.map(item => Object.assign({}, item, { options: buildKanjiOptionsFromPool(item, allKanji) }));
 }
 
@@ -451,7 +467,7 @@ function tryResumeKanji() {
 function getCategoryBandCountsKanji(items) {
   const counts = { untested: 0, neg3: 0, neg2: 0, neg1: 0, neutral: 0, pos1: 0, pos2: 0, pos3: 0, pos4: 0 };
   (items || []).forEach(item => {
-    const key = item.char + '|' + item.answer;
+    const key = kanjiScoreKey(item);
     const entry = kanaScores[key];
     if (!entry) { counts.untested++; return; }
     counts[confidenceBand(displayScore(entry))]++;
@@ -467,7 +483,7 @@ function getItemsAverageScoreKanji(items) {
   if (!items || !items.length) return null;
   let total = 0, count = 0;
   items.forEach(item => {
-    const key = item.char + '|' + item.answer;
+    const key = kanjiScoreKey(item);
     if (key in kanaScores) { total += displayScore(kanaScores[key]); count++; }
   });
   return count ? total / count : null;
@@ -497,13 +513,16 @@ const KANJI_ROMAJI = {
   '九|nine': 'ku',
   '十|ten': 'juu',
   '円|yen': 'en',
-  '月|Monday / month': 'getsuyoubi',
-  '火|Tuesday': 'kayoubi',
-  '水|Wednesday': 'suiyoubi',
-  '木|Thursday': 'mokuyoubi',
-  '金|Friday / gold': 'kinyoubi',
-  '土|Saturday / earth': 'doyoubi',
-  '日|Sunday': 'nichiyoubi',
+  '月曜日|Monday': 'getsuyoubi',
+  '火曜日|Tuesday': 'kayoubi',
+  '水曜日|Wednesday': 'suiyoubi',
+  '木曜日|Thursday': 'mokuyoubi',
+  '金曜日|Friday': 'kinyoubi',
+  '土曜日|Saturday': 'doyoubi',
+  '日曜日|Sunday': 'nichiyoubi',
+  '月|moon': 'tsuki',
+  '金|gold': 'kane',
+  '土|earth': 'tsuchi',
   '一月|January': 'ichigatsu',
   '二月|February': 'nigatsu',
   '三月|March': 'sangatsu',
@@ -678,9 +697,6 @@ const KANJI_ROMAJI = {
 // ambiguity to soften with an "(example: ...)" hedge in these cases.)
 const KANJI_COMPOUND = {
   '円|yen': '千円',
-  '月|Monday / month': '月曜日',
-  '金|Friday / gold': '金曜日',
-  '土|Saturday / earth': '土曜日',
   '年|year': '今年',
   '今|now': '今日',
   '時|hour / time': '時間',
@@ -729,9 +745,9 @@ const KANJI_COMPOUND = {
 const KANJI_READINGS = {
   '一|one': 'いち', '二|two': 'に', '三|three': 'さん', '四|four': 'し', '五|five': 'ご',
   '六|six': 'ろく', '七|seven': 'しち', '八|eight': 'はち', '九|nine': 'く', '十|ten': 'じゅう',
-  '円|yen': 'えん', '月|Monday / month': 'げつようび', '火|Tuesday': 'かようび',
-  '水|Wednesday': 'すいようび', '木|Thursday': 'もくようび', '金|Friday / gold': 'きんようび',
-  '土|Saturday / earth': 'どようび', '日|Sunday': 'にちようび', '年|year': 'とし', '今|now': 'いま', '時|hour / time': 'とき',
+  '円|yen': 'えん', '月曜日|Monday': 'げつようび', '火曜日|Tuesday': 'かようび',
+  '水曜日|Wednesday': 'すいようび', '木曜日|Thursday': 'もくようび', '金曜日|Friday': 'きんようび',
+  '土曜日|Saturday': 'どようび', '日曜日|Sunday': 'にちようび', '月|moon': 'つき', '金|gold': 'かね', '土|earth': 'つち', '年|year': 'とし', '今|now': 'いま', '時|hour / time': 'とき',
   '一月|January': 'いちがつ', '二月|February': 'にがつ', '三月|March': 'さんがつ', '四月|April': 'しがつ',
   '五月|May': 'ごがつ', '六月|June': 'ろくがつ', '七月|July': 'しちがつ', '八月|August': 'はちがつ',
   '九月|September': 'くがつ', '十月|October': 'じゅうがつ', '十一月|November': 'じゅういちがつ', '十二月|December': 'じゅうにがつ',
@@ -804,3 +820,148 @@ const KANJI_READINGS = {
 // Matches the same CJK ideograph range used when this word's kanjiReading
 // data was generated - kept in sync with that build process, not guessed.
 const KANJI_CHAR_RE = /[一-鿿㐀-䶿]/;
+
+// =============================================================================
+// THE 500 KANJI (2026-11-09, the kanji joining-up - decisions in Andrew's doc
+// "Moving Japanese onto the core", "Kanji Cards and Strokes: decisions").
+// Kanji Cards' list (ja/kanji-500.js, generated from Cards) is the kanji
+// data. Every single kanji in the topic sets above becomes its Cards card:
+// Cards' meaning (its wording wins everywhere), Cards' example words, and
+// Cards' recognition score - 'card:<n>', which core.js's LINKED SCORES
+// reads from and writes to Cards' own store, so a drill in either app moves
+// the same score. Words (時計, 地下鉄, 富士山...) stay whole-word cards with
+// their own scores. Beside the topic sets, Cards' three ways through all
+// 500: In order (blocks of 20), By part and By JLPT.
+// =============================================================================
+const KANJI_500 = (window.JP_KANJI_500 && window.JP_KANJI_500.cards) || [];
+const KANJI_PARTS = (window.JP_KANJI_500 && window.JP_KANJI_500.parts) || [];
+const KANJI_CARD_BY_CHAR = {}, KANJI_CARD_BY_N = {};
+KANJI_500.forEach(c => { KANJI_CARD_BY_CHAR[c.k] = c; KANJI_CARD_BY_N[c.n] = c; });
+
+// A kanji item's score key: its Cards card's, or (a word) its own.
+function kanjiScoreKey(item) {
+  return item.cardN ? 'card:' + item.cardN : item.char + '|' + item.answer;
+}
+
+// The one-time score move needs each card's old keys; the romaji and
+// readings tables move to the new meaning with it.
+const KANJI_OLD_KEYS = {};
+KANJI_KEYS.forEach(k => DATA[k].forEach(item => {
+  const card = KANJI_CARD_BY_CHAR[item.char];
+  if (!card) return;
+  const oldKey = item.char + '|' + item.answer, newKey = item.char + '|' + card.m;
+  (KANJI_OLD_KEYS[card.n] = KANJI_OLD_KEYS[card.n] || []).push(oldKey);
+  if (KANJI_ROMAJI[oldKey] && !KANJI_ROMAJI[newKey]) KANJI_ROMAJI[newKey] = KANJI_ROMAJI[oldKey];
+  if (KANJI_READINGS[oldKey] && !KANJI_READINGS[newKey]) KANJI_READINGS[newKey] = KANJI_READINGS[oldKey];
+  item.answer = card.m;
+  item.cardN = card.n;
+  delete item.altForm;
+}));
+// The days of the week, once single kanji, are now words.
+const KANJI_DAY_MOVES = {
+  '月|Monday / month': ['月曜日|Monday', '月'], '火|Tuesday': ['火曜日|Tuesday'], '水|Wednesday': ['水曜日|Wednesday'],
+  '木|Thursday': ['木曜日|Thursday'], '金|Friday / gold': ['金曜日|Friday', '金'], '土|Saturday / earth': ['土曜日|Saturday', '土'],
+  '日|Sunday': ['日曜日|Sunday'],
+};
+
+// A card as a drill item. The romaji under a choice: the app's own reading
+// where it had one; else the reading of the card's example word that is the
+// kanji on its own (林 hayashi); else its first on-reading (機 ki - its first
+// kun-reading, はた "loom", is one nobody needs).
+function kanjiCardItem(card) {
+  return { char: card.k, answer: card.m, disp: 'kanji', cardN: card.n, groupKey: 'kanji-500' };
+}
+function kanjiCardRomaji(card) {
+  const r = KANJI_ROMAJI[card.k + '|' + card.m];
+  if (r) return r;
+  const alone = (card.w || []).find(x => x.kanji === card.k);
+  if (alone) return alone.romaji;
+  const first = (card.on && card.on[0]) || (card.kun && card.kun[0]);
+  return first ? first[1].replace(/[()]/g, '') : '';
+}
+// The example after an answer: the card's first example word that isn't
+// the kanji on its own, with its reading.
+function kanjiCardExample(card) {
+  const w = (card.w || []).find(x => x.kanji && x.kanji !== card.k) || (card.w || [])[0];
+  return w ? w.kanji + ' ' + w.jp : '';
+}
+
+// MOVING THE SCORES (once). Each single kanji's score in this app moves to
+// its Cards card - where Cards has one too, the more recently practised
+// wins. A day of the week's score goes to its new word (and, for 月 金 土,
+// which also meant month / gold / earth, to the card as well). The old
+// entries stay where they were, unused. Called from legacy.js once the
+// scores are loaded.
+function moveKanjiScoresToCards() {
+  const FLAG = APP.storagePrefix + 'KanjiScoresMoved';
+  try { if (localStorage.getItem(FLAG)) return; } catch (e) { return; }
+  const newer = (a, b) => a && typeof a === 'object' && (!b || (a.lastSeen || 0) > (b.lastSeen || 0));
+  const give = (toKey, entry) => { if (newer(entry, kanaScores[toKey])) kanaScores[toKey] = entry; };
+  Object.keys(KANJI_OLD_KEYS).forEach(n => KANJI_OLD_KEYS[n].forEach(old => give('card:' + n, kanaScores[old])));
+  Object.keys(KANJI_DAY_MOVES).forEach(old => KANJI_DAY_MOVES[old].forEach(to => {
+    const card = KANJI_CARD_BY_CHAR[to];
+    give(card ? 'card:' + card.n : to, kanaScores[old]);
+  }));
+  saveKanaScores();
+  try { localStorage.setItem(FLAG, '1'); } catch (e) { /* private mode: tries again next time, harmlessly */ }
+}
+
+// ---- The 500's own sets: in order, by part, by JLPT ----
+// Each set is a selection screen like a topic's (showKanjiSectionSelection),
+// added to KANJI_SECTIONS with its own pool; the topic list above
+// (KANJI_SECTION_KEYS) is unchanged.
+const KANJI_BLOCK = 20;
+const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By part', sets: [] }, jlpt: { label: 'By JLPT', sets: [] } };
+(function buildKanji500Sets() {
+  const byD = KANJI_500.slice().sort((a, b) => a.d - b.d);
+  const addSet = (view, key, label, cards, heading) => {
+    KANJI_SECTIONS[key] = { label, dataKey: 'kanji-500', pool: cards.map(kanjiCardItem), dyn: true };
+    kanjiSelectedTiles[key] = new Set();
+    KANJI_VIEWS[view].sets.push({ key, label, heading });
+  };
+  for (let i = 0; i < byD.length; i += KANJI_BLOCK) {
+    const cards = byD.slice(i, i + KANJI_BLOCK);
+    addSet('order', 'k500-b' + (i / KANJI_BLOCK + 1), cards[0].d + '–' + cards[cards.length - 1].d, cards);
+  }
+  KANJI_PARTS.forEach((g, i) => {
+    const cards = g.cards.map(n => KANJI_CARD_BY_N[n]).filter(Boolean);
+    if (cards.length) addSet('part', 'k500-p' + i, g.part + ' ' + g.name, cards);
+  });
+  ['N5', 'N4', 'N3', 'N2', 'N1', ''].forEach(lv => {
+    const cards = byD.filter(c => (c.j || '') === lv);
+    const name = lv || 'No JLPT level';
+    for (let i = 0; i < cards.length; i += KANJI_BLOCK) {
+      const part = cards.slice(i, i + KANJI_BLOCK);
+      addSet('jlpt', 'k500-j' + (lv || 'none') + '-' + (i / KANJI_BLOCK + 1),
+        name + (cards.length > KANJI_BLOCK ? ' · ' + (i + 1) + '–' + (i + part.length) : ''), part, i === 0 ? name + ' (' + cards.length + ')' : null);
+    }
+  });
+})();
+
+// The list of one view's sets, each with its score bar.
+let activeKanjiView = 'order';
+function showKanjiView(view) {
+  activeKanjiView = view || activeKanjiView;
+  const v = KANJI_VIEWS[activeKanjiView];
+  document.getElementById('kanji-view-title').textContent = 'Kanji — ' + v.label;
+  const list = document.getElementById('kanji-view-list');
+  list.innerHTML = '';
+  v.sets.forEach(s => {
+    if (s.heading) {
+      const h = document.createElement('div');
+      h.className = 'kanji-view-heading';
+      h.textContent = s.heading;
+      list.appendChild(h);
+    }
+    const card = document.createElement('div');
+    card.className = 'group-card cat-tile';
+    card.style.cursor = 'pointer';
+    card.innerHTML = '<div class="cat-tile-top"><div class="group-name"></div></div><div class="cat-bar"></div>';
+    setJpText(card.querySelector('.group-name'), s.label);
+    card.onclick = () => showKanjiSectionSelection(s.key);
+    list.appendChild(card);
+    setupCatBar(card.querySelector('.cat-bar'), getCategoryBandCountsKanji(getKanjiSectionPool(s.key)));
+  });
+  showScreen('kanji-view');
+}
+function setJpText(el, text) { el.innerHTML = markSmallKana(text); }

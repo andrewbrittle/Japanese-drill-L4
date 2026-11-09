@@ -8,7 +8,7 @@ window.APP = {
   // are found as they are. Never change it.
   storagePrefix: 'jpL4',
   backupName: 'japanese-drill-backup',
-  latestChangelog: '2026-11-08-L4',
+  latestChangelog: '2026-11-09b-L4',
 
   vocabTabLabel: 'ことば',
   vocabPills: [],
@@ -32,9 +32,10 @@ window.APP = {
     numbers: { root: true, onShow: () => updateNumberTimeSwatches() },
     build: { root: true },
     grammar: { root: true },
-    'hiragana-selection': { home: 'kana-selection', onShow: () => Object.keys(HIRAGANA_SECTIONS).forEach(key => refreshKanaScoreShading('hiragana-grid-' + key)) },
-    'katakana-selection': { home: 'kana-selection', onShow: () => Object.keys(KATAKANA_SECTIONS).forEach(key => refreshKanaScoreShading('katakana-grid-' + key)) },
-    'kanji-selection': { home: 'kanji-index', onShow: () => KANJI_SECTION_KEYS.forEach(key => refreshKanaScoreShading('kanji-grid-' + key)) },
+    'hiragana-selection': { home: 'kana-selection', onShow: () => kanaPickers.hiragana && kanaPickers.hiragana.refresh() },
+    'katakana-selection': { home: 'kana-selection', onShow: () => kanaPickers.katakana && kanaPickers.katakana.refresh() },
+    'kanji-selection': { home: 'kanji-index', onShow: () => Object.keys(KANJI_SECTIONS).forEach(key => refreshKanaScoreShading('kanji-grid-' + key)) },
+    'kanji-view': { home: 'kanji-index' },
     'counter-quiz-selection': { home: 'numbers', onShow: () => buildCounterQuizSelectionList() },
     'desk-sheets': { home: 'build' },
     'study-guide': { home: 'grammar' },
@@ -152,6 +153,10 @@ window.APP = {
   peekSlide: item => item.guideWord ? () => showStudyGuideWord(item.guideWord) : isVerbItem(item) ? () => showVerbFormsPopup(item) : null,
   latestWordsDefault: '1w',
   // Private word lists (the Genki file): its format, and what a word must have.
+  // The single kanji share their score with Kanji Cards (same site, so the
+  // same storage): every 'card:<n>' key lives in Cards' store (core.js,
+  // LINKED SCORES; ja/kanji.js, THE 500 KANJI).
+  linkedScores: { prefix: 'card:', storageKey: 'kanjiCardsScores' },
   privateVocab: { format: 'jp-drill-private-vocab', wordOk: it => typeof it.jp === 'string' && typeof it.romaji === 'string' },
   groupOrder: 'alphabetical',
   vocabLabel: 'Vocabulary',

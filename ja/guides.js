@@ -21,12 +21,11 @@
 // Every Japanese word is a block you can hold: the bubble shows its romaji
 // (can't read it). Slide towards the bubble and let go for the full version:
 // romaji, English and what its particle or ending does (can read it, don't
-// know it). Same gesture as a verb on the word lists (attachTilePeek). The
-// Help switch at the top of a guide turns this off, to test yourself on a
-// guide you've already been through. Answers stay folded until tapped.
+// know it). Same gesture as a verb on the word lists (attachTilePeek). Help
+// is always on (the Help switch was removed 9 Nov: a block costs nothing
+// when it isn't held). Answers stay folded until tapped.
 
 const STUDY_GUIDES_KEY = APP.storagePrefix + 'StudyGuides';
-const STUDY_GUIDE_HELP_KEY = APP.storagePrefix + 'StudyGuideHelp';
 const STUDY_GUIDES_FORMAT = 'jp-drill-study-guides';
 let STUDY_GUIDES = null;
 let currentStudyGuide = null;
@@ -48,9 +47,8 @@ function loadStudyGuides() {
   } catch (e) { /* storage unavailable or corrupt - no guides */ }
 }
 
-function studyGuideHelpOn() {
-  try { return localStorage.getItem(STUDY_GUIDE_HELP_KEY) !== 'off'; } catch (e) { return true; }
-}
+// The old Help switch's setting, gone with the switch.
+try { localStorage.removeItem(APP.storagePrefix + 'StudyGuideHelp'); } catch (e) { /* private mode */ }
 
 // --- Settings > Study guides ---
 function updateStudyGuidesStatus() {
@@ -131,11 +129,6 @@ function showStudyGuide(id) {
   window.scrollTo(0, 0);
 }
 
-function toggleStudyGuideHelp() {
-  try { localStorage.setItem(STUDY_GUIDE_HELP_KEY, studyGuideHelpOn() ? 'off' : 'on'); } catch (e) { /* private mode */ }
-  renderStudyGuide();
-}
-
 function sgEsc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -203,10 +196,7 @@ function renderStudyGuide() {
   const g = currentStudyGuide;
   const body = document.getElementById('study-guide-body');
   if (!g || !body || !STUDY_GUIDES) return;
-  const help = studyGuideHelpOn();
   document.getElementById('study-guide-title').textContent = g.title;
-  const card = document.getElementById('study-guide-help-card');
-  if (card) card.classList.toggle('selected', help);
   // Blocks to HTML. Lists gather into <ul>/<ol>; everything under the
   // Answers heading folds away, one fold per sub-heading.
   let html = '';
@@ -271,9 +261,7 @@ function renderStudyGuide() {
   });
   closeFold();
   body.innerHTML = html;
-  body.classList.toggle('sg-help-off', !help);
   sgMarkWideTables(body);
-  if (!help) return;
   body.querySelectorAll('.sg-w').forEach(el => {
     const w = STUDY_GUIDES.words[el.dataset.k];
     if (!w) return;

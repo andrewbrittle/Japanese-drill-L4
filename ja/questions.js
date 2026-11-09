@@ -35,7 +35,7 @@ function jaFeedbackExtra(q) {
   const suppressHint = q.disp === 'word' && drillByMeaning;
   let hint = (q.hint && !suppressHint) ? ` (${q.hint})` : '';
   if (!hint && !q.altForm && (q.disp === 'kanji' || q.disp === 'survival')) {
-    const compoundWord = KANJI_COMPOUND[q.char + '|' + q.answer];
+    const compoundWord = q.cardN ? kanjiCardExample(KANJI_CARD_BY_N[q.cardN]) : KANJI_COMPOUND[q.char + '|' + q.answer];
     if (compoundWord) hint = ` (example: ${compoundWord})`;
   }
   const standardNote = (q.altIsStandard && q.altForm)
@@ -164,7 +164,7 @@ function renderKanaKanjiQuestion(q, ui) {
 // spoken by its reading where one is known.
 ['kanji', 'survival'].forEach(id => registerJaType({
   id, render: renderKanaKanjiQuestion, missedItem: false,
-  scoreKey: q => q.char + '|' + q.answer,
+  scoreKey: q => kanjiScoreKey(q), // a single kanji: its Kanji Cards card (ja/kanji.js)
   speechText: q => KANJI_READINGS[q.char + '|' + q.answer] || q.char,
 }));
 

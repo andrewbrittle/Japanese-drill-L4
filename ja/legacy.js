@@ -1782,6 +1782,7 @@ const NAV_RESTORE = {
   'katakana-selection': () => showKatakanaSelection(activeKatakanaSection),
   'kanji-index': () => showKanjiIndex(),
   'kanji-selection': () => showKanjiSelection(),
+  'kanji-view': () => showKanjiView(),
   'numbers': () => showNumbersScreen(),
   'counter-quiz-selection': () => showCounterQuizSelection(),
   'settings': () => showSettingsScreen(),
@@ -1827,10 +1828,10 @@ function jaPillFor(id) {
   const navRoot = NAV_ROOTS.includes(id) ? id : (navStack[0] || NAV_HOME[id]);
   if (NAV_TAB[navRoot]) return NAV_TAB[navRoot];
   if (id === 'kana-selection' || id === 'hiragana-selection' || id === 'katakana-selection') return 'nav-kana';
-  if (id === 'kanji-selection' || id === 'kanji-index') return 'nav-kanji';
+  if (id === 'kanji-selection' || id === 'kanji-index' || id === 'kanji-view') return 'nav-kanji';
   if (id === 'match-settings' || id === 'vocab-reference' || id === 'vocab-tile-selection') return 'nav-match';
   const pillIdByOrigin = { 'kana-selection': 'nav-kana', 'hiragana-selection': 'nav-kana', 'katakana-selection': 'nav-kana',
-    'kanji-selection': 'nav-kanji', 'kanji-index': 'nav-kanji', 'numbers': 'nav-numbers', 'match-settings': 'nav-match', 'vocab-tile-selection': 'nav-match' };
+    'kanji-selection': 'nav-kanji', 'kanji-index': 'nav-kanji', 'kanji-view': 'nav-kanji', 'numbers': 'nav-numbers', 'match-settings': 'nav-match', 'vocab-tile-selection': 'nav-match' };
   return pillIdByOrigin[lastSettingsScreen] || 'nav-numbers';
 }
 
@@ -1853,20 +1854,9 @@ function jaOnShowScreen(id) {
 // so the new score shading shows (APP.clearSelection; the core clears the
 // word tiles).
 function jaClearSelection(lastSettingsScreen) {
-  if (lastSettingsScreen === 'hiragana-selection') {
-    hiraganaSelectedRows[activeHiraganaSection].clear();
-    const grid = document.getElementById('hiragana-grid-' + activeHiraganaSection);
-    if (grid) grid.querySelectorAll('.kana-ref-row.selected').forEach(r => r.classList.remove('selected'));
-    const btn = document.getElementById('hira-selection-drill-btn');
-    if (btn) btn.disabled = true;
-    updateSelectAllHiraganaLabel();
-  } else if (lastSettingsScreen === 'katakana-selection') {
-    katakanaSelectedRows[activeKatakanaSection].clear();
-    const grid = document.getElementById('katakana-grid-' + activeKatakanaSection);
-    if (grid) grid.querySelectorAll('.kana-ref-row.selected').forEach(r => r.classList.remove('selected'));
-    const btn = document.getElementById('kata-selection-drill-btn');
-    if (btn) btn.disabled = true;
-    updateSelectAllKatakanaLabel();
+  if (lastSettingsScreen === 'hiragana-selection' || lastSettingsScreen === 'katakana-selection') {
+    const picker = kanaPickers[lastSettingsScreen.split('-')[0]];
+    if (picker) picker.clear();
   } else if (lastSettingsScreen === 'kanji-selection') {
     kanjiSelectedTiles[activeKanjiSection].clear();
     const grid = document.getElementById('kanji-grid-' + activeKanjiSection);
@@ -2225,6 +2215,7 @@ try {
 } catch (e) {
   kanaScores = {};
 }
+kanaScores = linkScoreStore(kanaScores); // the kanji shared with Kanji Cards (core.js, LINKED SCORES)
 
 // One-off migration: gym/pool/supermarket were stored hiragana-primary
 // (backwards from how they're actually written) and have swapped to
@@ -2261,6 +2252,9 @@ Object.keys(kanaScores).forEach((key) => {
     kanaScores[key] = { score: kanaScores[key], lastSeen: Date.now() };
   }
 });
+
+// The single kanji's scores move to their Kanji Cards cards, once (ja/kanji.js).
+moveKanjiScoresToCards();
 
 
 // PRODUCTION SCORES (2026-10-22, Andrew). Typing the answer yourself (romaji,

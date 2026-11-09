@@ -243,6 +243,7 @@ const BADGE_LABELS = {
   'kanji-places': 'places',
   'kanji-people': 'people / questions',
   'kanji-general': 'general',
+  'kanji-500': 'kanji',
   'kanji-verbs': 'verbs',
 };
 
@@ -262,18 +263,10 @@ const selected = new Set(['katakana-base']);
 
 let reversed = false;
 
-function toggleDirection() {
-  reversed = !reversed;
-  const label = reversed ? 'Romaji → kana' : 'Kana → romaji';
-  const sub = reversed ? 'See a reading, pick the character. Tap to reverse.' : 'See a character, pick the reading. Tap to reverse.';
-  ['direction-card-ref', 'direction-card-ref-hira'].forEach(id => {
-    const card = document.getElementById(id);
-    if (card) card.classList.toggle('selected', reversed);
-  });
-  document.getElementById('direction-name-ref').textContent = label;
-  document.getElementById('direction-sub-ref').textContent = sub;
-  document.getElementById('direction-name-ref-hira').textContent = label;
-  document.getElementById('direction-sub-ref-hira').textContent = sub;
+// Kana → romaji or back, chosen above the picker (2026-11-09; it was a
+// switch card under each kana table). Shared by hiragana and katakana.
+function setKanaDirection(rev) {
+  reversed = !!rev;
   updateHiraganaAnswersVisibility();
 }
 
@@ -446,13 +439,14 @@ function getKanaSectionBandCounts(section) {
 }
 
 function refreshKanaSelectionSwatches() {
-  [['kana-hiragana-base-swatch', HIRAGANA_SECTIONS.base],
-   ['kana-hiragana-diacritics-swatch', HIRAGANA_SECTIONS.diacritics],
-   ['kana-hiragana-youon-swatch', HIRAGANA_SECTIONS.youon],
-   ['kana-katakana-base-swatch', KATAKANA_SECTIONS.base],
-   ['kana-katakana-diacritics-swatch', KATAKANA_SECTIONS.diacritics],
-   ['kana-katakana-youon-swatch', KATAKANA_SECTIONS.youon]]
-    .forEach(([id, section]) => setupCatBar(document.getElementById(id), getKanaSectionBandCounts(section)));
+  [['kana-hiragana-swatch', HIRAGANA_SECTIONS], ['kana-katakana-swatch', KATAKANA_SECTIONS]].forEach(([id, sections]) => {
+    const counts = { untested: 0, neg3: 0, neg2: 0, neg1: 0, neutral: 0, pos1: 0, pos2: 0, pos3: 0, pos4: 0 };
+    Object.values(sections).forEach(section => {
+      const c = getKanaSectionBandCounts(section);
+      Object.keys(counts).forEach(k => { counts[k] += c[k]; });
+    });
+    setupCatBar(document.getElementById(id), counts);
+  });
 }
 
 function buildDeck() {
@@ -522,157 +516,6 @@ const HIRAGANA_SECTIONS = {
   },
 };
 
-const hiraganaSelectedRows = { base: new Set(), diacritics: new Set(), youon: new Set() };
-
-let activeHiraganaSection = 'base';
-
-// Takes the section to open directly (2026-09-22) - entered from the Kana
-// index page now (one row per section) rather than always landing on Base
-// and switching via an in-screen pill row, so the section is known up
-// front. activeHiraganaSection/hiraganaSelectedRows/hira-selection-drill-btn
-// etc. are otherwise untouched - they already tracked state per section,
-// keyed off activeHiraganaSection, so nothing downstream (drillHiragana
-// Selection, goBackToSettings, ...) needed to change at all.
-// Base kana have stroke order on hold (2026-10-16); the line under the title says so.
-function kanaSelectionSub(id, section) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = 'Tap a row to select it for drilling. Touch and hold a character to see its strokes.';
-}
-
-function showHiraganaSelection(sectionKey) {
-  activeHiraganaSection = sectionKey || 'base';
-  kanaSelectionSub('hiragana-selection-sub', activeHiraganaSection);
-  showScreen('hiragana-selection');
-  Object.keys(HIRAGANA_SECTIONS).forEach(key => {
-    buildKanaSectionGrid('hiragana-grid-' + key, HIRAGANA_SECTIONS[key]);
-    refreshKanaScoreShading('hiragana-grid-' + key);
-    const el = document.getElementById('hiragana-grid-' + key);
-    if (el) el.style.display = key === activeHiraganaSection ? 'block' : 'none';
-  });
-  const titleEl = document.getElementById('hiragana-selection-title');
-  if (titleEl) titleEl.textContent = activeHiraganaSection === 'base' ? 'Hiragana' : 'Hiragana — ' + HIRAGANA_SECTIONS[activeHiraganaSection].label;
-  document.getElementById('hira-selection-drill-btn').disabled = hiraganaSelectedRows[activeHiraganaSection].size === 0;
-  syncDirectionCardRefHira();
-  updateSelectAllHiraganaLabel();
-  const refCard = document.getElementById('hiragana-voicing-ref-card');
-  if (refCard) refCard.style.display = activeHiraganaSection === 'base' ? 'none' : 'flex';
-}
-
-// Shared by hiragana and katakana reference screens: builds a selectable,
-// score-shaded grid for one section into the given container (once; cached).
-function buildKanaSectionGrid(containerId, section) {
-  const container = document.getElementById(containerId);
-  if (!container || container.children.length > 0) return;
-
-  const grid = document.createElement('div');
-  grid.className = 'kana-ref-grid';
-
-  section.rows.forEach((rowData, rowIdx) => {
-    const rowEl = document.createElement('div');
-    rowEl.className = 'kana-ref-row';
-    rowEl.dataset.row = rowIdx;
-    // The tap after a hold-to-peek is swallowed so it doesn't select the row.
-    rowEl.onclick = () => { if (Date.now() < tilePeekSuppressClickUntil) return; toggleKanaSectionRow(section, containerId, rowIdx, rowEl); };
-
-    rowData.forEach(([char, rom]) => {
-      const card = document.createElement('div');
-      card.className = char ? 'kana-ref-card' : 'kana-ref-card empty';
-      if (char) {
-        card.innerHTML = `<span class="kana-ref-char">${markSmallKana(char)}</span><span class="kana-ref-rom">${rom}</span>`;
-        card.dataset.scoreKey = char;
-        const scoreClass = kanaScoreClass(char);
-        if (scoreClass) card.classList.add(scoreClass);
-        // Hold to see the stroke order (base kana 2026-10-16; dakuten,
-        // handakuten and contracted 2026-10-17). Every character in the cell
-        // needs stroke data, else no bubble.
-        const S = window.JP_DRILL_KANA_STROKES || {};
-        const glyphs = [...char].map(c => S[c]);
-        if (glyphs.every(Boolean)) attachTilePeek(card, { jp: char, romaji: rom, en: '', glyphs, chars: [...char] });
-      }
-      rowEl.appendChild(card);
-    });
-
-    grid.appendChild(rowEl);
-  });
-
-  container.appendChild(grid);
-}
-
-function toggleSelectAllHiragana() {
-  const section = HIRAGANA_SECTIONS[activeHiraganaSection];
-  const set = hiraganaSelectedRows[activeHiraganaSection];
-  const grid = document.getElementById('hiragana-grid-' + activeHiraganaSection);
-  const allSelected = set.size === section.rows.length;
-  if (allSelected) {
-    set.clear();
-    if (grid) grid.querySelectorAll('.kana-ref-row').forEach(r => r.classList.remove('selected'));
-  } else {
-    section.rows.forEach((_, idx) => set.add(idx));
-    if (grid) grid.querySelectorAll('.kana-ref-row').forEach(r => r.classList.add('selected'));
-  }
-  document.getElementById('hira-selection-drill-btn').disabled = set.size === 0;
-  updateSelectAllHiraganaLabel();
-}
-
-function updateSelectAllHiraganaLabel() {
-  const section = HIRAGANA_SECTIONS[activeHiraganaSection];
-  const set = hiraganaSelectedRows[activeHiraganaSection];
-  const allSelected = set.size === section.rows.length;
-  document.getElementById('hiragana-select-all-label').textContent =
-    (allSelected ? 'Deselect all — ' : 'Select all — ') + section.label;
-  const card = document.getElementById('hiragana-select-all-card');
-  if (card) card.classList.toggle('selected', allSelected);
-}
-
-function toggleKanaSectionRow(section, containerId, rowIdx, rowEl) {
-  const isHiragana = containerId.startsWith('hiragana-');
-  const sections = isHiragana ? HIRAGANA_SECTIONS : KATAKANA_SECTIONS;
-  const rowState = isHiragana ? hiraganaSelectedRows : katakanaSelectedRows;
-  const sectionKey = Object.keys(sections).find(k => sections[k] === section);
-  const set = rowState[sectionKey];
-  if (set.has(rowIdx)) {
-    set.delete(rowIdx);
-    rowEl.classList.remove('selected');
-  } else {
-    set.add(rowIdx);
-    rowEl.classList.add('selected');
-  }
-  const drillBtnId = isHiragana ? 'hira-selection-drill-btn' : 'kata-selection-drill-btn';
-  document.getElementById(drillBtnId).disabled = set.size === 0;
-  const updateLabel = isHiragana ? updateSelectAllHiraganaLabel : updateSelectAllKatakanaLabel;
-  updateLabel();
-}
-
-// switchHiraganaSection removed (2026-09-22) - its job (pick the section,
-// show that grid, update the drill button / Select-all label / voicing-ref
-// card visibility) is now done by showHiraganaSelection(sectionKey) above,
-// called directly from the Kana index page's rows instead of from an
-// in-screen pill row that no longer exists.
-function drillHiraganaSelection() {
-  const section = HIRAGANA_SECTIONS[activeHiraganaSection];
-  const selectedRows = hiraganaSelectedRows[activeHiraganaSection];
-  if (selectedRows.size === 0) return;
-  const data = DATA[section.dataKey];
-  const customDeck = [];
-  [...selectedRows].sort((a, b) => a - b).forEach(rowIdx => {
-    section.rowDataIndices[rowIdx].forEach(dataIdx => {
-      const entry = data[dataIdx];
-      if (entry) customDeck.push(Object.assign({ groupKey: section.dataKey }, entry));
-    });
-  });
-  lastSettingsScreen = 'hiragana-selection';
-  startDrill(shuffle(customDeck));
-}
-
-function syncDirectionCardRefHira() {
-  const label = reversed ? 'Romaji → kana' : 'Kana → romaji';
-  const sub = reversed ? 'See a reading, pick the character. Tap to reverse.' : 'See a character, pick the reading. Tap to reverse.';
-  const card = document.getElementById('direction-card-ref-hira');
-  if (card) card.classList.toggle('selected', reversed);
-  document.getElementById('direction-name-ref-hira').textContent = label;
-  document.getElementById('direction-sub-ref-hira').textContent = sub;
-}
-
 // Map each row index to the DATA['katakana-base'] character indices it contains
 const KATAKANA_SECTIONS = {
   base: {
@@ -733,85 +576,6 @@ const KATAKANA_SECTIONS = {
     ],
   },
 };
-
-const katakanaSelectedRows = { base: new Set(), diacritics: new Set(), youon: new Set() };
-
-let activeKatakanaSection = 'base';
-
-// Takes the section to open directly (2026-09-22) - same reasoning as
-// showHiraganaSelection above, which this mirrors.
-function showKatakanaSelection(sectionKey) {
-  activeKatakanaSection = sectionKey || 'base';
-  kanaSelectionSub('katakana-selection-sub', activeKatakanaSection);
-  showScreen('katakana-selection');
-  Object.keys(KATAKANA_SECTIONS).forEach(key => {
-    buildKanaSectionGrid('katakana-grid-' + key, KATAKANA_SECTIONS[key]);
-    refreshKanaScoreShading('katakana-grid-' + key);
-    const el = document.getElementById('katakana-grid-' + key);
-    if (el) el.style.display = key === activeKatakanaSection ? 'block' : 'none';
-  });
-  const titleEl = document.getElementById('katakana-selection-title');
-  if (titleEl) titleEl.textContent = activeKatakanaSection === 'base' ? 'Katakana' : 'Katakana — ' + KATAKANA_SECTIONS[activeKatakanaSection].label;
-  document.getElementById('kata-selection-drill-btn').disabled = katakanaSelectedRows[activeKatakanaSection].size === 0;
-  syncDirectionCardRef();
-  updateSelectAllKatakanaLabel();
-  const refCard = document.getElementById('katakana-voicing-ref-card');
-  if (refCard) refCard.style.display = activeKatakanaSection === 'base' ? 'none' : 'flex';
-  const hiraRefCard = document.getElementById('hiragana-answers-card-ref');
-  if (hiraRefCard) hiraRefCard.classList.toggle('selected', showHiraganaOnKatakana);
-}
-
-function syncDirectionCardRef() {
-  const label = reversed ? 'Romaji → kana' : 'Kana → romaji';
-  const sub = reversed ? 'See a reading, pick the character. Tap to reverse.' : 'See a character, pick the reading. Tap to reverse.';
-  const card = document.getElementById('direction-card-ref');
-  if (card) card.classList.toggle('selected', reversed);
-  document.getElementById('direction-name-ref').textContent = label;
-  document.getElementById('direction-sub-ref').textContent = sub;
-}
-
-function toggleSelectAllKatakana() {
-  const section = KATAKANA_SECTIONS[activeKatakanaSection];
-  const set = katakanaSelectedRows[activeKatakanaSection];
-  const grid = document.getElementById('katakana-grid-' + activeKatakanaSection);
-  const allSelected = set.size === section.rows.length;
-  if (allSelected) {
-    set.clear();
-    if (grid) grid.querySelectorAll('.kana-ref-row').forEach(r => r.classList.remove('selected'));
-  } else {
-    section.rows.forEach((_, idx) => set.add(idx));
-    if (grid) grid.querySelectorAll('.kana-ref-row').forEach(r => r.classList.add('selected'));
-  }
-  document.getElementById('kata-selection-drill-btn').disabled = set.size === 0;
-  updateSelectAllKatakanaLabel();
-}
-
-function updateSelectAllKatakanaLabel() {
-  const section = KATAKANA_SECTIONS[activeKatakanaSection];
-  const set = katakanaSelectedRows[activeKatakanaSection];
-  const allSelected = set.size === section.rows.length;
-  document.getElementById('katakana-select-all-label').textContent =
-    (allSelected ? 'Deselect all — ' : 'Select all — ') + section.label;
-}
-
-// switchKatakanaSection removed (2026-09-22) - see the equivalent comment
-// by drillHiraganaSelection above; showKatakanaSelection(sectionKey) now
-// does this job directly.
-function drillKatakanaSelection() {
-  const section = KATAKANA_SECTIONS[activeKatakanaSection];
-  const selectedRows = katakanaSelectedRows[activeKatakanaSection];
-  if (selectedRows.size === 0) return;
-  const data = DATA[section.dataKey];
-  const customDeck = [];
-  [...selectedRows].sort((a, b) => a - b).forEach(rowIdx => {
-    section.rowDataIndices[rowIdx].forEach(dataIdx => {
-      const entry = data[dataIdx];
-      if (entry) customDeck.push(Object.assign({ groupKey: section.dataKey }, entry));
-    });
-  });
-  lastSettingsScreen = 'katakana-selection';
-  startDrill(shuffle(customDeck));
-}
 
 // Which base row (in HIRAGANA_SECTIONS.base / KATAKANA_SECTIONS.base) feeds
 // which diacritics row (in ...SECTIONS.diacritics), grouped under a
@@ -877,3 +641,68 @@ function showKanaVoicingReference(kind) {
   });
   showScreen('vocab-reference');
 }
+
+// =============================================================================
+// THE KANA PICKERS (2026-11-09): each script on one page in the core's
+// character picker (core/picker.js) - Base, Dakuten / handakuten and
+// Contracted as sections of one chart, single characters, whole rows (the
+// row label), a section's Pick all, or Select all; the direction above;
+// hold a character for its strokes, as before. The drill is built exactly
+// as before, from the same DATA entries.
+// =============================================================================
+const kanaPickers = {};
+let activeHiraganaSection = 'base', activeKatakanaSection = 'base'; // kept for older callers
+
+function kanaPickerSpec(script) {
+  const sections = script === 'hiragana' ? HIRAGANA_SECTIONS : KATAKANA_SECTIONS;
+  const S = window.JP_DRILL_KANA_STROKES || {};
+  const band = char => (char in kanaScores) ? confidenceBand(displayScore(kanaScores[char])) || '' : '';
+  return {
+    name: script === 'hiragana' ? 'Hiragana' : 'Katakana',
+    unitKey: 'picker.nCharacters',
+    sections: Object.values(sections).map(sec => ({
+      key: sec.dataKey, label: sec.label, cols: 5,
+      rows: sec.rows.map((rowData, r) => {
+        let i = 0;
+        const items = rowData.map(([char, rom]) => {
+          if (!char) return null;
+          const entry = DATA[sec.dataKey][sec.rowDataIndices[r][i++]];
+          const glyphs = [...char].map(c => S[c]);
+          return {
+            id: char, char: markSmallKana(char), sub: rom, entry, dataKey: sec.dataKey,
+            band: () => band(char),
+            // Hold for the stroke order (every character in the cell needs data).
+            peek: glyphs.every(Boolean) ? tile => attachTilePeek(tile, { jp: char, romaji: rom, en: '', glyphs, chars: [...char] }) : null,
+          };
+        });
+        return { label: (rowData.find(c => c[0]) || [])[1], items };
+      }),
+    })),
+    direction: {
+      options: [{ key: 'f', label: (script === 'hiragana' ? 'かな' : 'カナ') + ' → romaji' }, { key: 'r', label: 'romaji → ' + (script === 'hiragana' ? 'かな' : 'カナ') }],
+      get: () => reversed ? 'r' : 'f',
+      set: k => setKanaDirection(k === 'r'),
+    },
+    // Katakana: answers in hiragana instead of romaji (forwards only).
+    extras: script === 'katakana' ? el => { const c = document.getElementById('hiragana-answers-card-ref'); if (c) el.appendChild(c); } : null,
+    start: items => {
+      lastSettingsScreen = script + '-selection';
+      startDrill(shuffle(items.map(it => Object.assign({ groupKey: it.dataKey }, it.entry))));
+    },
+  };
+}
+function showKanaPicker(script) {
+  showScreen(script + '-selection');
+  const el = document.getElementById(script + '-picker');
+  if (!kanaPickers[script]) kanaPickers[script] = renderPicker(el, kanaPickerSpec(script));
+  else kanaPickers[script].refresh();
+  if (script === 'katakana') {
+    const c = document.getElementById('hiragana-answers-card-ref');
+    if (c) c.classList.toggle('selected', showHiraganaOnKatakana);
+  }
+  updateHiraganaAnswersVisibility();
+}
+// The old names, still used by navigation (a section argument is ignored:
+// every section is on the one page now).
+function showHiraganaSelection() { showKanaPicker('hiragana'); }
+function showKatakanaSelection() { showKanaPicker('katakana'); }
