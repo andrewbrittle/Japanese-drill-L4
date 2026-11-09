@@ -909,19 +909,22 @@ function moveKanjiScoresToCards() {
 // ---- The 500's own sets: in order, by part, by JLPT ----
 // Each set is a selection screen like a topic's (showKanjiSectionSelection),
 // added to KANJI_SECTIONS with its own pool; the topic list above
-// (KANJI_SECTION_KEYS) is unchanged.
-const KANJI_BLOCK = 20;
+// (KANJI_SECTION_KEYS) is unchanged. Laid out as Kanji Cards does (Andrew,
+// 9 Nov: a card and score bar per set was "too detailed and overwhelming"):
+// one headline score bar, then compact pills with counts - In order in
+// hundreds (1–100 ... 401–500), By part one pill per group ("日 sun (25)"),
+// By JLPT one pill per level ("N5 (79)").
 const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By part', sets: [] }, jlpt: { label: 'By JLPT', sets: [] } };
 (function buildKanji500Sets() {
   const byD = KANJI_500.slice().sort((a, b) => a.d - b.d);
-  const addSet = (view, key, label, cards, heading) => {
+  const addSet = (view, key, label, cards) => {
     KANJI_SECTIONS[key] = { label, dataKey: 'kanji-500', pool: cards.map(kanjiCardItem), dyn: true };
     kanjiSelectedTiles[key] = new Set();
-    KANJI_VIEWS[view].sets.push({ key, label, heading });
+    KANJI_VIEWS[view].sets.push({ key, label, count: cards.length });
   };
-  for (let i = 0; i < byD.length; i += KANJI_BLOCK) {
-    const cards = byD.slice(i, i + KANJI_BLOCK);
-    addSet('order', 'k500-b' + (i / KANJI_BLOCK + 1), cards[0].d + '–' + cards[cards.length - 1].d, cards);
+  for (let i = 0; i < byD.length; i += 100) {
+    const cards = byD.slice(i, i + 100);
+    addSet('order', 'k500-o' + (i / 100 + 1), cards[0].d + '–' + cards[cards.length - 1].d, cards);
   }
   KANJI_PARTS.forEach((g, i) => {
     const cards = g.cards.map(n => KANJI_CARD_BY_N[n]).filter(Boolean);
@@ -929,38 +932,26 @@ const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By
   });
   ['N5', 'N4', 'N3', 'N2', 'N1', ''].forEach(lv => {
     const cards = byD.filter(c => (c.j || '') === lv);
-    const name = lv || 'No JLPT level';
-    for (let i = 0; i < cards.length; i += KANJI_BLOCK) {
-      const part = cards.slice(i, i + KANJI_BLOCK);
-      addSet('jlpt', 'k500-j' + (lv || 'none') + '-' + (i / KANJI_BLOCK + 1),
-        name + (cards.length > KANJI_BLOCK ? ' · ' + (i + 1) + '–' + (i + part.length) : ''), part, i === 0 ? name + ' (' + cards.length + ')' : null);
-    }
+    if (cards.length) addSet('jlpt', 'k500-j' + (lv || 'none'), lv || 'No JLPT level', cards);
   });
 })();
 
-// The list of one view's sets, each with its score bar.
+// One way through the 500: the headline bar, then a pill per set.
 let activeKanjiView = 'order';
 function showKanjiView(view) {
   activeKanjiView = view || activeKanjiView;
   const v = KANJI_VIEWS[activeKanjiView];
   document.getElementById('kanji-view-title').textContent = 'Kanji — ' + v.label;
+  setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(KANJI_500.map(kanjiCardItem)));
   const list = document.getElementById('kanji-view-list');
   list.innerHTML = '';
   v.sets.forEach(s => {
-    if (s.heading) {
-      const h = document.createElement('div');
-      h.className = 'kanji-view-heading';
-      h.textContent = s.heading;
-      list.appendChild(h);
-    }
-    const card = document.createElement('div');
-    card.className = 'group-card cat-tile';
-    card.style.cursor = 'pointer';
-    card.innerHTML = '<div class="cat-tile-top"><div class="group-name"></div></div><div class="cat-bar"></div>';
-    setJpText(card.querySelector('.group-name'), s.label);
-    card.onclick = () => showKanjiSectionSelection(s.key);
-    list.appendChild(card);
-    setupCatBar(card.querySelector('.cat-bar'), getCategoryBandCountsKanji(getKanjiSectionPool(s.key)));
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = 'kanji-view-pill';
+    setJpText(pill, s.label + ' (' + s.count + ')');
+    pill.onclick = () => showKanjiSectionSelection(s.key);
+    list.appendChild(pill);
   });
   showScreen('kanji-view');
 }

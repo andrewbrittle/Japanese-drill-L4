@@ -35,7 +35,7 @@ window.APP = {
     'hiragana-selection': { home: 'kana-selection', onShow: () => kanaPickers.hiragana && kanaPickers.hiragana.refresh() },
     'katakana-selection': { home: 'kana-selection', onShow: () => kanaPickers.katakana && kanaPickers.katakana.refresh() },
     'kanji-selection': { home: 'kanji-index', onShow: () => Object.keys(KANJI_SECTIONS).forEach(key => refreshKanaScoreShading('kanji-grid-' + key)) },
-    'kanji-view': { home: 'kanji-index' },
+    'kanji-view': { home: 'kanji-index', onShow: () => setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(KANJI_500.map(kanjiCardItem))) },
     'counter-quiz-selection': { home: 'numbers', onShow: () => buildCounterQuizSelectionList() },
     'desk-sheets': { home: 'build' },
     'study-guide': { home: 'grammar' },
