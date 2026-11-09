@@ -186,7 +186,7 @@ function sgRunsHtml(runs) {
         }
       }
       h = parts.map(q => q.h).join('');
-      h = `<span class="sg-jp">${h}</span>`;
+      h = `<span class="gd-jp">${h}</span>`;
     }
     if (f && f.includes('b')) h = `<strong>${h}</strong>`;
     if (f && f.includes('i')) h = `<em>${h}</em>`;
@@ -258,7 +258,13 @@ function renderStudyGuide() {
     closeList();
     if (b.t === 'table') {
       html += '<div class="sg-table-wrap"><table class="sg-table">' + b.rows.map((row, i) =>
-        '<tr>' + row.map(c => `<${i ? 'td' : 'th'}>${sgRunsHtml(c)}</${i ? 'td' : 'th'}>`).join('') + '</tr>').join('') + '</table></div>';
+        '<tr>' + row.map(c => {
+          // A short cell that's all Japanese (えいがを みませんか) stays on one
+          // line, as in the PDF; a whole sentence still wraps between words.
+          const tag = i ? 'td' : 'th', txt = sgRunsText(c).trim();
+          const jpOnly = !/[A-Za-z]/.test(txt) && txt.length <= 12;
+          return `<${tag}${jpOnly ? ' class="sg-td-jp"' : ''}>${sgRunsHtml(c)}</${tag}>`;
+        }).join('') + '</tr>').join('') + '</table></div>';
       return;
     }
     html += `<p class="sg-p">${sgRunsHtml(b.runs)}</p>`;

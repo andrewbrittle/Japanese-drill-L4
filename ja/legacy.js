@@ -1797,7 +1797,8 @@ const NAV_RESTORE = {
 // itself back to portrait everywhere except the builder and the desk sheets.
 // Where the browser won't lock (iPhone/iPad, or not installed) the whole app
 // simply follows the device, as it did on the iPad already.
-const ROTATE_OK_SCREENS = ['sentence-builder', 'desk-sheets'];
+// The study guides too (2026-11-09): more room for their tables sideways.
+const ROTATE_OK_SCREENS = ['sentence-builder', 'desk-sheets', 'study-guide'];
 function applyScreenOrientation(id) {
   const so = screen.orientation;
   if (!so || typeof so.lock !== 'function') return;
