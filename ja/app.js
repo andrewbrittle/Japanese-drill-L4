@@ -8,7 +8,7 @@ window.APP = {
   // are found as they are. Never change it.
   storagePrefix: 'jpL4',
   backupName: 'japanese-drill-backup',
-  latestChangelog: '2026-11-10-L4',
+  latestChangelog: '2026-11-09b-L4',
 
   vocabTabLabel: 'ことば',
   vocabPills: [],

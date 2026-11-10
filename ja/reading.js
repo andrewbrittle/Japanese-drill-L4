@@ -275,43 +275,9 @@ function buildDeskSheets() {
       else body = c.items.map(x => dsCardHtml(x)).join('');
       return `<div class="ds-col${c.wide ? ' wide' : ''}" style="--slot:var(--slot-${c.slot || i + 1})">${head}${note}${body}</div>`;
     }).join('');
-    // As many column spaces as the page's columns take (a wide one takes two):
-    // Giving has two wide columns, so on 8 its verbs wrapped underneath.
-    const tracks = cols.reduce((n, c) => n + (c.wide ? 2 : 1), 0);
-    return `<div class="ds-page"><div class="ds-page-title">${p.title}<span>${p.sub}</span><span class="ds-example">e.g. ${p.ex}</span></div><div class="ds-cols" style="grid-template-columns:repeat(${tracks},1fr)">${colHtml}</div></div>`;
+    return `<div class="ds-page"><div class="ds-page-title">${p.title}<span>${p.sub}</span><span class="ds-example">e.g. ${p.ex}</span></div><div class="ds-cols">${colHtml}</div></div>`;
   }).join('');
 }
-
-// Printing (2026-11-10, Andrew: columns ran off the bottom of the page):
-// just before printing, the sheets take their printed look (ds-printlook),
-// each is measured, and any too tall for an A4 landscape page is shrunk to
-// fit, widening as it shrinks so it still fills the page across - smaller
-// but all there. Put back after printing.
-const DS_PRINT_MM = { w: 283, h: 194 }; // A4 landscape less @page's 7mm margins
-function dsFitForPrint() {
-  const el = document.getElementById('desk-sheets');
-  if (!el || !el.offsetParent) return; // not on the desk sheets
-  el.classList.add('ds-printlook');
-  const mm = 96 / 25.4, W = DS_PRINT_MM.w * mm, H = (DS_PRINT_MM.h - 2) * mm;
-  el.querySelectorAll('.ds-page').forEach(pg => {
-    pg.style.zoom = '';
-    pg.style.setProperty('height', 'auto', 'important');
-    const tall = z => { pg.style.setProperty('width', W / z + 'px', 'important'); return pg.scrollHeight * z > H; };
-    let z = 1;
-    for (let k = 0; k < 8 && tall(z); k++) z = Math.min(z * 0.99, H / pg.scrollHeight);
-    while (tall(z) && z > 0.3) z *= 0.97;
-    pg.style.setProperty('height', DS_PRINT_MM.h * mm / z + 'px', 'important');
-    pg.style.zoom = z;
-  });
-}
-function dsUnfitAfterPrint() {
-  const el = document.getElementById('desk-sheets');
-  if (!el) return;
-  el.classList.remove('ds-printlook');
-  el.querySelectorAll('.ds-page').forEach(pg => { pg.style.zoom = ''; pg.style.removeProperty('width'); pg.style.removeProperty('height'); });
-}
-window.addEventListener('beforeprint', dsFitForPrint);
-window.addEventListener('afterprint', dsUnfitAfterPrint);
 
 function showDeskSheets() {
   buildDeskSheets();

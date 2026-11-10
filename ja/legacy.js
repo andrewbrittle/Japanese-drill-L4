@@ -3238,6 +3238,8 @@ function pickUntested20() {
 // automatically, so adding ahead of the course is harmless.
 
 
+try { sbParts = JSON.parse(localStorage.getItem(SB_PARTS_KEY)) || {}; } catch (e) { sbParts = {}; }
+try { sbPartsR = JSON.parse(localStorage.getItem(SB_PARTS_KEY_R)) || {}; } catch (e) { sbPartsR = {}; }
 
 
 applyAllSettingsUI();
