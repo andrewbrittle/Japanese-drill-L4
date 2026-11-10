@@ -12,14 +12,24 @@
 //       chunks(sel) (word order, joins), english(sel), notes(sel) for the free
 //       builder, newTarget() and buildColumns() for a challenge, formsMatch,
 //       clearWith (what goes when a wrong pick comes off), partDefs.
+//       Optional hooks, for a language whose builder differs (Japanese:
+//       readings, endings and か, Answer it): screen (its screen id), title(),
+//       onReset(why) ('enter' | 'challenge' | 'clear': its own state),
+//       targetSel(target), same(a, b), sayPick(id, card), sayText(),
+//       targetSay(), mark(id, s, t) (before the usual right / missing /
+//       extra; undefined to carry on), compare(id, s, t), afterMark(res, prev),
+//       counts(res) -> { r, n } (session and verdict), recordParts(res),
+//       labelHtml(label), stripHtml(chunks), answerHtml(), endingMsg(),
+//       buttons(btn, chunks), drawColumns(colsEl).
 //   registerBuilderMode({...}) one per mode, in the order they're offered:
 //       id, label, slots ([id, role] in sentence order), reading (false: no
 //       reading challenge), preset(sel) and fixed (parts that are given),
 //       formSlot (the part whose form is chosen under it), formAlwaysChecked,
-//       agreeSlot, partFor(id) (part-score name), onPick(id, card, same)
+//       agreeSlot, partFor(id) (part-score name), onPick(id, card, same, extra)
 //       (what a new pick clears), endingNote(reverse), draw(ui) (its columns).
 // The test every mode must pass: it solves its own challenges (see
-// golden/harness.js, builderPlay).
+// golden/harness.js, builderPlay; Japanese: golden/japanese/harness.js).
+// Japanese moved onto it 10 Nov 2026 (ja/builder.js registers its modes).
 
 let sbMode = null, sbChallenge = false, sbReverse = false; // sbMode: the first mode registered
 let sbSel = {}, sbTarget = null, sbTry = 0, sbDone = false, sbResult = null, sbCols = null;
@@ -37,6 +47,10 @@ const sbFixed = id => (sbM().fixed || []).includes(id);
 const sbReadingMode = id => BUILDER_MODES[id] && BUILDER_MODES[id].reading !== false;
 const sbSlots = () => sbM().slots.map(([id, role]) => ({ id, role }));
 const sbSlotIdx = id => sbSlots().findIndex(s => s.id === id);
+const sbHook = (name, ...a) => BUILDER[name] ? BUILDER[name](...a) : undefined;
+const sbTargetSel = () => BUILDER.targetSel ? BUILDER.targetSel(sbTarget) : sbTarget.sel;
+const sbSame = (a, b) => !!a && !!b && (BUILDER.same ? BUILDER.same(a, b) : a.pt === b.pt);
+const sbLabelHtml = l => BUILDER.labelHtml ? BUILDER.labelHtml(l) : l;
 
 // --- part scores (building and reading kept apart) ------------------------
 const SB_PARTS_KEY = APP.storagePrefix + 'SentenceParts', SB_PARTS_KEY_R = APP.storagePrefix + 'SentencePartsR';
@@ -69,12 +83,12 @@ function sbPartsPanelHtml(rev) {
   if (!stats.length) return '';
   const rows = stats.map(x => {
     const few = x.n < 5;
-    return `<div class="sbp-row${few ? ' sbp-few' : ''}" style="--slot:var(--slot-${x.slot})"><span class="sbp-label">${x.label}</span>` +
+    return `<div class="sbp-row${few ? ' sbp-few' : ''}" style="--slot:var(--slot-${x.slot})"><span class="sbp-label">${sbLabelHtml(x.label)}</span>` +
       `<span class="sbp-bar"><span style="width:${x.pct}%"></span></span><span class="sbp-pct">${few ? '–' : x.pct + '%'}</span></div>`;
   }).join('');
   const weak = sbWeakestPart(rev);
   return `<div class="sbp-panel"><div class="sbp-title">${rev ? tx('parts.titleReading') : tx('parts.titleChallenge')}</div>${rows}` +
-    `<div class="sbp-note">${weak ? tx('parts.mostRoom', { part: weak.label }) + ' ' : ''}${tx('parts.over20')}</div></div>`;
+    `<div class="sbp-note">${weak ? tx('parts.mostRoom', { part: sbLabelHtml(weak.label) }) + ' ' : ''}${tx('parts.over20')}</div></div>`;
 }
 
 // --- screen --------------------------------------------------------------
@@ -89,10 +103,11 @@ function showSentenceBuilder(challenge) {
   if (sbReverse && !sbReadingMode(sbMode)) sbMode = Object.keys(BUILDER_MODES).find(sbReadingMode);
   // Every entry starts clean (a finished challenge once locked the builder).
   sbSel = {}; sbTarget = null; sbTry = 0; sbDone = false; sbResult = null;
+  sbHook('onReset', 'enter', challenge);
   const title = document.getElementById('sb-title');
-  if (title) title.textContent = sbReverse ? tx('sb.titleReading') : sbChallenge ? tx('sb.titleChallenge') : tx('sb.titleBuilder');
+  if (title) title.textContent = sbHook('title') || (sbReverse ? tx('sb.titleReading') : sbChallenge ? tx('sb.titleChallenge') : tx('sb.titleBuilder'));
   sbStart();
-  showScreen('sb');
+  showScreen(BUILDER.screen || 'sb');
   window.scrollTo(0, 0);
 }
 function sbStart() { if (sbChallenge) sbNewChallenge(); else { sbSel = {}; sbPreset(); BUILDER.buildColumns(); sbRender(); } }
@@ -104,22 +119,25 @@ function sbSetMode(m) {
 function sbNewChallenge() {
   sbTarget = BUILDER.newTarget();
   sbSel = {}; sbTry = 0; sbDone = false; sbResult = null;
+  sbHook('onReset', 'challenge');
   sbPreset();
   BUILDER.buildColumns();
   sbRender();
 }
 function sbShuffle() { BUILDER.buildColumns(); sbSel = {}; sbPreset(); sbRender(); }
-function sbClear() { if (sbDone) return; sbSel = {}; sbPreset(); sbResult = null; sbRender(); }
+function sbClear() { if (sbDone) return; sbSel = {}; sbHook('onReset', 'clear'); sbPreset(); sbResult = null; sbRender(); }
 const sbLocked = id => sbResult && sbResult[id] === 'right';
-function sbPick(id, card) {
+// extra: what the card brings with it (Japanese: the verb an object is
+// listed under), for the mode's onPick.
+function sbPick(id, card, extra) {
   if (sbDone || sbLocked(id)) return;
-  const same = sbSel[id] && sbSel[id].pt === card.pt;
+  const same = sbSame(sbSel[id], card);
   if (same) delete sbSel[id]; else sbSel[id] = card;
   if (sbResult) delete sbResult[id];
   // What a new pick clears (a new verb has its own forms and objects...).
-  if (sbM().onPick) sbM().onPick(id, card, same);
+  if (sbM().onPick) sbM().onPick(id, card, same, extra);
   sbRender();
-  if (!same && !sbReverse) speakTarget(card.pt);
+  if (!same) { if (BUILDER.sayPick) BUILDER.sayPick(id, card); else if (!sbReverse) speakTarget(card.pt); }
 }
 function sbPickForm(f) {
   if (sbDone || sbLocked('ending')) return;
@@ -135,24 +153,25 @@ function sbPickAgree(f) {
   sbRender();
   if (sbSel.agree) speakTarget(f.pt);
 }
-function sbSay() { const t = BUILDER.assemble(sbSel); if (t) speakTarget(t); }
-function sbSayTarget() { if (sbTarget) speakTarget(sbTarget.pt); }
+function sbSay() { const t = BUILDER.sayText ? BUILDER.sayText() : BUILDER.assemble(sbSel); if (t) speakTarget(t); }
+function sbSayTarget() { if (sbTarget) speakTarget(BUILDER.targetSay ? BUILDER.targetSay() : sbTarget.pt); }
 
 // Check: each part right / wrong / missing / extra; the right verb (or
 // describing word) with the wrong form is its own message.
 function sbCheck() {
   if (!sbTarget || sbDone) return;
   sbTry++;
-  const M = sbM(), T = sbTarget.sel, S = sbSel, res = {}, prev = sbResult || {};
+  const M = sbM(), T = sbTargetSel(), S = sbSel, res = {}, prev = sbResult || {};
   sbSlots().forEach(({ id }) => {
     if (prev[id] === 'right') { res[id] = 'right'; return; }
     if (sbFixed(id)) return; // given (ir in Going); only its form counts
     const t = T[id], s = S[id];
+    if (BUILDER.mark) { const m = BUILDER.mark(id, s, t); if (m !== undefined) { res[id] = m; return; } }
     if (id === 'who' && sbTarget.whoOptional) { if (s) res[id] = s.pt === t.pt ? 'right' : 'wrong'; return; }
     if (!t && !s) return;
     if (!t) { res[id] = 'extra'; return; }
     if (!s) { res[id] = 'missing'; return; }
-    res[id] = s.pt === t.pt ? 'right' : 'wrong';
+    res[id] = BUILDER.compare ? BUILDER.compare(id, s, t) : s.pt === t.pt ? 'right' : 'wrong';
   });
   // The form chosen under a pick (a verb's ending) is marked as "ending";
   // an agreeing form (Being's describing word) as "agree".
@@ -160,10 +179,12 @@ function sbCheck() {
   if (M.formAlwaysChecked) res.ending = prev.ending === 'right' || formOk() ? 'right' : (S.form ? 'wrong' : 'missing');
   else if (M.formSlot && res[M.formSlot] === 'right') res.ending = prev.ending === 'right' || formOk() ? 'right' : 'ending';
   if (M.agreeSlot && res[M.agreeSlot] === 'right') res.agree = prev.agree === 'right' || (S.agree && S.agree.pt === T.agree.pt) ? 'right' : 'ending';
+  sbHook('afterMark', res, prev);
   if (sbTry === 1) {
-    const counted = Object.keys(res);
-    sbStats.total += counted.length; sbStats.right += counted.filter(k => res[k] === 'right').length;
-    Object.entries(res).forEach(([id, r]) => {
+    const c = sbCounts(res);
+    sbStats.total += c.n; sbStats.right += c.r;
+    if (BUILDER.recordParts) BUILDER.recordParts(res);
+    else Object.entries(res).forEach(([id, r]) => {
       const part = M.partFor ? M.partFor(id) : id;
       sbRecordPart(part, r === 'right');
     });
@@ -174,17 +195,25 @@ function sbCheck() {
     if (res[id] === 'wrong' || res[id] === 'extra') {
       if (id === 'ending') { delete S.form; return; }
       delete S[id];
-      (BUILDER.clearWith[id] || []).forEach(k => delete S[k]);
+      ((BUILDER.clearWith || {})[id] || []).forEach(k => delete S[k]);
     }
     if (res[id] === 'ending') { if (id === 'agree') delete S.agree; else delete S.form; }
   });
   sbResult = res;
-  const allRight = Object.values(res).every(r => r === 'right');
+  // (A part left out where that's fine is null: not counted either way.)
+  const allRight = Object.values(res).every(r => r === 'right' || r === null);
   if (allRight || sbTry >= 2) sbDone = true;
   // Draw first, then speak: if speech fails on a device, the challenge still
   // finishes (2026-11-07 - a reading challenge on a Pixel stuck at Check).
   sbRender();
   if (sbDone) sbSayTarget();
+}
+// Parts right of parts counted: every part marked, unless the language counts
+// otherwise (Japanese: the answer's parts).
+function sbCounts(res) {
+  if (BUILDER.counts) return BUILDER.counts(res);
+  const ids = Object.keys(res);
+  return { r: ids.filter(k => res[k] === 'right').length, n: ids.length };
 }
 function sbRender() {
   const top = document.getElementById('sb-strip'), colsEl = document.getElementById('sb-cols');
@@ -201,9 +230,10 @@ function sbRender() {
     if (id === M.agreeSlot && sbResult && sbResult.agree === 'ending') id = 'agree';
     return sbResult && sbResult[id] ? ' sb-' + sbResult[id] : '';
   };
-  const label = id => (sbSlots().find(x => x.id === id) || {}).role || id;
+  const label = id => (sbSlots().find(x => String(x.id) === String(id)) || {}).role || id; // (Japanese's ids are numbers)
   let html = '';
-  if (sbReverse && sbTarget) {
+  if (BUILDER.stripHtml) html += BUILDER.stripHtml(chunks);
+  else if (sbReverse && sbTarget) {
     html += `<div class="sb-pt sb-prompt-pt" onclick="sbSayTarget()">${escapeHtmlText(sbTarget.pt)}</div>`;
     html += Object.keys(sbSel).some(k => sbSel[k] && !sbFixed(k))
       ? `<div class="sb-en sb-en-built">"${escapeHtmlText(BUILDER.english(sbSel))}"</div>`
@@ -218,19 +248,19 @@ function sbRender() {
       if (!sbChallenge) html += `<div class="sb-en">"${escapeHtmlText(BUILDER.english(sbSel))}"</div>`;
     } else html += `<div class="sb-empty">${sbChallenge ? tx('sb.challengeHelp') : tx('sb.builderHelp')}</div>`;
   }
-  const notes = !sbChallenge ? BUILDER.notes(sbSel) : [];
+  const notes = !sbChallenge && !BUILDER.stripHtml ? BUILDER.notes(sbSel) : [];
   if (notes.length) html += `<div class="sb-notes">${notes.map(escapeHtmlText).join(' · ')}</div>`;
   if (sbChallenge && sbResult) {
     if (sbDone) {
-      const ids = Object.keys(sbResult), n = ids.length, r = ids.filter(k => sbResult[k] === 'right').length;
-      html += sbReverse ? `<div class="sb-answer"><div class="sb-en sb-en-answer">"${escapeHtmlText(sbTarget.en)}"</div></div>`
+      const { r, n } = sbCounts(sbResult);
+      html += BUILDER.answerHtml ? BUILDER.answerHtml() : sbReverse ? `<div class="sb-answer"><div class="sb-en sb-en-answer">"${escapeHtmlText(sbTarget.en)}"</div></div>`
         : `<div class="sb-answer" onclick="sbSayTarget()"><div class="sb-pt">${escapeHtmlText(sbTarget.pt)}</div></div>`;
       html += `<div class="sb-verdict${r === n ? ' good' : ''}">${r === n ? (sbTry === 1 ? tx('sb.allRightFirst') : tx('sb.allRightSecond')) : tx('sb.rOfN', { r, n })}</div>`;
     } else {
       const missing = Object.keys(sbResult).filter(k => sbResult[k] === 'missing').map(k => k === 'ending' ? tx('sb.theVerbForm') : label(k));
       const wrongN = Object.values(sbResult).filter(r => r === 'wrong' || r === 'extra').length;
       const bits = [wrongN ? tx('sb.nNotRight', { n: wrongN }) : '',
-        sbResult.ending === 'ending' ? (M.endingNote ? M.endingNote(sbReverse) : tx('sb.checkTheForm')) : '',
+        BUILDER.endingMsg ? BUILDER.endingMsg() : sbResult.ending === 'ending' ? (M.endingNote ? M.endingNote(sbReverse) : tx('sb.checkTheForm')) : '',
         sbResult.agree === 'ending' ? tx('sb.checkAgreement') : '',
         missing.length ? tx('sb.missing', { parts: missing.join(', ') }) : ''].filter(Boolean);
       html += `<div class="sb-verdict">${tx('sb.oneMoreGo', { bits: bits.join(' · ') })}</div>`;
@@ -238,21 +268,23 @@ function sbRender() {
   }
   const btn = (text, fn, main) => `<button type="button" class="ds-btn${main ? ' ds-btn-main' : ''}" onclick="${fn}">${text}</button>`;
   html += '<div class="ds-buttons sb-buttons">';
-  if (sbReverse) html += btn(tx('sb.hearIt'), 'sbSayTarget()');
+  if (BUILDER.buttons) html += BUILDER.buttons(btn, chunks);
+  else if (sbReverse) html += btn(tx('sb.hearIt'), 'sbSayTarget()');
   else if (chunks.length) html += btn(tx('sb.hearIt'), 'sbSay()');
   if (sbChallenge) html += sbDone ? btn(tx('drill.next'), 'sbNewChallenge()', true) : btn(sbTry ? tx('sb.checkAgain') : tx('drill.check'), 'sbCheck()', true) + btn(tx('sb.clear'), 'sbClear()');
   else html += btn(tx('sb.clear'), 'sbClear()') + btn(tx('sb.shuffle'), 'sbShuffle()');
   html += '</div>';
   if (sbChallenge && sbStats.total) {
     const weak = sbWeakestPart(sbReverse);
-    html += `<div class="sb-stats">${tx('sb.session', { r: sbStats.right, n: sbStats.total })}${weak ? ' · ' + tx('sb.sessionWeak', { part: weak.label, pct: weak.pct }) : ''}</div>`;
+    html += `<div class="sb-stats">${tx('sb.session', { r: sbStats.right, n: sbStats.total })}${weak ? ' · ' + tx('sb.sessionWeak', { part: sbLabelHtml(weak.label), pct: weak.pct }) : ''}</div>`;
   }
   top.innerHTML = html;
 
   // Columns
-  const T = sbDone && sbTarget ? sbTarget.sel : null;
   colsEl.innerHTML = '';
   colsEl.classList.toggle('sb-rev', sbReverse);
+  if (BUILDER.drawColumns) { BUILDER.drawColumns(colsEl); return; }
+  const T = sbDone && sbTarget ? sbTargetSel() : null;
   const column = (id, note, fill) => {
     const i = sbSlotIdx(id);
     const col = document.createElement('div');
