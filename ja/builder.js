@@ -1,9 +1,9 @@
 // Japanese - the sentence builder (2026-11-08, step 8 of the move onto the
 // core): build the Japanese for an English sentence from columns of words,
 // or the other way round, with each sentence part scored (SB_PARTS).
-// Japanese's own for now: the core's builder (core/builder.js) uses the
-// same sb names, so the two are merged as a later step. Loaded before
-// ja/legacy.js.
+// On the core's builder (core/builder.js) since 10 Nov 2026: this file
+// registers Japanese's modes and rules (see ON THE CORE, at the end).
+// Loaded after core/builder.js, before ja/legacy.js.
 
 // A random "X is Y" target for the challenges, in the same shape sbNewTarget returns.
 function sbNewTargetBeing() {
@@ -75,18 +75,18 @@ function sbNewTargetAnswer() {
 //               for every challenge, so they don't go stale.
 // Slots are the Sentence order card's 0-6 (colours --slot-1..7); Giving has
 // no slot 4.
-let sbMode = 'do', sbChallenge = false, sbCols = [], sbSel = {}, sbEnd = 0, sbQ = false;
+// Japanese's own state, beside the core's (sbMode, sbSel, sbTarget...):
+// the verb ending and か.
+let sbEnd = 0, sbQ = false;
 
 // Reading challenge (2026-10-23): the reverse - a Japanese sentence to read,
 // answered by picking each part's English. Shares everything else with the
-// challenge; sbReverse switches the card faces and the scores it keeps.
-let sbReverse = false, sbShowKana = false, sbShowRomaji = false;
+// challenge; the core's sbReverse switches the card faces and the scores it keeps.
+let sbShowKana = false, sbShowRomaji = false;
 
 // Answer it (L4, 2026-11-04): a question like the ones in class, in Japanese -
 // build your answer. The target is the answer; sbTarget.question is the prompt.
-let sbAnswer = false, sbShowEn = false;
-
-let sbTarget = null, sbTry = 0, sbDone = false, sbResult = null, sbStats = { right: 0, total: 0 };
+let sbShowEn = false; // (sbAnswer is the core's since 11 Nov)
 
 const SB_ENDS = [['ます', 'masu', 'hab', false], ['ません', 'masen', 'hab', true], ['ました', 'mashita', 'past', false], ['ませんでした', 'masendeshita', 'past', true]];
 
@@ -95,7 +95,7 @@ const sbNorm = s => String(s || '').replace(/\s/g, '');
 // The particle each slot adds after the chosen word, for this mode.
 function sbParticle(slot, it) {
   if (!it) return ['', ''];
-  if (sbMode === 'being') return slot === 0 ? ['は', 'wa'] : slot === 4 && isNaAdj(it.jp) ? ['な', 'na'] : ['', ''];
+  if (sbMode === 'being') return slot === 0 ? ['は', 'wa'] : slot === 4 ? beingLink(it.jp) : ['', ''];
   if (slot === 0) return ['は', 'wa'];
   if (slot === 3) return /で$/.test(it.jp) ? ['', ''] : sbMode === 'give' ? ['に', 'ni'] : ['と', 'to'];
   if (slot === 4) return it.jp === 'あるいて' ? ['', ''] : ['で', 'de'];
@@ -206,9 +206,16 @@ function sbNewTarget(opts = {}) {
     slots[6] = { word: w.verb, ro: sgW(w.verb).ro, en: vIt ? vIt.en : '', key: vIt ? vIt.jp + '|' + vIt.en : null,
       end: (tense === 'past' ? 2 : 0) + (neg ? 1 : 0), q: l3cIsQ() };
     // "I" with no topic: わたし or nothing are both right.
-    const meImplied = !slots[0] && w.subj.me;
-    const say = ex.parts.map((pt, k) => pt.slot === 0 && !(ex.parts[k + 1] && ex.parts[k + 1].slot === 0) ? pt.jp.replace(/は$/, 'わ') : pt.jp).join('');
-    return { slots, en: ex.en, jp: ex.jp, romaji: ex.romaji, meImplied, say, question };
+    let meImplied = !slots[0] && w.subj.me;
+    let say = ex.parts.map((pt, k) => pt.slot === 0 && !(ex.parts[k + 1] && ex.parts[k + 1].slot === 0) ? pt.jp.replace(/は$/, 'わ') : pt.jp).join('');
+    if (!question) return { slots, en: ex.en, jp: ex.jp, romaji: ex.romaji, meImplied, say, question };
+    // Answer it: a question to you is answered without わたしは, as people
+    // do - so the answer leaves it out and saying it is fine too (Andrew,
+    // 10 Nov: it counted against him for leaving it out). The parts are kept
+    // so the answer can follow the card picked for the asked part.
+    let parts = ex.parts.map(p => ({ slot: p.slot, jp: p.jp, ro: p.ro }));
+    if (slots[0] && sbNorm(slots[0].word) === 'わたし') { delete slots[0]; meImplied = true; parts = parts.filter(p => p.slot !== 0); }
+    return Object.assign({ slots, en: ex.en, meImplied, question, parts }, sbPartsText(parts));
   } finally {
     [l3cMode, l3SentStates, l3FreqIdx, l3SentWords] = saved;
   }
@@ -376,7 +383,8 @@ function sbEnglishBeing(sel, endIdx, q) {
 // Verb and Verb ending are separate: the right verb with the wrong ending
 // counts as a right verb and a wrong ending. Picking a part the sentence
 // doesn't need (a frequency word that isn't there) counts against that part.
-const SB_PARTS_KEY = 'jpL4SentenceParts';
+// The scores themselves are kept by the core, under the same keys as before
+// (jpL4SentenceParts, jpL4SentencePartsR).
 
 const SB_PART_DEFS = [
   ['who', 'Who は', 1], ['when', 'When (に)', 2], ['often', 'How often', 3], ['mou', 'もう (already / yet)', 3], ['degree', 'とても / あまり', 3], ['with', 'With whom と', 4], ['to', 'To / from whom に', 4],
@@ -384,62 +392,11 @@ const SB_PART_DEFS = [
   ['verb', 'Verb', 7], ['ending', 'Verb ending (+か)', 7],
 ];
 
-let sbParts = {}, sbPartsR = {};
-
-// Reading is a different skill from building, so it keeps its own record.
-const SB_PARTS_KEY_R = 'jpL4SentencePartsR';
-
-// The core's name for it (its backup and restore call this), until the
-// builder moves onto the core.
-function sbSaveParts() { saveSbParts(); }
-
-function saveSbParts() { try { localStorage.setItem(SB_PARTS_KEY, JSON.stringify(sbParts)); localStorage.setItem(SB_PARTS_KEY_R, JSON.stringify(sbPartsR)); } catch (e) { /* fine */ } }
-
 // Slot (0-6) + mode -> part id.
 function sbPartId(slot, mode) {
   return [
     'who', 'when', mode === 'being' ? 'degree' : 'often', mode === 'give' ? 'to' : 'with', mode === 'go' ? 'how' : mode === 'being' ? 'describe' : 'place', mode === 'go' ? 'whereTo' : mode === 'being' ? 'is' : 'what', 'verb',
   ][slot];
-}
-
-function sbRecordPart(id, ok) {
-  const store = sbReverse ? sbPartsR : sbParts;
-  const e = store[id] || { r: [], n: 0 };
-  e.r.push(ok ? 1 : 0);
-  if (e.r.length > 20) e.r = e.r.slice(-20);
-  e.n++;
-  store[id] = e;
-}
-
-function sbPartStats(rev = sbReverse) {
-  const store = rev ? sbPartsR : sbParts;
-  return SB_PART_DEFS.map(([id, label, slot]) => {
-    const e = store[id];
-    const pct = e && e.r.length ? Math.round(100 * e.r.reduce((a, b) => a + b, 0) / e.r.length) : null;
-    return { id, label, slot, pct, n: e ? e.n : 0 };
-  });
-}
-
-// The part to work on: lowest first-time rate with at least 5 tries.
-function sbWeakestPart(rev = sbReverse) {
-  const ok = sbPartStats(rev).filter(p => p.n >= 5 && p.pct !== null).sort((a, b) => a.pct - b.pct);
-  return ok.length && ok[0].pct < 100 ? ok[0] : null;
-}
-
-// Panel for the Grammar page.
-function sbPartsPanelHtml(rev = false) {
-  const stats = sbPartStats(rev).filter(p => p.n > 0);
-  if (!stats.length) return '';
-  const rows = stats.map(p => {
-    const few = p.n < 5;
-    return `<div class="sbp-row${few ? ' sbp-few' : ''}" style="--slot:var(--slot-${p.slot})">
-      <span class="sbp-label">${markSmallKana(p.label)}</span>
-      <span class="sbp-bar"><span style="width:${p.pct}%"></span></span>
-      <span class="sbp-pct">${few ? '–' : p.pct + '%'}</span></div>`;
-  }).join('');
-  const weak = sbWeakestPart(rev);
-  return `<div class="sbp-panel"><div class="sbp-title">${rev ? 'Reading' : 'Challenge'} parts — right first time</div>${rows}
-    <div class="sbp-note">${weak ? `Most room to grow: <strong>${markSmallKana(weak.label)}</strong>. ` : ''}Over your last 20 tries of each part; a dash until there have been 5.</div></div>`;
 }
 
 // Every card a column could ever show, for copying an answer card's wording.
@@ -452,50 +409,6 @@ function sbPoolCard(slotIdx, jp) {
   const f = pools[slotIdx];
   if (!f) return null;
   return f().filter(Boolean).find(x => sbNorm(x.jp) === sbNorm(jp)) || null;
-}
-
-function sbNewChallenge() {
-  for (let i = 0; i < 10 && !(sbTarget = sbAnswer ? sbNewTargetAnswer() : sbMode === 'being' ? sbNewTargetBeing() : sbNewTarget()); i++);
-  sbSel = {}; sbEnd = 0; sbQ = false; sbTry = 0; sbDone = false; sbResult = null; sbShowRomaji = false; sbShowEn = false;
-  sbBuildColumns();
-  sbRender();
-}
-
-// Builder and challenge are two cards on the 作文 page (2026-10-23), sharing
-// one screen; the title says which.
-function showSentenceBuilder(challenge) {
-  sbReverse = challenge === 'reverse';
-  sbAnswer = challenge === 'answer';
-  sbChallenge = !!challenge;
-  sbShowKana = false; sbShowRomaji = false; sbShowEn = false;
-  // A finished challenge left sbDone set, which locked the builder's cards
-  // (Andrew, 2026-10-23) - every entry starts clean.
-  sbSel = {}; sbEnd = 0; sbQ = false; sbTarget = null; sbDone = false; sbResult = null; sbTry = 0;
-  const t = document.getElementById('sb-title');
-  if (t) t.textContent = sbReverse ? 'Reading challenge' : sbAnswer ? 'Answer it' : sbChallenge ? 'Sentence challenge' : 'Sentence builder';
-  if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbRender(); }
-  showScreen('sentence-builder');
-  window.scrollTo(0, 0);
-}
-
-function sbSetMode(m) { if (sbMode === m) return; sbMode = m; sbSel = {}; if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbRender(); } }
-
-function sbSetChallenge(on) { if (sbChallenge === on) return; sbChallenge = on; sbReverse = false; sbAnswer = false; sbSel = {}; sbEnd = 0; sbQ = false; sbDone = false; sbResult = null; sbTry = 0; if (on) sbNewChallenge(); else { sbTarget = null; sbBuildColumns(); sbRender(); } }
-
-function sbShuffle() { if (sbChallenge) sbNewChallenge(); else { sbBuildColumns(); sbSel = {}; sbRender(); } }
-
-function sbClear() { if (sbDone) return; sbSel = {}; sbEnd = 0; sbQ = false; sbRender(); }
-
-function sbPick(slotIdx, it, groupVerb) {
-  if (sbDone) return;
-  if (sbResult && sbResult[slotIdx] === 'right') return; // locked after a right answer
-  const same = sbSel[slotIdx] && sbNorm(sbSel[slotIdx].jp) === sbNorm(it.jp);
-  if (same) delete sbSel[slotIdx]; else sbSel[slotIdx] = it;
-  if (sbResult) delete sbResult[slotIdx]; // a new pick sheds the last check's mark
-  // Doing: an object listed under a verb brings that verb with it.
-  if (!same && groupVerb && sbMode === 'do' && !(sbResult && sbResult[6] === 'right')) sbSel[6] = groupVerb;
-  sbRender();
-  if (!same) sbSaySlot(slotIdx);
 }
 
 function sbSetEnd(i) { if (sbDone || (sbResult && sbResult[6] === 'right')) return; sbEnd = i; if (sbResult) delete sbResult[6]; sbRender(); sbSaySlot(6); }
@@ -547,41 +460,124 @@ function sbToggleEn() { sbShowEn = !sbShowEn; sbRender(); }
 
 function sbSayQuestion() { if (sbTarget && sbTarget.question) speakJapanese(sbTarget.question.jp.replace(/[\s。]/g, '')); }
 
-function sbSay() { const t = sbBuilt().map(sbSayOf).join(''); if (t) speakJapanese(t); }
+// Answer it: does a card from the asked column answer the question? Any
+// card of the right kind: a time word that suits the question's tense; a
+// place for a place, a tool for a tool; a thing the verb takes; anywhere to
+// go, except that you only go home (かえります) to where the answer says.
+function sbAnswerFits(i, s) {
+  const T = sbTarget.slots, w = sbNorm(s.jp), verb = T[6] && T[6].word;
+  const col = dsColumns(sbMode).find((c, k) => (c.slot || k + 1) - 1 === i);
+  if (!col) return false;
+  if (col.groups) return col.groups.some(g => g.verb.jp.split(/\s*\/\s*/).includes(verb) && g.items.some(x => sbNorm(x.jp) === w));
+  const shown = sbCols.find(c => c.slotIdx === i);
+  if (!shown || !(shown.items || []).some(x => sbNorm(x.jp) === w)) return false;
+  if (i === 1) {
+    const st = typeof SG_TIMES !== 'undefined' && SG_TIMES[w];
+    if (!st) return true; // a day, or an occasion
+    return T[6].end >= 2 ? st.tenses.includes('past') : st.tenses.includes('hab') || st.tenses.includes('fut');
+  }
+  if (i === 4 && sbMode === 'do') return !!sgIsTool(w) === !!(T[4] && sgIsTool(sbNorm(T[4].word)));
+  if (i === 5 && sbMode === 'go') return verb !== 'かえります';
+  return true;
+}
 
-function sbSayTarget() { if (sbTarget) speakJapanese(sbTarget.say || sbTarget.jp.replace(/[\s。]/g, '')); }
+// An Answer it sentence from its parts: the Japanese, romaji and what's said.
+function sbPartsText(parts) {
+  return { jp: parts.map(p => p.jp).join(' ') + '。', romaji: sgCap(parts.map(p => p.ro).join(' ')) + '.', say: parts.map(p => p.jp).join('') };
+}
 
-// Check a challenge: each slot right / wrong / missing / extra.
-function sbCheck() {
-  if (!sbTarget || sbDone) return;
-  sbTry++;
-  const T = sbTarget.slots, res = {};
-  [0, 1, 2, 3, 4, 5, 6].forEach(i => {
-    const t = T[i], s = sbSel[i];
-    if (sbResult && sbResult[i] === 'right') { res[i] = 'right'; return; }
-    if (i === 0 && !t && sbTarget.meImplied) { res[i] = !s || s.jp === 'わたし' ? (s ? 'right' : null) : 'wrong'; return; }
-    if (i === 0 && !t && sbTarget.optional0) { res[i] = !s ? null : sbNorm(s.jp) === sbNorm(sbTarget.optional0) ? 'right' : 'wrong'; return; }
-    if (!t && !s) return;
-    if (!t) { res[i] = 'extra'; return; }
-    if (!s) { res[i] = 'missing'; return; }
-    const ok = sbNorm(s.jp) === sbNorm(t.word);
+// The answer shown follows the card picked for the asked part.
+function sbAdoptAnswer(i, s) {
+  const it = l3TaughtItem(sbNorm(s.jp)), [pj, pr] = sbParticle(i, s);
+  const k = sbTarget.parts.findIndex(p => p.slot === i);
+  if (k < 0) return;
+  sbTarget.parts = sbTarget.parts.filter((p, n) => n === k || p.slot !== i);
+  sbTarget.parts[k] = { slot: i, jp: s.jp + pj, ro: [s.ro, pr].filter(Boolean).join(' ') };
+  Object.assign(sbTarget, sbPartsText(sbTarget.parts));
+  sbTarget.slots[i] = { word: s.jp, ro: s.ro, en: s.en || '', key: it ? it.jp + '|' + it.en : null };
+  // And its English, from the parts as the builder reads them.
+  const sel = {};
+  Object.keys(sbTarget.slots).forEach(k => { const x = sbTarget.slots[k]; sel[k] = { jp: x.word, ro: x.ro, en: x.en }; });
+  const e = sbEnglishOf(sel, sbTarget.slots[6].end, false).enM;
+  if (e) sbTarget.en = l3cEnPlain(e);
+}
+
+// ==== ON THE CORE (10 Nov 2026) ====
+// The mechanics - picking, Check, one more go, the part scores, the verdict
+// and the session line - are the core's (core/builder.js), shared with
+// Portuguese. What's Japanese is registered here: the four modes, with the
+// Sentence order card's slots 0-6, and the hooks for readings, endings and
+// か, the topic that can be left out, Answer it, and the columns.
+const SB_SLOT_IDS = [0, 1, 2, 3, 4, 5, 6];
+['do', 'go', 'give', 'being'].forEach(id => registerBuilderMode({
+  id,
+  label: { do: 'Doing', go: 'Going', give: 'Giving', being: 'Being' }[id],
+  // The roles name what's missing ("missing: When, Verb").
+  get slots() { return SB_SLOT_IDS.map(i => [i, ((L3C_SLOTS[id] || [])[i] || { role: String(i) }).role.replace(/ \(.*\)$/, '')]); },
+  // Doing: an object listed under a verb brings that verb with it.
+  onPick: id === 'do' ? (i, card, same, groupVerb) => { if (!same && groupVerb && !(sbResult && sbResult[6] === 'right')) sbSel[6] = groupVerb; } : null,
+}));
+
+setBuilderLanguage({
+  screen: 'sentence-builder',
+  partDefs: SB_PART_DEFS,
+  title: () => sbAnswer ? tx('sb.titleAnswer') : '',
+  // Japanese's own state: the ending and か, Answer it, the reading toggles.
+  onReset(why, challenge) {
+    sbEnd = 0; sbQ = false;
+    if (why === 'enter') { sbAnswer = challenge === 'answer'; sbShowKana = false; sbShowRomaji = false; sbShowEn = false; }
+    if (why === 'challenge') { sbShowRomaji = false; sbShowEn = false; }
+  },
+  newTarget() {
+    let t = null;
+    for (let i = 0; i < 10 && !(t = sbAnswer ? sbNewTargetAnswer() : sbMode === 'being' ? sbNewTargetBeing() : sbNewTarget()); i++);
+    return t;
+  },
+  buildColumns: sbBuildColumns,
+  targetSel: t => t.slots,
+  same: (a, b) => sbNorm(a.jp) === sbNorm(b.jp),
+  chunks: () => sbBuilt(),
+  // Picking a word says it with its particle, or the verb with its ending.
+  sayPick: i => sbSaySlot(i),
+  sayText: () => sbBuilt().map(sbSayOf).join(''),
+  targetSay: () => sbTarget.say || sbTarget.jp.replace(/[\s。]/g, ''),
+  labelHtml: l => markSmallKana(l),
+  // "I" with no topic: わたし or nothing are both right; Being's Answer it
+  // topic likewise.
+  mark(i, s, t) {
+    if (i === 0 && !t && sbTarget.meImplied) return !s || s.jp === 'わたし' ? (s ? 'right' : null) : 'wrong';
+    if (i === 0 && !t && sbTarget.optional0) return !s ? null : sbNorm(s.jp) === sbNorm(sbTarget.optional0) ? 'right' : 'wrong';
+    return undefined;
+  },
+  compare(i, s, t) {
+    let ok = sbNorm(s.jp) === sbNorm(t.word);
+    // Answer it: the part asked about is yours to choose ("Where do you do
+    // your homework?" - at home, at the library…), so any card that fits is
+    // right, and the answer shown becomes yours (Andrew, 10 Nov).
+    if (!ok && sbAnswer && sbTarget.question && sbTarget.question.slot === i && sbAnswerFits(i, s)) { sbAdoptAnswer(i, s); ok = true; }
     // Right verb, wrong ending (or か): say so, and keep the verb picked.
-    if (i === 6 && ok && (sbEnd !== t.end || sbQ !== t.q)) { res[i] = 'ending'; return; }
-    res[i] = ok ? 'right' : 'wrong';
-  });
+    if (i === 6 && ok && (sbEnd !== t.end || sbQ !== t.q)) return 'ending';
+    return ok ? 'right' : 'wrong';
+  },
   // Production credit for each target word, the first time it's settled.
-  const credit = sbTry === 1 ? 1 : 0.5;
-  Object.keys(T).forEach(i => {
-    const t = T[i], was = sbResult && sbResult[i] === 'right';
-    if (was || !t.key) return;
-    if (sbReverse) return; // reading is recognition - parts only
-    if (res[i] === 'right') recordProduction(t.key, credit);
-    else if (sbTry >= 2) recordProduction(t.key, 0);
-  });
-  if (sbTry === 1) {
-    sbStats.total += Object.keys(T).length; sbStats.right += Object.keys(T).filter(i => res[i] === 'right').length;
-    // Parts, first Check only.
-    [0, 1, 2, 3, 4, 5, 6].forEach(i => {
+  afterMark(res, prev) {
+    const T = sbTarget.slots, credit = sbTry === 1 ? 1 : 0.5;
+    Object.keys(T).forEach(i => {
+      const t = T[i];
+      if (prev[i] === 'right' || !t.key) return;
+      if (sbReverse) return; // reading is recognition - parts only
+      if (res[i] === 'right') recordProduction(t.key, credit);
+      else if (sbTry >= 2) recordProduction(t.key, 0);
+    });
+  },
+  // Counted: the answer's parts.
+  counts(res) {
+    const ids = Object.keys(sbTarget.slots);
+    return { r: ids.filter(i => res[i] === 'right').length, n: ids.length };
+  },
+  recordParts(res) {
+    const T = sbTarget.slots;
+    SB_SLOT_IDS.forEach(i => {
       const r = res[i];
       if (!r) return; // not in the sentence and not picked (or "I" left out)
       if (i === 6 && sbMode === 'being') { sbRecordPart('ending', r === 'right'); return; } // です is the only "verb"
@@ -596,21 +592,30 @@ function sbCheck() {
       const mw = i === 2 ? (T[2] ? T[2].word : (sbSel[2] && sbSel[2].jp)) : null;
       sbRecordPart(mw === 'もう' ? 'mou' : tw && sgIsTool(sbNorm(tw)) ? 'tool' : sbPartId(i, sbMode), r === 'right');
     });
-    saveSbParts();
-  }
-  // Clear wrong picks so the second go starts from what's right.
-  Object.keys(res).forEach(i => { if (res[i] === 'wrong' || res[i] === 'extra') { if (sbTry < 2) delete sbSel[i]; } });
-  sbResult = res;
-  const allRight = Object.keys(T).every(i => res[i] === 'right') && !Object.values(res).some(r => r === 'extra' || r === 'wrong');
-  if (allRight || sbTry >= 2) { sbDone = true; sbSayTarget(); }
-  sbRender();
-}
+  },
+  endingMsg: () => sbResult[6] === 'ending' ? (sbTarget.slots[6].q !== sbQ && sbTarget.slots[6].end === sbEnd ? tx('sb.checkTheKa') : tx('sb.checkTheEnding')) : '',
+  stripHtml: sbStripHtml,
+  answerHtml: () => sbReverse ? `<div class="sb-answer"><div class="sb-en sb-en-answer">"${sbTarget.en}"</div></div>`
+    : `<div class="sb-answer" onclick="sbSayTarget()"><div class="sb-jp">${markSmallKana(sbTarget.jp)}</div><div class="sb-ro">${sbTarget.romaji}</div>${sbAnswer ? `<div class="sb-en">"${sbTarget.en}"</div>` : ''}</div>`,
+  buttons(btn, built) {
+    let html = '';
+    if (sbReverse) {
+      html += btn(tx('sb.hearIt'), 'sbSayTarget()');
+      if (!sbDone) html += btn(sbShowRomaji ? tx('sb.hideRomaji') : tx('sb.showRomaji'), 'sbToggleRomaji()');
+      html += btn(sbShowKana ? tx('sb.hideKana') : tx('sb.showKana'), 'sbToggleKana()');
+    } else if (sbAnswer) {
+      html += btn(tx('sb.hearQuestion'), 'sbSayQuestion()');
+      if (!sbDone) html += btn(sbShowRomaji ? tx('sb.hideRomaji') : tx('sb.showRomaji'), 'sbToggleRomaji()') + btn(sbShowEn ? tx('sb.hideEnglish') : tx('sb.showEnglish'), 'sbToggleEn()');
+      if (built.length) html += btn(tx('sb.hearMyAnswer'), 'sbSay()');
+    } else if (built.length) html += btn(tx('sb.hearIt'), 'sbSay()');
+    return html;
+  },
+  drawColumns: sbDrawColumns,
+});
 
-function sbRender() {
-  const top = document.getElementById('sb-strip'), colsEl = document.getElementById('sb-cols');
-  if (!top || !colsEl) return;
-  document.querySelectorAll('#sb-mode-row button').forEach(b => b.classList.toggle('active', b.dataset.mode === sbMode));
-  const built = sbBuilt();
+// The top of the screen: the question (reading, Answer it, or the English to
+// build), the sentence so far in Japanese and romaji, and the notes.
+function sbStripHtml(built) {
   const chunkHtml = (c, field) => `<span class="l3c-chunk sb-chunk${sbResult && sbResult[c.slot] ? ' sb-' + sbResult[c.slot] : ''}" style="--slot:var(--slot-${c.slot + 1})">${field === 'jp' ? markSmallKana(c.jp) : c.ro}</span>`;
   let html = '';
   const eng = sbEnglishOf(sbSel, sbEnd, sbQ);
@@ -620,7 +625,7 @@ function sbRender() {
     // Reading: the Japanese is the question; the English builds underneath.
     html += `<div class="sb-prompt-jp" onclick="sbSayTarget()">${markSmallKana(sbTarget.jp)}</div>`
       + (sbShowRomaji || sbDone ? `<div class="sb-ro sb-prompt-ro">${sbTarget.romaji}</div>` : '');
-    html += eng.enM ? `<div class="sb-en sb-en-built">"${l3cEnHtml(eng.enM)}"</div>` : `<div class="sb-empty">Read the sentence, then pick the English for each part — skip the columns it doesn't use.</div>`;
+    html += eng.enM ? `<div class="sb-en sb-en-built">"${l3cEnHtml(eng.enM)}"</div>` : `<div class="sb-empty">${tx('sb.readingHelp')}</div>`;
   } else {
     if (sbAnswer && sbTarget && sbTarget.question) {
       const Q = sbTarget.question;
@@ -629,46 +634,15 @@ function sbRender() {
         + (sbShowEn || sbDone ? `<div class="sb-en">"${Q.en}"</div>` : '');
     } else if (sbChallenge && sbTarget) html += `<div class="sb-prompt">"${sbTarget.en}"</div>`;
     html += built.length ? `<div class="sb-jp">${built.map(c => chunkHtml(c, 'jp')).join(' ')}。</div><div class="sb-ro">${built.map(c => chunkHtml(c, 'ro')).join(' ')}</div>` + (sbChallenge ? '' : enLine)
-      : `<div class="sb-empty">${sbAnswer ? 'Answer the question about yourself — build the whole sentence.' : sbChallenge ? 'Tap a word in each column you need — skip the ones you don\'t.' : 'Tap a word from each column to build a sentence.'}</div>`;
+      : `<div class="sb-empty">${sbAnswer ? tx('sb.answerHelp') : sbChallenge ? tx('sb.challengeHelp') : tx('sb.builderHelp')}</div>`;
   }
   if (!sbChallenge || sbReverse) html += notesHtml;
-  if (sbChallenge && sbResult) {
-    const missing = Object.keys(sbResult).filter(i => sbResult[i] === 'missing').map(i => L3C_SLOTS[sbMode][i].role.replace(/ \(.*\)$/, ''));
-    const wrongN = Object.values(sbResult).filter(r => r === 'wrong' || r === 'extra').length;
-    const endingMsg = sbResult[6] === 'ending' ? (sbTarget.slots[6].q !== sbQ && sbTarget.slots[6].end === sbEnd ? 'right verb — check the か' : 'right verb — check the ending') : '';
-    if (sbDone) {
-      const n = Object.keys(sbTarget.slots).length, r = Object.keys(sbTarget.slots).filter(i => sbResult[i] === 'right').length;
-      html += (sbReverse ? `<div class="sb-answer"><div class="sb-en sb-en-answer">"${sbTarget.en}"</div></div>`
-        : `<div class="sb-answer" onclick="sbSayTarget()"><div class="sb-jp">${markSmallKana(sbTarget.jp)}</div><div class="sb-ro">${sbTarget.romaji}</div>${sbAnswer ? `<div class="sb-en">"${sbTarget.en}"</div>` : ''}</div>`)
-        + `<div class="sb-verdict ${r === n ? 'good' : ''}">${r === n ? (sbTry === 1 ? 'All right first time!' : 'All right on the second go.') : `${r} of ${n} parts right — the answer is above.`}</div>`;
-    } else {
-      const bits = [wrongN ? `${wrongN} part${wrongN === 1 ? '' : 's'} not right (taken off)` : '', endingMsg, missing.length ? 'missing: ' + missing.join(', ') : ''].filter(Boolean);
-      html += `<div class="sb-verdict">${bits.join(' · ')} — one more go.</div>`;
-    }
-  }
-  const btn = (label, fn, main) => `<button type="button" class="ds-btn${main ? ' ds-btn-main' : ''}" onclick="${fn}">${label}</button>`;
-  html += '<div class="ds-buttons sb-buttons">';
-  if (sbReverse) {
-    html += btn('🔊 Hear it', 'sbSayTarget()');
-    if (!sbDone) html += btn(sbShowRomaji ? 'Hide romaji' : 'Show romaji', 'sbToggleRomaji()');
-    html += btn(sbShowKana ? 'Hide kana on cards' : 'Kana on cards', 'sbToggleKana()');
-  } else if (sbAnswer) {
-    html += btn('🔊 Hear the question', 'sbSayQuestion()');
-    if (!sbDone) html += btn(sbShowRomaji ? 'Hide romaji' : 'Show romaji', 'sbToggleRomaji()') + btn(sbShowEn ? 'Hide English' : 'Show English', 'sbToggleEn()');
-    if (built.length) html += btn('🔊 Hear my answer', 'sbSay()');
-  } else if (built.length) html += btn('🔊 Hear it', 'sbSay()');
-  if (sbChallenge) html += sbDone ? btn('Next →', 'sbNewChallenge()', true) : btn(sbTry ? 'Check again' : 'Check', 'sbCheck()', true) + btn('Clear', 'sbClear()');
-  else html += btn('Clear', 'sbClear()') + btn('Shuffle words', 'sbShuffle()');
-  html += '</div>';
-  if (sbChallenge && sbStats.total) {
-    const weak = sbWeakestPart();
-    html += `<div class="sb-stats">This session: ${sbStats.right} of ${sbStats.total} parts right first time${weak ? ` · most room to grow: ${markSmallKana(weak.label)} (${weak.pct}%)` : ''}</div>`;
-  }
-  top.innerHTML = html;
-  // Columns
-  const S = L3C_SLOTS[sbMode];
-  colsEl.innerHTML = '';
-  colsEl.classList.toggle('sb-rev', sbReverse);
+  return html;
+}
+
+// The columns: the desk sheets' cards (grouped under their verbs in the free
+// builder), and under the verb the endings and か.
+function sbDrawColumns(colsEl) {
   colsEl.classList.toggle('sb-showkana', sbReverse && sbShowKana);
   sbCols.forEach((c, n) => {
     const i = c.slotIdx;

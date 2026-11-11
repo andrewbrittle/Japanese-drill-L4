@@ -1291,7 +1291,10 @@ window.JP_DRILL_VOCAB = {
   // Lesson 8 of Minna no Nihongo (adjectives), added AHEAD of the class from
   // the textbook's usual Lesson 8 list so Andrew meets them first. Tagged
   // l4-preview: when the real handout arrives, reconcile (keep, re-gloss or
-  // move) and drop the tag. adj-na marks な-adjectives (the engine and the
+  // move) and drop the tag. Reconciled 10 Nov after Lesson 1: every preview
+  // word the class covered lost the tag; たのしい, せいかつ, 〜が and the two
+  // leaving phrases weren't in Lesson 1, so they keep l4-preview (no l4-1)
+  // until a lesson covers them. adj-na marks な-adjectives (the engine and the
   // Adjective forms drill read it); everything else tagged adjectives is an
   // い-adjective. Older adjectives are tagged forward into adjectives-l4 too,
   // so all the adjectives drill together.
@@ -1302,21 +1305,25 @@ window.JP_DRILL_VOCAB = {
     chars: 'おおきい きれい しずか…',
     tagQuery: ['L4','adjectives-l4'],
     items: [
-      {jp:'ハンサム', romaji:'hansamu', en:'handsome', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'しずか', romaji:'shizuka', en:'quiet', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'静か', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'にぎやか', romaji:'nigiyaka', en:'lively, busy (of a place)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'ゆうめい', romaji:'yuumei', en:'famous', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'有名', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'しんせつ', romaji:'shinsetsu', en:'kind, helpful', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'親切', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'げんき', romaji:'genki', en:'well, energetic', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'元気', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'ひま', romaji:'hima', en:'free (not busy)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'暇', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'べんり', romaji:'benri', en:'convenient', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1','l4-preview'], altForm:'便利', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'わるい', romaji:'warui', en:'bad', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'悪い', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'むずかしい', romaji:'muzukashii', en:'difficult', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'難しい', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'やさしい', romaji:'yasashii', en:'easy / kind (people)', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'易しい', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'ひくい', romaji:'hikui', en:'low, short (height)', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'低い', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'たのしい', romaji:'tanoshii', en:'fun, enjoyable', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'楽しい', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'くろい', romaji:'kuroi', en:'black', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'黒い', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'あおい', romaji:'aoi', en:'blue', tags:['L4','adjectives-l4','adjectives','taught','l4-1','l4-preview'], altForm:'青い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'ハンサム', romaji:'hansamu', en:'handsome', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], dateAdded:'2026-11-04'},
+      {jp:'しずか', romaji:'shizuka', en:'quiet', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'静か', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'にぎやか', romaji:'nigiyaka', en:'lively, busy (of a place)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], dateAdded:'2026-11-04'},
+      {jp:'ゆうめい', romaji:'yuumei', en:'famous', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'有名', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'しんせつ', romaji:'shinsetsu', en:'kind, helpful', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'親切', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'げんき', romaji:'genki', en:'well, energetic', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'元気', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'ひま', romaji:'hima', en:'free (not busy)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'暇', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'べんり', romaji:'benri', en:'convenient', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'便利', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'わるい', romaji:'warui', en:'bad', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'悪い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'むずかしい', romaji:'muzukashii', en:'difficult', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'難しい', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'やさしい', romaji:'yasashii', en:'easy / kind (people)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'易しい', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'ひくい', romaji:'hikui', en:'low, short (height)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'低い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'たのしい', romaji:'tanoshii', en:'fun, enjoyable', tags:['L4','adjectives-l4','adjectives','taught','l4-preview'], altForm:'楽しい', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'くろい', romaji:'kuroi', en:'black', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'黒い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'あおい', romaji:'aoi', en:'blue', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'青い', altIsStandard:true, dateAdded:'2026-11-04'},
+      // Lesson 1 (2026-11-10): the rest of the class charts and colour sheet.
+      {jp:'つまらない', romaji:'tsumaranai', en:'boring', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'きいろい', romaji:'kiiroi', en:'yellow', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'黄色い', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'ちゃいろい', romaji:'chairoi', en:'brown', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'茶色い', altIsStandard:true, dateAdded:'2026-11-10'},
     ],
   },
   'vocab-general-l4': {
@@ -1326,14 +1333,38 @@ window.JP_DRILL_VOCAB = {
     chars: 'とても ところ さくら…',
     tagQuery: ['L4','general-l4'],
     items: [
-      {jp:'ひと', romaji:'hito', en:'person', tags:['L4','general-l4','taught','l4-1','l4-preview'], altForm:'人', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'さくら', romaji:'sakura', en:'cherry blossom', tags:['L4','general-l4','taught','l4-1','l4-preview'], altForm:'桜', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'ところ', romaji:'tokoro', en:'place', tags:['L4','general-l4','taught','l4-1','l4-preview'], altForm:'所', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'せいかつ', romaji:'seikatsu', en:'(daily) life', tags:['L4','general-l4','taught','l4-1','l4-preview'], altForm:'生活', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'とても', romaji:'totemo', en:'very', tags:['L4','general-l4','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'〜が', romaji:'~ga', en:'but (〜ですが、〜です)', tags:['L4','general-l4','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'そろそろ しつれいします', romaji:'sorosoro shitsurei shimasu', en:'I should be going (politely leaving)', tags:['L4','general-l4','phrases-l4','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'また いらっしゃって ください', romaji:'mata irasshatte kudasai', en:'please come again', tags:['L4','general-l4','phrases-l4','taught','l4-1','l4-preview'], dateAdded:'2026-11-04'},
+      {jp:'ひと', romaji:'hito', en:'person', tags:['L4','general-l4','taught','l4-1'], altForm:'人', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'さくら', romaji:'sakura', en:'cherry blossom', tags:['L4','general-l4','taught','l4-1'], altForm:'桜', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'ところ', romaji:'tokoro', en:'place', tags:['L4','general-l4','taught','l4-1'], altForm:'所', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'せいかつ', romaji:'seikatsu', en:'(daily) life', tags:['L4','general-l4','taught','l4-preview'], altForm:'生活', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'とても', romaji:'totemo', en:'very', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-04'},
+      {jp:'〜が', romaji:'~ga', en:'but (〜ですが、〜です)', tags:['L4','general-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
+      {jp:'そろそろ しつれいします', romaji:'sorosoro shitsurei shimasu', en:'I should be going (politely leaving)', tags:['L4','general-l4','phrases-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
+      {jp:'また いらっしゃって ください', romaji:'mata irasshatte kudasai', en:'please come again', tags:['L4','general-l4','phrases-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
+      // Lesson 1 (2026-11-10): これ (taught early on, now in the class's
+      // これは おおきい かばんです), nouns from the adjective charts, the colour
+      // sheet, the practices and the listening; the tea-offering phrases.
+      {jp:'これ', romaji:'kore', en:'this (one)', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'おとこのこ', romaji:'otoko no ko', en:'boy', tags:['L4','general-l4','taught','l4-1'], altForm:'男の子', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'おとこのひと', romaji:'otoko no hito', en:'man', tags:['L4','general-l4','taught','l4-1'], altForm:'男の人', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'たてもの', romaji:'tatemono', en:'building', tags:['L4','general-l4','taught','l4-1'], altForm:'建物', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'まつり', romaji:'matsuri', en:'festival', tags:['L4','general-l4','taught','l4-1'], altForm:'祭り', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'ばんぐみ', romaji:'bangumi', en:'programme (TV, radio)', tags:['L4','general-l4','taught','l4-1'], altForm:'番組', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'テスト', romaji:'tesuto', en:'test', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'いろ', romaji:'iro', en:'colour', tags:['L4','general-l4','taught','l4-1'], altForm:'色', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'グレー', romaji:'guree', en:'grey', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'あいいろ', romaji:'aiiro', en:'indigo', tags:['L4','general-l4','taught','l4-1'], altForm:'藍色', dateAdded:'2026-11-10'},
+      {jp:'にじ', romaji:'niji', en:'rainbow', tags:['L4','general-l4','taught','l4-1'], altForm:'虹', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'ばら', romaji:'bara', en:'rose', tags:['L4','general-l4','taught','l4-1'], altForm:'薔薇', dateAdded:'2026-11-10'},
+      {jp:'パンダ', romaji:'panda', en:'panda', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'ハムスター', romaji:'hamusutaa', en:'hamster', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'ふじさん', romaji:'fujisan', en:'Mount Fuji', tags:['L4','general-l4','taught','l4-1'], altForm:'富士山', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'デザイン', romaji:'dezain', en:'design', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'ウインドーショッピング', romaji:'uindoo shoppingu', en:'window shopping', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'いかがですか', romaji:'ikaga desu ka', en:'would you like …? (offering)', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'けっこうです', romaji:'kekkou desu', en:'no, thank you (I\'m fine)', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'もう いっぱい', romaji:'mou ippai', en:'another cup / glass', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      {jp:'もう ひとつ', romaji:'mou hitotsu', en:'another one', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
     ],
   },
   // みず (water) moved out to Level 2's General vocabulary in Week 6, now

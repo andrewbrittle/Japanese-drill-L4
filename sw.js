@@ -15,12 +15,13 @@
 // LEVEL 4 APP: its own cache prefix, jpl4-. The Level 3 app (same web
 // address) deletes every cache starting jp-drill- except its own, and this
 // app deletes only jpl4- ones, so neither clears the other's offline copy.
-const CACHE_VERSION = 'jpl4-v261109-004';
+const CACHE_VERSION = 'jpl4-v261111-002';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.json',
+  './core/builder.js',
   './core/core.js',
   './core/picker.js',
   './core/questions.js',
@@ -137,7 +138,9 @@ self.addEventListener('fetch', (event) => {
   });
 
   event.respondWith(
-    Promise.race([networkFetch, timeout]).catch(() => caches.match(event.request).then((cached) => {
+    // ignoreSearch: the page asks for its scripts with ?v=<version> (publish.sh,
+    // 10 Nov 2026), the offline copies are kept without it.
+    Promise.race([networkFetch, timeout]).catch(() => caches.match(event.request, { ignoreSearch: true }).then((cached) => {
       if (cached) return cached;
       // No exact match cached - if this was a page navigation (not an
       // image/font/etc.), fall back to the cached app shell rather than

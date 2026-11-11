@@ -1102,6 +1102,15 @@ function beingIForm(jp, ro, endIdx) {
 
 const BEING_NA = ['きれい', 'すてき'];
 
+// Colours that are nouns only (L4 Lesson 1): before a noun they take の -
+// みどりの シャツ - where あかい, あおい, しろい, くろい, きいろい, ちゃいろい are
+// い-adjectives (あかい かさ). Used in the adjective + noun sentences only.
+const BEING_COLOUR_NOUNS = ['みどり', 'むらさき', 'ピンク', 'オレンジ', 'グレー'];
+
+// What joins a describing word to its noun: な (しずかな まち), の for a colour
+// noun (みどりの シャツ), nothing for an い-word (あかい かさ).
+const beingLink = jp => isNaAdj(jp) ? ['な', 'na'] : BEING_COLOUR_NOUNS.includes(jp) ? ['の', 'no'] : ['', ''];
+
 const BEING_SKIP_JOBS = ['きょうし', 'しゃいん']; // two "teacher"s / vague
 
 const BEING_DEMONYM = { オーストラリア: 'Australian', ブラジル: 'Brazilian', カナダ: 'Canadian', ちゅうごく: 'Chinese', エジプト: 'Egyptian', フランス: 'French',
@@ -1110,17 +1119,31 @@ const BEING_DEMONYM = { オーストラリア: 'Australian', ブラジル: 'Braz
   タイ: 'Thai', イギリス: 'British', アメリカ: 'American', ベトナム: 'Vietnamese' };
 
 // Things to describe, and the describing words that suit them.
+// L4 Lesson 1 (2026-11-10): the class's colours, つまらない / わるい / ひくい,
+// and its things (やま, はな, ばんぐみ, テスト, まつり, たてもの, へや, おかし,
+// くに). adjNoun: the group's things also go in "これは あかい かさです"
+// (adjective + noun); colours: and take the noun-only colours with の
+// (みどりの シャツ); noun: the things are names, described with that noun
+// (ふじさんは たかい やまです).
 const BEING_THINGS = [
-  { objs: ['かばん', 'とけい', 'ぼうし', 'カップ', 'マグカップ', 'ハンカチ', 'シャツ', 'コート', 'ふく', 'くつ', 'さいふ'], adjs: ['あたらしい', 'ふるい', 'かわいい', 'かっこいい', 'きれい', 'すてき', 'あかい', 'しろい', 'いい'] },
-  { objs: ['くるま', 'いえ', 'じてんしゃ'], adjs: ['あたらしい', 'ふるい', 'かっこいい', 'きれい', 'すてき', 'すごい', 'あかい', 'しろい'] },
-  { objs: ['ほん', 'えいが', 'ドラマ', 'しんぶん', 'ざっし'], adjs: ['おもしろい', 'いい', 'すごい', 'ながい', 'みじかい', 'ふるい', 'あたらしい'] },
-  { objs: ['にんぎょう', 'ぬいぐるみ', 'え'], adjs: ['かわいい', 'きれい', 'すてき', 'ふるい', 'あたらしい'] },
+  { objs: ['かばん', 'とけい', 'ぼうし', 'カップ', 'マグカップ', 'ハンカチ', 'シャツ', 'コート', 'ふく', 'くつ', 'さいふ', 'かさ'], adjs: ['あたらしい', 'ふるい', 'かわいい', 'かっこいい', 'きれい', 'すてき', 'あかい', 'しろい', 'くろい', 'あおい', 'きいろい', 'ちゃいろい', 'いい'], adjNoun: true, colours: true },
+  { objs: ['くるま', 'いえ', 'じてんしゃ'], adjs: ['あたらしい', 'ふるい', 'かっこいい', 'きれい', 'すてき', 'すごい', 'あかい', 'しろい', 'くろい', 'あおい'], adjNoun: true, colours: true },
+  { objs: ['ほん', 'えいが', 'ドラマ', 'しんぶん', 'ざっし', 'ばんぐみ'], adjs: ['おもしろい', 'つまらない', 'いい', 'わるい', 'すごい', 'ながい', 'みじかい', 'ふるい', 'あたらしい'], adjNoun: true },
+  { objs: ['にんぎょう', 'ぬいぐるみ', 'え'], adjs: ['かわいい', 'きれい', 'すてき', 'ふるい', 'あたらしい', 'おもしろい'], adjNoun: true },
+  { objs: ['やま'], adjs: ['たかい', 'ひくい', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい'], adjNoun: true },
+  { objs: ['ふじさん'], adjs: ['たかい', 'きれい', 'ゆうめい', 'おおきい'], noun: 'やま', place: true },
+  { objs: ['はな', 'ばら'], adjs: ['きれい', 'かわいい', 'すてき', 'あかい', 'しろい', 'きいろい'], adjNoun: true, colours: true },
+  { objs: ['たてもの'], adjs: ['たかい', 'ふるい', 'あたらしい', 'おおきい', 'ちいさい', 'ゆうめい', 'きれい'], adjNoun: true },
+  { objs: ['へや'], adjs: ['きれい', 'おおきい', 'ちいさい', 'しずか', 'あたらしい', 'ふるい', 'さむい', 'あつい'], adjNoun: true },
+  { objs: ['まつり'], adjs: ['にぎやか', 'おもしろい', 'ゆうめい', 'すごい', 'いい'], adjNoun: true },
+  { objs: ['くに'], adjs: ['おおきい', 'ちいさい', 'あつい', 'さむい', 'きれい', 'ゆうめい'], adjNoun: true },
   { objs: ['ビール', 'ジュース', 'みず', 'アイスコーヒー'], adjs: ['つめたい'] },
   // L4 (Lesson 8 preview, 2026-11-04): places, food, study and work.
   { objs: ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター', 'まち'], adjs: ['にぎやか', 'しずか', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい', 'ふるい', 'あたらしい', 'いい', 'さむい', 'あつい'], place: true },
   { objs: ['えき', 'こうえん', 'レストラン', 'デパート', 'がっこう'], adjs: ['にぎやか', 'しずか', 'きれい', 'べんり', 'おおきい', 'ちいさい', 'あたらしい', 'ふるい', 'ゆうめい'] },
-  { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの'], adjs: ['おいしい', 'たかい', 'やすい'] },
-  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'たのしい'] },
+  { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの', 'おかし'], adjs: ['おいしい', 'たかい', 'やすい'] },
+  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'つまらない', 'たのしい'] },
+  { objs: ['テスト'], adjs: ['むずかしい', 'やさしい', 'ながい', 'みじかい'], adjNoun: true },
 ];
 
 const BEING_PEOPLE_ADJS = ['おもしろい', 'かっこいい', 'きれい', 'すてき', 'かわいい', 'すごい', 'しんせつ', 'げんき', 'ひま', 'いそがしい', 'ハンサム', 'ゆうめい'];
@@ -1140,7 +1163,7 @@ const BEING_DEGREE = { とても: { ro: 'totemo', en: 'very' }, あまり: { ro:
 
 // English for an adjective (first meaning, before any comma or slash).
 // Topics whose English isn't "the" + the word list's first meaning.
-const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town' };
+const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town', ふじさん: 'Mount Fuji', くに: 'the country' };
 
 function beingTopicEn(o) {
   if (BEING_TOPIC_EN[o]) return BEING_TOPIC_EN[o];
@@ -1154,6 +1177,11 @@ const BEING_BIG_CITIES = ['とうきょう', 'ロンドン', 'おおさか'];
 const beingAdjFits = (o, a) => !(BEING_BIG_CITIES.includes(o) && ['ちいさい', 'しずか'].includes(a));
 
 const beingAdjEn = (jp, person) => (person && BEING_PEOPLE_EN[jp]) || adjEnWord((l3TaughtItem(jp) || { en: jp }).en);
+
+// Describing a thing: words whose first English meaning is the wrong one for
+// it - a mountain is たかい (high), not expensive.
+const BEING_THING_EN = { たかい: { やま: 'high', ふじさん: 'high', たてもの: 'tall' } };
+const beingThingAdjEn = (jp, thing) => (BEING_THING_EN[jp] || {})[thing] || beingAdjEn(jp);
 
 const beingEnWord = it => String(it.en || '').split(' / ')[0].replace(/\s*\(.*\)$/, '').trim();
 
@@ -1211,7 +1239,27 @@ function beingPick(opts = {}) {
   if (opts.degree && kind !== 'adj') kind = 'adj';
   if (opts.adjNoun) kind = 'adjnoun';
   let subj, topicWord = null, topicEn = null, comp, adj = null;
-  if (kind === 'adjnoun') {
+  // L4 Lesson 1: a thing (これは あかい かさです, これは みどりの シャツです) or a
+  // named one with its noun (ふじさんは たかい やまです).
+  const adjNounThings = kind === 'adjnoun' && !opts.person && sgW('これ') && sgChance(0.4)
+    ? BEING_THINGS.filter(g => g.adjNoun || g.noun).map(g => ({ g, objs: g.objs.filter(o => sgW(o) && !['くつ', 'ふく'].includes(o) && (!g.noun || sgW(g.noun))), adjs: g.adjs.filter(a => sgW(a)).concat(g.colours ? BEING_COLOUR_NOUNS.filter(c => sgW(c)) : []) })).filter(x => x.objs.length && x.adjs.length)
+    : [];
+  if (adjNounThings.length) {
+    const x = sgPick(adjNounThings), o = sgPick(x.objs), a = sgPick(x.adjs.filter(y => beingAdjFits(o, y)));
+    if (!a) return null;
+    if (x.g.noun) {
+      topicWord = o; topicEn = beingTopicEn(o);
+      subj = { segs: [sgSeg(o, 'は', 'wa')], en: topicEn, third: true, thing: true };
+      comp = { jp: x.g.noun, ro: sgW(x.g.noun).ro, en: beingEnWord(l3TaughtItem(x.g.noun)), noun: true };
+    } else {
+      topicWord = 'これ'; topicEn = 'this';
+      subj = { segs: [sgSeg('これ', 'は', 'wa')], en: 'this', third: true, thing: true };
+      comp = { jp: o, ro: sgW(o).ro, en: beingEnWord(l3TaughtItem(o)), noun: true };
+    }
+    adj = { jp: a, ro: sgW(a).ro, en: beingThingAdjEn(a, x.g.noun || o) };
+    // Not "very red", and a thing in front of you is now (not でした).
+    if (BEING_COLOUR_NOUNS.includes(a) || ['あかい', 'あおい', 'しろい', 'くろい', 'きいろい', 'ちゃいろい'].includes(a)) opts = Object.assign({}, opts, { degree: null });
+  } else if (kind === 'adjnoun') {
     // A person (+ ひと or their job) or a city (+ まち).
     if (!opts.person && sgChance(0.35) && sgW('まち')) {
       const cities = ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター'].filter(c => sgW(c));
@@ -1240,13 +1288,13 @@ function beingPick(opts = {}) {
       }
     }
   } else if (kind === 'adj' && !opts.person && sgChance(0.65)) {
-    const groups = BEING_THINGS.map(g => ({ objs: g.objs.filter(o => sgW(o)), adjs: g.adjs.filter(a => sgW(a) && !(opts.needTime && !isNaAdj(a))), place: g.place })).filter(g => g.objs.length && g.adjs.length);
+    const groups = BEING_THINGS.map(g => ({ objs: g.objs.filter(o => sgW(o)), adjs: g.adjs.filter(a => sgW(a) && !(opts.needTime && !isNaAdj(a))), place: g.place, now: !!g.noun })).filter(g => g.objs.length && g.adjs.length);
     if (!groups.length) return null;
     const g = sgPick(groups), o = sgPick(g.objs), a = sgPick(g.adjs.filter(x => beingAdjFits(o, x)));
     if (!a) return null;
     topicWord = o; topicEn = beingTopicEn(o);
-    subj = { segs: [sgSeg(o, 'は', 'wa')], en: topicEn, third: true, thing: true };
-    comp = { jp: a, ro: sgW(a).ro, en: beingAdjEn(a) };
+    subj = { segs: [sgSeg(o, 'は', 'wa')], en: topicEn, third: true, thing: true, now: g.now };
+    comp = { jp: a, ro: sgW(a).ro, en: beingThingAdjEn(a, o) };
   } else {
     subj = sgSubject({ noTeacher: true });
     if (kind === 'adj') {
@@ -1269,7 +1317,7 @@ function beingPick(opts = {}) {
   // Time words: jobs only (with or without a describing word).
   const canTime = kind === 'job' || (kind === 'adjnoun' && comp.jobEn);
   const isI = kind === 'adj' && beingIsI(comp.jp);
-  let tense = kind === 'nation' ? 'hab' : sgPick(['hab', 'hab', 'hab', 'past']);
+  let tense = kind === 'nation' || subj.now ? 'hab' : sgPick(['hab', 'hab', 'hab', 'past']);
   let time = null;
   if (canTime) {
     const tr = sgRand();
@@ -1282,7 +1330,7 @@ function beingPick(opts = {}) {
   if (opts.needTime && !time) return null;
   const degree = opts.degree && (kind === 'adj' || kind === 'adjnoun') ? opts.degree : null;
   const neg = degree ? !!BEING_DEGREE[degree].neg : sgChance(0.25);
-  if (kind === 'adjnoun' && !time) tense = sgChance(0.2) ? 'past' : 'hab';
+  if (kind === 'adjnoun' && !time) tense = topicWord === 'これ' ? 'hab' : sgChance(0.2) ? 'past' : 'hab';
   return { mode: 'being', kind, subj, topicWord, topicEn, comp, adj, degree, time, tense, neg, isI };
 }
 
@@ -1302,7 +1350,7 @@ function beingBuild(w, st) {
   else if (topicOn) w.subj.segs.forEach(sg => parts.push({ slot: 0, jp: l3cJp(sg), ro: sg.ro }));
   if (st[1] === 'on' && w.time) parts.push({ slot: 1, jp: w.time.jp, ro: w.time.ro });
   if (w.degree) parts.push({ slot: 2, jp: w.degree, ro: BEING_DEGREE[w.degree].ro });
-  if (w.adj) { const na = isNaAdj(w.adj.jp); parts.push({ slot: 4, jp: w.adj.jp + (na ? 'な' : ''), ro: w.adj.ro + (na ? ' na' : '') }); }
+  if (w.adj) { const [lj, lr] = beingLink(w.adj.jp); parts.push({ slot: 4, jp: w.adj.jp + lj, ro: w.adj.ro + (lr ? ' ' + lr : '') }); }
   if (isI && endIdx >= 4) {
     const [fj, fr] = beingIForm(w.comp.jp, w.comp.ro, endIdx);
     parts.push({ slot: 5, jp: fj, ro: fr });

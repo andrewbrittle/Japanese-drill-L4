@@ -304,6 +304,10 @@ function refreshKanjiIndexSwatches() {
   KANJI_SECTION_KEYS.forEach(key => setupCatBar(document.getElementById('kanji-index-swatch-' + key), getCategoryBandCountsKanji(getKanjiSectionPool(key))));
   setupCatBar(document.getElementById('kanji-index-swatch-all'), getCategoryBandCountsKanji(getAllKanjiFlat()));
   setupCatBar(document.getElementById('kanji-index-swatch-500'), getCategoryBandCountsKanji(KANJI_500.map(kanjiCardItem)));
+  setupCatBar(document.getElementById('kanji-index-swatch-seen'), getCategoryBandCountsKanji(kanjiSeenItems()));
+  const cd = document.getElementById('kanji-cards-desc'), sd = document.getElementById('kanji-seen-desc');
+  if (cd) cd.textContent = "Kanji Cards' list and scores (" + KANJI_500.length + ' kanji)';
+  if (sd) sd.textContent = 'Kanji from the class handouts and homework (' + kanjiSeenItems().length + ' so far)';
 }
 
 // One set's selection screen - entered with a fixed section, like
@@ -345,7 +349,8 @@ function buildKanjiTileGrid(sectionKey) {
 
   data.forEach((item, idx) => {
     const tile = document.createElement('div');
-    tile.className = 'kana-ref-card';
+    const seenKind = kanjiSeenKind(item);
+    tile.className = 'kana-ref-card' + (seenKind ? ' seen-' + seenKind : '');
     tile.innerHTML = `<span class="kana-ref-char">${markSmallKana(item.char)}</span><span class="kana-ref-rom">${item.answer}</span>`;
     const scoreKey = kanjiScoreKey(item);
     tile.dataset.scoreKey = scoreKey;
@@ -914,7 +919,21 @@ function moveKanjiScoresToCards() {
 // one headline score bar, then compact pills with counts - In order in
 // hundreds (1–100 ... 401–500), By part one pill per group ("日 sun (25)"),
 // By JLPT one pill per level ("N5 (79)").
-const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By part', sets: [] }, jlpt: { label: 'By JLPT', sets: [] } };
+const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By part', sets: [] }, jlpt: { label: 'By JLPT', sets: [] }, seen: { label: 'Seen in materials', sets: [] } };
+
+// SEEN IN MATERIALS (11 Nov 2026, from Andrew's mock-up): the kanji the
+// class has shown - Kanji Cards' seen.js, carried in JP_KANJI_500.seen. A
+// lighter mark than taught: pointed out as kanji (the colour sheet), or
+// seen in passing (printed with readings); whole-word cards count too
+// (富士山, 東京, 暑い...). One set overall, not per lesson. Marked on tiles
+// everywhere, as in Kanji Cards: a dot if pointed out, a ring if in passing.
+const KANJI_SEEN = (window.JP_KANJI_500 && window.JP_KANJI_500.seen) || { pointed: [], passing: [], words: [] };
+function kanjiSeenKind(item) {
+  if (item.cardN) return KANJI_SEEN.pointed.includes(item.char) ? 'pointed' : KANJI_SEEN.passing.includes(item.char) ? 'passing' : '';
+  return KANJI_SEEN.words.includes(item.char) ? 'passing' : '';
+}
+// Seen kanji not in Kanji Cards (yet): first in line if the list grows or changes.
+const KANJI_SEEN_NOT_CARDS = [...new Set(KANJI_SEEN.pointed.concat(KANJI_SEEN.passing))].filter(k => !KANJI_CARD_BY_CHAR[k]);
 (function buildKanji500Sets() {
   const byD = KANJI_500.slice().sort((a, b) => a.d - b.d);
   const addSet = (view, key, label, cards) => {
@@ -934,6 +953,20 @@ const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By
     const cards = byD.filter(c => (c.j || '') === lv);
     if (cards.length) addSet('jlpt', 'k500-j' + (lv || 'none'), lv || 'No JLPT level', cards);
   });
+  // Seen in materials: Cards' cards, then the whole-word cards from the topic sets.
+  const pointed = KANJI_SEEN.pointed.map(k => KANJI_CARD_BY_CHAR[k]).filter(Boolean).map(kanjiCardItem);
+  const passing = KANJI_SEEN.passing.filter(k => !KANJI_SEEN.pointed.includes(k)).map(k => KANJI_CARD_BY_CHAR[k]).filter(Boolean).map(kanjiCardItem);
+  const words = [];
+  KANJI_KEYS.forEach(k => DATA[k].forEach(q => { if (!q.cardN && KANJI_SEEN.words.includes(q.char) && !words.some(w => w.char === q.char)) words.push(Object.assign({ groupKey: k }, q)); }));
+  const addSeen = (key, label, pool) => {
+    if (!pool.length) return;
+    KANJI_SECTIONS[key] = { label: 'Seen · ' + label, dataKey: 'kanji-500', pool, dyn: true };
+    kanjiSelectedTiles[key] = new Set();
+    KANJI_VIEWS.seen.sets.push({ key, label, count: pool.length });
+  };
+  addSeen('seen-all', 'All seen', pointed.concat(passing, words));
+  addSeen('seen-pointed', 'Pointed out', pointed);
+  addSeen('seen-passing', 'Seen in passing', passing.concat(words));
 })();
 
 // One way through the 500: the headline bar, then a pill per set.
@@ -941,8 +974,14 @@ let activeKanjiView = 'order';
 function showKanjiView(view) {
   activeKanjiView = view || activeKanjiView;
   const v = KANJI_VIEWS[activeKanjiView];
+  const seenView = activeKanjiView === 'seen';
   document.getElementById('kanji-view-title').textContent = 'Kanji — ' + v.label;
-  setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(KANJI_500.map(kanjiCardItem)));
+  document.getElementById('kanji-view-sub').textContent = seenView
+    ? 'Kanji the class has shown you: pointed out as kanji (a dot on the tile), or seen in passing on the handouts and homework (a ring). Same scores as Kanji Cards.'
+    : 'The same list and scores as Kanji Cards. Tap a set to choose kanji to drill.';
+  setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(seenView ? kanjiSeenItems() : KANJI_500.map(kanjiCardItem)));
+  const note = document.getElementById('kanji-view-note');
+  note.innerHTML = seenView && KANJI_SEEN_NOT_CARDS.length ? 'Seen but not in Kanji Cards yet: <span class="seen-not">' + markSmallKana(KANJI_SEEN_NOT_CARDS.join('')) + '</span><br>First in line if the list grows or changes.' : '';
   const list = document.getElementById('kanji-view-list');
   list.innerHTML = '';
   v.sets.forEach(s => {
@@ -956,3 +995,4 @@ function showKanjiView(view) {
   showScreen('kanji-view');
 }
 function setJpText(el, text) { el.innerHTML = markSmallKana(text); }
+const kanjiSeenItems = () => (KANJI_SECTIONS['seen-all'] || { pool: [] }).pool;

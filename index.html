@@ -781,6 +781,28 @@
     .sb-stats { display: none; }
     #screen-sentence-builder .sb-head .settings-title { display: none; }
   }
+  /* The printed look (2026-11-10): on while printing (dsFitForPrint adds it
+     at beforeprint), so each sheet can be measured in it and shrunk to fit. */
+  #desk-sheets.ds-printlook { display: block; min-width: 0; width: auto; margin: 0; }
+  #desk-sheets.ds-printlook .ds-page { border: none; border-radius: 0; padding: 0; break-after: page; page-break-after: always; }
+  #desk-sheets.ds-printlook .ds-page:last-child { break-after: auto; page-break-after: auto; }
+  #desk-sheets.ds-printlook .ds-card { padding: 1px 3px; }
+  #desk-sheets.ds-printlook .ds-col { gap: 3px; }
+  /* Bigger print text (2026-10-13, Andrew: "quite small") - long words step down so columns keep their width. */
+  #desk-sheets.ds-printlook .ds-jp { font-size: 18px; line-height: 1.12; }
+  #desk-sheets.ds-printlook .ds-jp.long { font-size: 15px; }
+  #desk-sheets.ds-printlook .ds-jp.xlong { font-size: 12.5px; }
+  #desk-sheets.ds-printlook .ds-ro { font-size: 10.5px; }
+  #desk-sheets.ds-printlook .ds-en { font-size: 11px; font-weight: 600; }
+  #desk-sheets.ds-printlook .ds-group-head .ds-jp { font-size: 14px; }
+  #desk-sheets.ds-printlook .ds-group-head { padding: 0 6px; margin-top: 0; line-height: 1.25; }
+  #desk-sheets.ds-printlook .ds-verb .ds-jp { font-size: 15px; }
+  #desk-sheets.ds-printlook .ds-verb .ds-jp.xlong { font-size: 12px; }
+  #desk-sheets.ds-printlook .ds-end-jp { font-size: 14px; }
+  #desk-sheets.ds-printlook .ds-end-en { font-size: 10.5px; }
+  #desk-sheets.ds-printlook .ds-role { font-size: 12.5px; }
+  #desk-sheets.ds-printlook .ds-note { font-size: 10.5px; }
+  #desk-sheets.ds-printlook .ds-particle { font-size: 17px; }
   @media print {
     @page { size: A4 landscape; margin: 7mm; }
     html, body { background: #fff !important; color: #000 !important; }
@@ -788,33 +810,20 @@
     main { padding: 0 !important; display: block !important; }
     #screen-desk-sheets { display: block !important; max-width: none !important; }
     .ds-scroll { overflow: visible !important; }
-    #desk-sheets { display: block !important; min-width: 0 !important; width: auto !important; margin: 0 !important; }
-    .ds-page { width: auto !important; height: 194mm; border: none !important; border-radius: 0; padding: 0 !important; background: #fff !important; color: #000 !important; break-after: page; page-break-after: always; overflow: hidden; }
+    #desk-sheets { display: block !important; min-width: 0 !important; margin: 0 !important; }
+    /* Width, height and zoom: dsFitForPrint's, for each sheet. */
+    .ds-page { height: 194mm; border: none !important; border-radius: 0; padding: 0 !important; background: #fff !important; color: #000 !important; break-after: page; page-break-after: always; overflow: hidden; }
     .ds-page:last-child { break-after: auto; page-break-after: auto; }
     .ds-page, .ds-page * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .ds-head { background: #e4e4e4 !important; border-left-color: #555 !important; }
     .ds-num, .ds-particle { color: #000 !important; border-color: #333 !important; }
-    .ds-card { background: #fff !important; border-color: #aaa !important; border-left-color: #666 !important; padding: 1px 3px !important; }
-    .ds-col { gap: 3px !important; }
+    .ds-card { background: #fff !important; border-color: #aaa !important; border-left-color: #666 !important; }
     .ds-verb, .ds-group-head { background: #f0f0f0 !important; border-left-color: #666 !important; }
     .ds-ro, .ds-note, .ds-example, .ds-page-title span { color: #444 !important; }
     .ds-en, .ds-jp, .ds-role, .ds-page-title { color: #000 !important; }
-    /* Bigger print text (2026-10-13, Andrew: "quite small") - long words step down so columns keep their width. */
-    .ds-jp { font-size: 18px !important; line-height: 1.12 !important; }
-    .ds-jp.long { font-size: 15px !important; }
-    .ds-jp.xlong { font-size: 12.5px !important; }
-    .ds-ro { font-size: 10.5px !important; }
-    .ds-en { font-size: 11px !important; font-weight: 600; }
-    .ds-group-head .ds-jp { font-size: 14px !important; }
-    .ds-group-head { padding: 0 6px !important; margin-top: 0 !important; line-height: 1.25; }
-    .ds-verb .ds-jp { font-size: 15px !important; }
-    .ds-verb .ds-jp.xlong { font-size: 12px !important; }
     .ds-ends { background: #fff !important; border-color: #aaa !important; border-left-color: #666 !important; }
-    .ds-end-jp { font-size: 14px !important; color: #000 !important; }
-    .ds-end-en { font-size: 10.5px !important; color: #333 !important; }
-    .ds-role { font-size: 12.5px !important; }
-    .ds-note { font-size: 10.5px !important; }
-    .ds-particle { font-size: 17px !important; }
+    .ds-end-jp { color: #000 !important; }
+    .ds-end-en { color: #333 !important; }
   }
   #match-grammar-view { flex-direction: column; gap: 0.5rem; }
   .grammar-page-head { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-top: 0.9rem; }
@@ -833,6 +842,15 @@
   .kanji-view-pill { padding: 8px 14px; border-radius: 99px; border: 1.5px solid var(--accent); background: transparent; color: var(--text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
   .kanji-view-pill:active { background: var(--accent-dim); }
   .tier-off-note { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.4; margin: 0 0.5rem; }
+  /* The Kanji page's Topics heading, and seen kanji's marks (11 Nov 2026):
+     a dot = pointed out as kanji, a ring = seen in passing - as Kanji Cards. */
+  .kanji-section-head { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 0.2rem 0.3rem -0.2rem; }
+  .kana-ref-card.seen-pointed, .kana-ref-card.seen-passing { position: relative; }
+  .kana-ref-card.seen-pointed::after, .kana-ref-card.seen-passing::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; }
+  .kana-ref-card.seen-pointed::after { background: var(--accent); }
+  .kana-ref-card.seen-passing::after { border: 1.5px solid var(--accent); width: 5px; height: 5px; }
+  #kanji-view-note { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; margin-top: 1rem; }
+  #kanji-view-note .seen-not { font-size: 18px; letter-spacing: 3px; color: var(--text); }
   /* Links on the Grammar page (2026-10-15): plain text colour rather than the
      gold/bold of other ref cards, so the gold headings stand out. The topic
      (before " — ") is bold; the explanation after it is lighter and grey. */
@@ -1756,7 +1774,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261109.004</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261111.002</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -1816,21 +1834,22 @@
   <div class="screen" id="screen-kanji-index">
     <div class="settings-title">Kanji</div>
     <div class="settings-sub">Tap a set to choose kanji to drill.</div>
-    <div class="group-card cat-tile" id="kanji-all-card" onclick="startRandomKanji()" style="cursor:pointer;">
+    <!-- KANJI PAGE (11 Nov 2026, from Andrew's mock-up): Seen in materials,
+         then Kanji cards, then the Topics with their own Random 20. -->
+    <div class="group-card cat-tile" id="kanji-seen-card" onclick="showKanjiView('seen')" style="cursor:pointer;">
       <div class="cat-tile-top cat-tile-top-stack">
-        <div class="group-name">Random 20 from all</div>
-        <div class="random-choice-desc">20 kanji from every set, weakest more often</div>
+        <div class="group-name">Seen in materials</div>
+        <div class="random-choice-desc" id="kanji-seen-desc">Kanji from the class handouts and homework</div>
       </div>
-      <div class="cat-bar" id="kanji-index-swatch-all"></div>
+      <div class="cat-bar" id="kanji-index-swatch-seen"></div>
     </div>
-    <div class="tier-off-note">You can turn this page off in Settings (Show Kanji content).</div>
-    <div class="section-divider"></div>
-    <!-- THE 500 KANJI (2026-11-09): Kanji Cards' list, three ways through it
-         (ja/kanji.js). Scores shared with Kanji Cards. -->
+    <!-- KANJI CARDS (2026-11-09; "The 500 kanji" until 11 Nov - the list may
+         grow): Kanji Cards' list, three ways through it (ja/kanji.js). Scores
+         shared with Kanji Cards. -->
     <div class="group-card cat-tile kanji-500-card">
       <div class="cat-tile-top cat-tile-top-stack">
-        <div class="group-name">The 500 kanji</div>
-        <div class="random-choice-desc">The same list and scores as Kanji Cards</div>
+        <div class="group-name">Kanji cards</div>
+        <div class="random-choice-desc" id="kanji-cards-desc">Kanji Cards' list and scores</div>
       </div>
       <div class="cat-bar" id="kanji-index-swatch-500"></div>
       <div class="kanji-500-views">
@@ -1840,6 +1859,14 @@
       </div>
     </div>
     <div class="section-divider"></div>
+    <div class="kanji-section-head">Topics</div>
+    <div class="group-card cat-tile" id="kanji-all-card" onclick="startRandomKanji()" style="cursor:pointer;">
+      <div class="cat-tile-top cat-tile-top-stack">
+        <div class="group-name">Random 20 from these topics</div>
+        <div class="random-choice-desc">20 from the topic sets below, weakest more often</div>
+      </div>
+      <div class="cat-bar" id="kanji-index-swatch-all"></div>
+    </div>
     <div class="group-card cat-tile" data-kanji-section="numbers-time" onclick="showKanjiSectionSelection('numbers-time')" style="cursor:pointer;">
       <div class="cat-tile-top"><div class="group-name">Numbers</div></div>
       <div class="cat-bar" id="kanji-index-swatch-numbers-time"></div>
@@ -1872,14 +1899,16 @@
       <div class="cat-tile-top"><div class="group-name">Verbs</div></div>
       <div class="cat-bar" id="kanji-index-swatch-verbs"></div>
     </div>
+    <div class="tier-off-note">You can turn this page off in Settings (Show Kanji content).</div>
   </div>
 
   <!-- One way through the 500 kanji: its sets, each with its score bar. -->
   <div class="screen" id="screen-kanji-view">
     <div class="settings-title" id="kanji-view-title">Kanji</div>
-    <div class="settings-sub">The same list and scores as Kanji Cards. Tap a set to choose kanji to drill.</div>
+    <div class="settings-sub" id="kanji-view-sub">The same list and scores as Kanji Cards. Tap a set to choose kanji to drill.</div>
     <div class="cat-bar" id="kanji-view-swatch"></div>
     <div id="kanji-view-list"></div>
+    <div id="kanji-view-note"></div>
   </div>
 
   <div class="screen" id="screen-kanji-selection">
@@ -2526,31 +2555,32 @@
 </main>
 
 <!-- The course vocabulary (2026-10-08) - must load before the app script below. -->
-<script src="ja/vocab.js"></script>
-<script src="ja/grammar.js"></script>
-<script src="ja/kana-strokes.js"></script>
+<script src="ja/vocab.js?v=261111.002"></script>
+<script src="ja/grammar.js?v=261111.002"></script>
+<script src="ja/kana-strokes.js?v=261111.002"></script>
 <script type="module">
-import ja from './lang/ja.js';
+import ja from './lang/ja.js?v=261111.002';
 window.LANG = ja;
 </script>
-<script defer src="ui/en.js"></script>
-<script defer src="core/text.js"></script>
-<script defer src="ja/app.js"></script>
-<script defer src="core/core.js"></script>
-<script defer src="core/picker.js"></script>
-<script defer src="core/questions.js"></script>
-<script defer src="ja/numbers.js"></script>
-<script defer src="ja/forms.js"></script>
-<script defer src="ja/notes.js"></script>
-<script defer src="ja/reading.js"></script>
-<script defer src="ja/sentences.js"></script>
-<script defer src="ja/builder.js"></script>
-<script defer src="ja/daily.js"></script>
-<script defer src="ja/guides.js"></script>
-<script defer src="ja/kana.js"></script>
-<script defer src="ja/kanji-500.js"></script>
-<script defer src="ja/kanji.js"></script>
-<script defer src="ja/legacy.js"></script>
-<script defer src="ja/questions.js"></script>
+<script defer src="ui/en.js?v=261111.002"></script>
+<script defer src="core/text.js?v=261111.002"></script>
+<script defer src="ja/app.js?v=261111.002"></script>
+<script defer src="core/core.js?v=261111.002"></script>
+<script defer src="core/picker.js?v=261111.002"></script>
+<script defer src="core/questions.js?v=261111.002"></script>
+<script defer src="ja/numbers.js?v=261111.002"></script>
+<script defer src="ja/forms.js?v=261111.002"></script>
+<script defer src="ja/notes.js?v=261111.002"></script>
+<script defer src="ja/reading.js?v=261111.002"></script>
+<script defer src="ja/sentences.js?v=261111.002"></script>
+<script defer src="core/builder.js?v=261111.002"></script>
+<script defer src="ja/builder.js?v=261111.002"></script>
+<script defer src="ja/daily.js?v=261111.002"></script>
+<script defer src="ja/guides.js?v=261111.002"></script>
+<script defer src="ja/kana.js?v=261111.002"></script>
+<script defer src="ja/kanji-500.js?v=261111.002"></script>
+<script defer src="ja/kanji.js?v=261111.002"></script>
+<script defer src="ja/legacy.js?v=261111.002"></script>
+<script defer src="ja/questions.js?v=261111.002"></script>
 </body>
 </html>

@@ -55,8 +55,8 @@ function rpPassage() {
       const isI = beingIsI(a), pa2 = isI ? beingIForm(a, sgW(a).ro, 5) : [a, sgW(a).ro];
       const deg = sgChance(0.4) && sgW('とても');
       const tEn = beingTopicEn(thing), plural = /^the \S.*s$/i.test(tEn) && !/(ss|us)$/i.test(tEn);
-      lines.push({ jp: `${thing}は ${deg ? 'とても ' : ''}${pa2[0]}${isI ? 'です' : 'でした'}。`, ro: sgCap(`${sgW(thing).ro} wa ${deg ? 'totemo ' : ''}${pa2[1]} ${isI ? 'desu' : 'deshita'}.`), en: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${deg ? 'very ' : ''}${beingAdjEn(a)}.`) });
-      facts.push({ t: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${beingAdjEn(a)}.`), f: sgCap(`${tEn} ${plural ? "weren't" : "wasn't"} ${beingAdjEn(a)}.`) });
+      lines.push({ jp: `${thing}は ${deg ? 'とても ' : ''}${pa2[0]}${isI ? 'です' : 'でした'}。`, ro: sgCap(`${sgW(thing).ro} wa ${deg ? 'totemo ' : ''}${pa2[1]} ${isI ? 'desu' : 'deshita'}.`), en: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${deg ? 'very ' : ''}${beingThingAdjEn(a, thing)}.`) });
+      facts.push({ t: sgCap(`${tEn} ${plural ? 'were' : 'was'} ${beingThingAdjEn(a, thing)}.`), f: sgCap(`${tEn} ${plural ? "weren't" : "wasn't"} ${beingThingAdjEn(a, thing)}.`) });
     }
   }
   // 4. then something at home, or home
@@ -275,9 +275,43 @@ function buildDeskSheets() {
       else body = c.items.map(x => dsCardHtml(x)).join('');
       return `<div class="ds-col${c.wide ? ' wide' : ''}" style="--slot:var(--slot-${c.slot || i + 1})">${head}${note}${body}</div>`;
     }).join('');
-    return `<div class="ds-page"><div class="ds-page-title">${p.title}<span>${p.sub}</span><span class="ds-example">e.g. ${p.ex}</span></div><div class="ds-cols">${colHtml}</div></div>`;
+    // As many column spaces as the page's columns take (a wide one takes two):
+    // Giving has two wide columns, so on 8 its verbs wrapped underneath.
+    const tracks = cols.reduce((n, c) => n + (c.wide ? 2 : 1), 0);
+    return `<div class="ds-page"><div class="ds-page-title">${p.title}<span>${p.sub}</span><span class="ds-example">e.g. ${p.ex}</span></div><div class="ds-cols" style="grid-template-columns:repeat(${tracks},1fr)">${colHtml}</div></div>`;
   }).join('');
 }
+
+// Printing (2026-11-10, Andrew: columns ran off the bottom of the page):
+// just before printing, the sheets take their printed look (ds-printlook),
+// each is measured, and any too tall for an A4 landscape page is shrunk to
+// fit, widening as it shrinks so it still fills the page across - smaller
+// but all there. Put back after printing.
+const DS_PRINT_MM = { w: 283, h: 194 }; // A4 landscape less @page's 7mm margins
+function dsFitForPrint() {
+  const el = document.getElementById('desk-sheets');
+  if (!el || !el.offsetParent) return; // not on the desk sheets
+  el.classList.add('ds-printlook');
+  const mm = 96 / 25.4, W = DS_PRINT_MM.w * mm, H = (DS_PRINT_MM.h - 2) * mm;
+  el.querySelectorAll('.ds-page').forEach(pg => {
+    pg.style.zoom = '';
+    pg.style.setProperty('height', 'auto', 'important');
+    const tall = z => { pg.style.setProperty('width', W / z + 'px', 'important'); return pg.scrollHeight * z > H; };
+    let z = 1;
+    for (let k = 0; k < 8 && tall(z); k++) z = Math.min(z * 0.99, H / pg.scrollHeight);
+    while (tall(z) && z > 0.3) z *= 0.97;
+    pg.style.setProperty('height', DS_PRINT_MM.h * mm / z + 'px', 'important');
+    pg.style.zoom = z;
+  });
+}
+function dsUnfitAfterPrint() {
+  const el = document.getElementById('desk-sheets');
+  if (!el) return;
+  el.classList.remove('ds-printlook');
+  el.querySelectorAll('.ds-page').forEach(pg => { pg.style.zoom = ''; pg.style.removeProperty('width'); pg.style.removeProperty('height'); });
+}
+window.addEventListener('beforeprint', dsFitForPrint);
+window.addEventListener('afterprint', dsUnfitAfterPrint);
 
 function showDeskSheets() {
   buildDeskSheets();
@@ -293,14 +327,15 @@ function dsBeingColumns(who) {
   const degree = { role: 'How much', particle: '–', note: 'あまり → negative', items: Object.keys(BEING_DEGREE).filter(d => sgW(d)).map(d => ({ jp: d, ro: BEING_DEGREE[d].ro, en: d === 'とても' ? 'very' : 'not very (+ negative)' })) };
   const allAdjs = [...new Set(BEING_THINGS.flatMap(g => g.adjs).concat(BEING_PEOPLE_ADJS, BEING_ADJ_NOUN_PEOPLE, BEING_ADJ_NOUN_PLACES))].filter(a => sgW(a));
   const adjCard = a => ({ jp: a, ro: sgW(a).ro, en: beingAdjEn(a) });
-  const describe = { role: 'Describing (+ noun)', particle: 'な', note: 'before a noun: な-words add な (しずかな まち), い-words don\'t (おもしろい ひと)', items: dsPick(allAdjs.map(adjCard), ['しんせつ', 'にぎやか', 'おもしろい', 'ゆうめい'], 9) };
+  const colourNouns = BEING_COLOUR_NOUNS.filter(c => sgW(c)).map(c => ({ jp: c, ro: sgW(c).ro, en: beingAdjEn(c) }));
+  const describe = { role: 'Describing (+ noun)', particle: 'な / の', note: 'before a noun: な-words add な (しずかな まち), colour nouns add の (みどりの シャツ), い-words add nothing (おもしろい ひと)', items: dsPick(allAdjs.map(adjCard), ['しんせつ', 'にぎやか', 'おもしろい', 'ゆうめい'], 8).concat(dsPick(colourNouns, ['みどり'], 1)) };
   const jobs = dsPick(beingJobs().map(j => ({ jp: j.jp, ro: j.romaji, en: beingEnWord(j) })), ['がくせい', 'いしゃ', 'かいしゃいん'], 8);
   const nations = dsPick(beingNations(), ['イギリスじん', 'にほんじん'], 4);
   const adjs = dsPick(allAdjs.map(adjCard), ['おもしろい', 'きれい', 'しずか', 'むずかしい'], 10);
-  const nouns = ['ひと', 'まち'].filter(n => sgW(n)).map(n => dsItem(n));
+  const nouns = ['ひと', 'まち', 'やま', 'かさ', 'シャツ'].filter(n => sgW(n)).map(n => dsItem(n));
   const what = { role: 'What they are / what it\'s like', particle: '–', note: 'then です — い-words change their own ending: おもしろくないです', wide: true,
     groups: [{ verb: { jp: 'しごと', ro: 'shigoto', en: 'jobs' }, items: jobs }, { verb: { jp: '〜じん', ro: '~jin', en: 'nationality' }, items: nations },
-      { verb: { jp: 'どんな？', ro: 'donna', en: 'describing' }, items: adjs }, { verb: { jp: 'ひと・まち', ro: 'hito, machi', en: 'person, town' }, items: nouns }].filter(g => g.items.length) };
+      { verb: { jp: 'どんな？', ro: 'donna', en: 'describing' }, items: adjs }, { verb: { jp: 'ひと・まち…', ro: 'hito, machi…', en: 'a noun to describe' }, items: nouns }].filter(g => g.items.length) };
   const verb = { role: 'です', particle: '。/か', note: 'です and its endings · か for a question', lead: [{ jp: 'です', ro: 'desu', en: 'is / am / are' }],
     ends: [['です', 'is / am / are'], ['じゃありません', "isn't"], ['でした', 'was'], ['じゃありませんでした', "wasn't"], ['〜くないです', "isn't (い-words)"], ['〜かったです', 'was (い-words)'], ['〜くなかったです', "wasn't (い-words)"]] };
   const cols = [whoCol, when, degree, describe, what, verb];
