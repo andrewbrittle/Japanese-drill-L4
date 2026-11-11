@@ -46,6 +46,13 @@ function sbNewTargetAnswer() {
     if (c && (c.kind === 'adj' || c.kind === 'adjnoun') && c.subj.thing && !c.time) w = c;
   }
   if (!w) return null;
+  w.tense = 'hab'; // the question is ですか, so the answer is now (it could come out でした)
+  return sbBeingAnswerTarget(w);
+}
+
+// A Being Answer it target from its words (w as beingPick gives it): also
+// how the answer is rebuilt from the cards you pick (sbBeingAdopt).
+function sbBeingAnswerTarget(w) {
   const st = ['off', 'off', w.degree ? 'on' : 'off', 'off', w.adj ? 'on' : 'off', 'on', 'stmt'];
   const ex = beingBuild(w, st);
   ex.enM = beingBuild(w, ['on'].concat(st.slice(1))).enM; // English names the topic ("London isn't…", not "I'm not…")
@@ -60,7 +67,49 @@ function sbNewTargetAnswer() {
   if (w.adj) { const it = l3TaughtItem(w.adj.jp); slots[4] = { word: w.adj.jp, ro: w.adj.ro, en: w.adj.en, key: it ? it.jp + '|' + it.en : null }; }
   { const it = l3TaughtItem(w.comp.jp); slots[5] = { word: w.comp.jp, ro: w.comp.ro, en: w.comp.en, key: it ? it.jp + '|' + it.en : null }; }
   slots[6] = { word: 'です', ro: 'desu', en: 'is / am / are', key: null, end: ex.endIdx, q: false };
-  return { slots, en: l3cEnPlain(ex.enM), jp: ex.jp, romaji: ex.romaji, meImplied: false, optional0: tj.replace(/は$/, ''), say: ex.parts.map(p => p.jp).join(''), being: w.kind, question };
+  return { slots, en: l3cEnPlain(ex.enM), jp: ex.jp, romaji: ex.romaji, meImplied: false, optional0: tj.replace(/は$/, ''), say: ex.parts.map(p => p.jp).join(''), being: w.kind, question, beingW: w };
+}
+
+// Being's Answer it is yours to answer (Andrew, 11 Nov): "How is London?" or
+// "What kind of town is it?" has many right answers, and wanting the one
+// hidden sentence made it chance, not skill. So before marking, the cards
+// picked are read as an answer: any describing word that suits the thing
+// (BEING_THINGS, as the sentences choose them), とても / あまり or neither,
+// and a positive or negative ending - if they hang together (あまり wants
+// the negative, とても the positive, no "very" with a colour, an い-word's
+// own endings), the answer becomes yours and is all right. A describing
+// word that doesn't suit the thing is marked against the answer as before.
+function sbBeingAnswerAdjs(w) {
+  const key = w.topicWord === 'これ' ? w.comp.jp : w.topicWord;
+  if (w.adj && w.comp.jp === 'まち') return BEING_ADJ_NOUN_PLACES.filter(a => sgW(a) && beingAdjFits(key, a));
+  const g = BEING_THINGS.find(x => x.objs.includes(key));
+  if (!g) return [];
+  return g.adjs.concat(w.adj && g.colours ? BEING_COLOUR_NOUNS : []).filter(a => sgW(a) && beingAdjFits(key, a));
+}
+const SB_COLOURS = ['あかい', 'あおい', 'しろい', 'くろい', 'きいろい', 'ちゃいろい'].concat(BEING_COLOUR_NOUNS);
+
+function sbBeingAdopt(S) {
+  const w = sbTarget && sbTarget.beingW;
+  if (!w || !sbAnswer || sbReverse || sbQ) return;
+  const n = x => x ? sbNorm(x.jp) : null;
+  const a = w.adj ? n(S[4]) : n(S[5]), deg = n(S[2]);
+  if (!a || !sbBeingAnswerAdjs(w).includes(a)) return;
+  if (w.adj && n(S[5]) !== sbNorm(w.comp.jp)) return;
+  // The describing word fits, so it's yours. What goes with it follows it:
+  // とても / あまり if they can go with it (not with a colour), and the
+  // ending that suits - so if the rest doesn't hang together, what's marked
+  // wrong is the part that's wrong (とても with a negative: the ending; a
+  // "very" colour: the とても), never the describing word you chose.
+  const d = deg && BEING_DEGREE[deg] && !SB_COLOURS.includes(a) ? deg : null;
+  const isI = !w.adj && beingIsI(a);
+  const yours = sbEnd === beingEndIdx(isI, false, true) ? true : sbEnd === beingEndIdx(isI, false, false) ? false : null;
+  const neg = d ? !!BEING_DEGREE[d].neg : yours !== null ? yours : w.neg;
+  const key = w.topicWord === 'これ' ? w.comp.jp : w.topicWord;
+  const g = BEING_THINGS.find(x => x.objs.includes(key));
+  const word = { jp: a, ro: sgW(a).ro, en: w.comp.jp === 'まち' ? beingAdjEn(a) : beingThingAdjEn(a, (g && g.noun) || key) };
+  const nw = Object.assign({}, w, { degree: d, neg, tense: 'hab' }, w.adj ? { adj: word } : { comp: word });
+  const t = sbBeingAnswerTarget(nw);
+  if (t) Object.assign(sbTarget, t, { question: sbTarget.question });
 }
 
 // ==== SENTENCE BUILDER (2026-10-22, Andrew) ====
@@ -535,6 +584,7 @@ setBuilderLanguage({
   },
   buildColumns: sbBuildColumns,
   targetSel: t => t.slots,
+  beforeCheck: sel => sbBeingAdopt(sel),
   same: (a, b) => sbNorm(a.jp) === sbNorm(b.jp),
   chunks: () => sbBuilt(),
   // Picking a word says it with its particle, or the verb with its ending.
