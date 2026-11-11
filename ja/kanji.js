@@ -869,21 +869,48 @@ const KANJI_DAY_MOVES = {
   '日|Sunday': ['日曜日|Sunday'],
 };
 
-// A card as a drill item. The romaji under a choice: the app's own reading
-// where it had one; else the reading of the card's example word that is the
-// kanji on its own (林 hayashi); else its first on-reading (機 ki - its first
-// kun-reading, はた "loom", is one nobody needs).
+// A card as a drill item. Its reading - the romaji under a choice AND what
+// the voice says, always the same one (11 Nov 2026: the voice was given the
+// bare kanji and guessed - 赤 said あか under "seki" - Andrew: "the vocal
+// representation isn't one of the options"):
+//   1. the app's own reading, where it had one;
+//   2. else the kanji as a word of its own, from the card's examples: on its
+//      own (林 はやし) or with just a kana ending (赤い あかい, 見る みる,
+//      暑い あつい) - the word the class meets;
+//   3. else its first on-reading (機 き - its first kun-reading, はた "loom",
+//      is one nobody needs).
 function kanjiCardItem(card) {
   return { char: card.k, answer: card.m, disp: 'kanji', cardN: card.n, groupKey: 'kanji-500' };
 }
-function kanjiCardRomaji(card) {
-  const r = KANJI_ROMAJI[card.k + '|' + card.m];
-  if (r) return r;
-  const alone = (card.w || []).find(x => x.kanji === card.k);
-  if (alone) return alone.romaji;
+const kanjiKataToHira = t => t.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+function kanjiCardReading(card) {
+  const key = card.k + '|' + card.m, r = KANJI_ROMAJI[key];
+  if (r) return { romaji: r, kana: KANJI_READINGS[key] || '' };
+  const ws = card.w || [];
+  const word = ws.find(x => x.kanji === card.k)
+    || ws.find(x => x.kanji && x.kanji.startsWith(card.k) && /^[\u3041-\u3096]+$/.test(x.kanji.slice(card.k.length)));
+  if (word) return { romaji: word.romaji, kana: word.jp };
   const first = (card.on && card.on[0]) || (card.kun && card.kun[0]);
-  return first ? first[1].replace(/[()]/g, '') : '';
+  return first ? { romaji: first[1].replace(/[()]/g, ''), kana: kanjiKataToHira(first[0].replace(/[()]/g, '')) } : { romaji: '', kana: '' };
 }
+const kanjiCardRomaji = card => kanjiCardReading(card).romaji;
+// The colours, set by hand (11 Nov 2026): the first kanji the course shows
+// as kanji (the L4 Lesson 1 colour sheet), so they read as taught - each
+// kanji on its own is the colour's noun (赤 あか, as in 赤い / 赤ちゃん; 黄 き,
+// as in 黄色), not the rule's 赤い akai or 黄 kō.
+[['赤', 'aka', 'あか'], ['青', 'ao', 'あお'], ['白', 'shiro', 'しろ'], ['黒', 'kuro', 'くろ'],
+ ['黄', 'ki', 'き'], ['茶', 'cha', 'ちゃ'], ['緑', 'midori', 'みどり']].forEach(([k, ro, kana]) => {
+  const card = KANJI_CARD_BY_CHAR[k];
+  if (!card) return;
+  KANJI_ROMAJI[k + '|' + card.m] = ro; KANJI_READINGS[k + '|' + card.m] = kana;
+});
+KANJI_ROMAJI['茶色|brown'] = 'chairo'; KANJI_READINGS['茶色|brown'] = 'ちゃいろ'; // the one colour word, which had neither
+// What the voice says for every card is its reading's kana (speechText reads
+// KANJI_READINGS), never the bare kanji.
+KANJI_500.forEach(card => {
+  const key = card.k + '|' + card.m, kana = kanjiCardReading(card).kana;
+  if (!KANJI_READINGS[key] && kana) KANJI_READINGS[key] = kana;
+});
 // The example after an answer: the card's first example word that isn't
 // the kanji on its own, with its reading.
 function kanjiCardExample(card) {
