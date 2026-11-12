@@ -1596,7 +1596,9 @@ function drillMissed() {
   // Questions the app builds again itself (APP.rebuildMissed - Japanese's
   // kana and kanji), then the ones kept as they were asked.
   const rebuilt = APP.rebuildMissed ? APP.rebuildMissed(missedSet) : [];
-  startDrill(shuffle([...rebuilt, ...missedItems.filter(q => missedSet.has(q.char + '|' + q.answer))]));
+  const again = [...rebuilt, ...missedItems.filter(q => missedSet.has(q.char + '|' + q.answer))];
+  if (!again.length) return; // never an empty drill
+  startDrill(shuffle(again));
 }
 
 const SPEECH_SUPPORTED = ('speechSynthesis' in window);

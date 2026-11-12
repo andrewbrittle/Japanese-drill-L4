@@ -443,6 +443,7 @@ function buildKanjiOptionsFromPool(item, pool) {
 }
 
 function drillKanjiSelection() {
+  kanjiRandomMode[activeKanjiSection] = false; // as the word lists: the hidden pick shows once you drill
   const section = KANJI_SECTIONS[activeKanjiSection];
   const selectedIdx = kanjiSelectedTiles[activeKanjiSection];
   if (selectedIdx.size === 0) return;
