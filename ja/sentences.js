@@ -830,7 +830,10 @@ function sgButSentence() {
   if (!g) return null;
   const o = sgPick(g.objs);
   const pairs = [];
-  g.good.forEach(x => g.bad.forEach(y => { if (!SG_BUT_OPPOSITES.some(p => p.includes(x) && p.includes(y)) && beingAdjFits(o, x) && beingAdjFits(o, y)) pairs.push([x, y]); }));
+  // A "bad" word only with its bad meaning: たかい on a mountain is high, not
+  // expensive (12 Nov 2026: "Mount Fuji is expensive, but it is famous").
+  const badHere = y => !(BEING_THING_EN[y] || {})[o];
+  g.good.forEach(x => g.bad.forEach(y => { if (badHere(y) && !SG_BUT_OPPOSITES.some(p => p.includes(x) && p.includes(y)) && beingAdjFits(o, x) && beingAdjFits(o, y)) pairs.push([x, y]); }));
   if (!pairs.length) return null;
   let [a1, a2] = sgPick(pairs);
   if (sgChance(0.5)) [a1, a2] = [a2, a1];
@@ -840,7 +843,7 @@ function sgButSentence() {
   const seg = sgSeg(o, 'は', 'wa');
   const w1 = sgW(a1), w2 = sgW(a2);
   return [{ jp: `${seg.jp} ${w1.jp}ですが、 ${w2.jp}です。`, ro: sgCap(`${seg.ro} ${w1.ro} desu ga, ${w2.ro} desu.`),
-    en: sgCap(`${topicEn} ${be} ${beingAdjEn(a1)}, but ${pron} ${be} ${beingAdjEn(a2)}.`) }];
+    en: sgCap(`${topicEn} ${be} ${beingThingAdjEn(a1, o)}, but ${pron} ${be} ${beingThingAdjEn(a2, o)}.`) }];
 }
 
 function sgQA() {

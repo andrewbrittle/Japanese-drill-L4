@@ -1774,7 +1774,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261111.004</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261112.001</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -1915,11 +1915,21 @@
     <div class="settings-title" id="kanji-selection-title">Kanji</div>
     <div class="settings-sub">Tap a character to select it for drilling.</div>
 
-    <div class="group-card emphasis" id="kanji-select-all-card" onclick="toggleSelectAllKanji()" style="cursor:pointer;">
-      <div class="group-info">
-        <div class="group-name" id="kanji-select-all-label">Select all — Numbers</div>
+    <!-- Select all / Random 20 side by side, as on the word lists (12 Nov
+         2026, Andrew: big sets like Seen in materials were all-or-nothing). -->
+    <div class="tile-select-actions-row">
+      <div class="group-card emphasis" id="kanji-select-all-card" onclick="toggleSelectAllKanji()" style="cursor:pointer;">
+        <div class="group-info">
+          <div class="group-name" id="kanji-select-all-label">Select all</div>
+        </div>
+        <div style="font-size:20px; color:var(--text-muted);">→</div>
       </div>
-      <div style="font-size:20px; color:var(--text-muted);">→</div>
+      <div class="group-card" id="kanji-random-card" onclick="toggleRandomKanji()" style="cursor:pointer; display:none;">
+        <div class="group-info">
+          <div class="group-name" id="kanji-random-label">Random 20</div>
+        </div>
+        <div style="font-size:20px; color:var(--text-muted);">→</div>
+      </div>
     </div>
 
     <div id="kanji-grid-numbers-time"></div>
@@ -2555,32 +2565,32 @@
 </main>
 
 <!-- The course vocabulary (2026-10-08) - must load before the app script below. -->
-<script src="ja/vocab.js?v=261111.004"></script>
-<script src="ja/grammar.js?v=261111.004"></script>
-<script src="ja/kana-strokes.js?v=261111.004"></script>
+<script src="ja/vocab.js?v=261112.001"></script>
+<script src="ja/grammar.js?v=261112.001"></script>
+<script src="ja/kana-strokes.js?v=261112.001"></script>
 <script type="module">
-import ja from './lang/ja.js?v=261111.004';
+import ja from './lang/ja.js?v=261112.001';
 window.LANG = ja;
 </script>
-<script defer src="ui/en.js?v=261111.004"></script>
-<script defer src="core/text.js?v=261111.004"></script>
-<script defer src="ja/app.js?v=261111.004"></script>
-<script defer src="core/core.js?v=261111.004"></script>
-<script defer src="core/picker.js?v=261111.004"></script>
-<script defer src="core/questions.js?v=261111.004"></script>
-<script defer src="ja/numbers.js?v=261111.004"></script>
-<script defer src="ja/forms.js?v=261111.004"></script>
-<script defer src="ja/notes.js?v=261111.004"></script>
-<script defer src="ja/reading.js?v=261111.004"></script>
-<script defer src="ja/sentences.js?v=261111.004"></script>
-<script defer src="core/builder.js?v=261111.004"></script>
-<script defer src="ja/builder.js?v=261111.004"></script>
-<script defer src="ja/daily.js?v=261111.004"></script>
-<script defer src="ja/guides.js?v=261111.004"></script>
-<script defer src="ja/kana.js?v=261111.004"></script>
-<script defer src="ja/kanji-500.js?v=261111.004"></script>
-<script defer src="ja/kanji.js?v=261111.004"></script>
-<script defer src="ja/legacy.js?v=261111.004"></script>
-<script defer src="ja/questions.js?v=261111.004"></script>
+<script defer src="ui/en.js?v=261112.001"></script>
+<script defer src="core/text.js?v=261112.001"></script>
+<script defer src="ja/app.js?v=261112.001"></script>
+<script defer src="core/core.js?v=261112.001"></script>
+<script defer src="core/picker.js?v=261112.001"></script>
+<script defer src="core/questions.js?v=261112.001"></script>
+<script defer src="ja/numbers.js?v=261112.001"></script>
+<script defer src="ja/forms.js?v=261112.001"></script>
+<script defer src="ja/notes.js?v=261112.001"></script>
+<script defer src="ja/reading.js?v=261112.001"></script>
+<script defer src="ja/sentences.js?v=261112.001"></script>
+<script defer src="core/builder.js?v=261112.001"></script>
+<script defer src="ja/builder.js?v=261112.001"></script>
+<script defer src="ja/daily.js?v=261112.001"></script>
+<script defer src="ja/guides.js?v=261112.001"></script>
+<script defer src="ja/kana.js?v=261112.001"></script>
+<script defer src="ja/kanji-500.js?v=261112.001"></script>
+<script defer src="ja/kanji.js?v=261112.001"></script>
+<script defer src="ja/legacy.js?v=261112.001"></script>
+<script defer src="ja/questions.js?v=261112.001"></script>
 </body>
 </html>

@@ -332,7 +332,7 @@ function showKanjiSectionSelection(sectionKey) {
   const titleEl = document.getElementById('kanji-selection-title');
   if (titleEl) titleEl.textContent = 'Kanji — ' + KANJI_SECTIONS[activeKanjiSection].label;
   document.getElementById('kanji-selection-drill-btn').disabled = kanjiSelectedTiles[activeKanjiSection].size === 0;
-  updateSelectAllKanjiLabel();
+  syncKanjiTiles();
 }
 
 function showKanjiSelection() { showKanjiSectionSelection(activeKanjiSection); }
@@ -364,6 +364,7 @@ function buildKanjiTileGrid(sectionKey) {
 }
 
 function toggleKanjiTile(sectionKey, idx, tileEl) {
+  if (kanjiRandomMode[sectionKey]) return; // the random pick is kept out of sight
   const set = kanjiSelectedTiles[sectionKey];
   if (set.has(idx)) {
     set.delete(idx);
@@ -383,26 +384,45 @@ function switchKanjiSection(sectionKey) { showKanjiSectionSelection(sectionKey);
 function toggleSelectAllKanji() {
   const total = getKanjiSectionPool(activeKanjiSection).length;
   const set = kanjiSelectedTiles[activeKanjiSection];
-  const grid = document.getElementById('kanji-grid-' + activeKanjiSection);
-  const allSelected = set.size === total;
-  if (allSelected) {
-    set.clear();
-    if (grid) grid.querySelectorAll('.kana-ref-card').forEach(t => t.classList.remove('selected'));
-  } else {
-    for (let i = 0; i < total; i++) set.add(i);
-    if (grid) grid.querySelectorAll('.kana-ref-card').forEach(t => t.classList.add('selected'));
-  }
+  const allSelected = set.size === total && !kanjiRandomMode[activeKanjiSection];
+  kanjiRandomMode[activeKanjiSection] = false;
+  set.clear();
+  if (!allSelected) for (let i = 0; i < total; i++) set.add(i);
+  syncKanjiTiles();
+}
+
+// RANDOM 20 (12 Nov 2026, Andrew: "things like seen are potentially going to
+// end up huge"): the word lists' rule and behaviour - over 30 kanji, Random
+// 20; 21-30, Random 10; fewer, none. The pick is hidden as the word lists'
+// is: every tile shows as picked and can't be tapped, so you can't see which.
+const kanjiRandomMode = {};
+const kanjiRandomSize = key => getRandomPickSize(getKanjiSectionPool(key).length);
+function toggleRandomKanji() {
+  const key = activeKanjiSection, set = kanjiSelectedTiles[key];
+  set.clear();
+  kanjiRandomMode[key] = !kanjiRandomMode[key];
+  if (kanjiRandomMode[key]) shuffle([...Array(getKanjiSectionPool(key).length).keys()]).slice(0, kanjiRandomSize(key)).forEach(i => set.add(i));
+  syncKanjiTiles();
+}
+
+// The tiles, the buttons and Drill, from the selection (and random mode).
+function syncKanjiTiles() {
+  const key = activeKanjiSection, set = kanjiSelectedTiles[key], random = !!kanjiRandomMode[key];
+  const grid = document.getElementById('kanji-grid-' + key);
+  if (grid) grid.querySelectorAll('.kana-ref-card').forEach((t, i) => t.classList.toggle('selected', random || set.has(i)));
   document.getElementById('kanji-selection-drill-btn').disabled = set.size === 0;
   updateSelectAllKanjiLabel();
+  const n = kanjiRandomSize(key), card = document.getElementById('kanji-random-card');
+  card.style.display = n ? '' : 'none';
+  card.classList.toggle('selected', random);
+  document.getElementById('kanji-random-label').textContent = random ? tx('tiles.deselectAll') : tx('tiles.randomN', { n });
 }
 
 function updateSelectAllKanjiLabel() {
-  const section = KANJI_SECTIONS[activeKanjiSection];
   const total = getKanjiSectionPool(activeKanjiSection).length;
   const set = kanjiSelectedTiles[activeKanjiSection];
-  const allSelected = set.size === total;
-  document.getElementById('kanji-select-all-label').textContent =
-    (allSelected ? 'Deselect all — ' : 'Select all — ') + section.label;
+  const allSelected = set.size === total && !kanjiRandomMode[activeKanjiSection];
+  document.getElementById('kanji-select-all-label').textContent = tx(allSelected ? 'tiles.deselectAll' : 'tiles.selectAll');
 }
 
 // Builds options by drawing 3 other real kanji from the given pool, rather
@@ -1006,7 +1026,7 @@ function showKanjiView(view) {
   document.getElementById('kanji-view-sub').textContent = seenView
     ? 'Kanji the class has shown you: pointed out as kanji (a dot on the tile), or seen in passing on the handouts and homework (a ring). Same scores as Kanji Cards.'
     : 'The same list and scores as Kanji Cards. Tap a set to choose kanji to drill.';
-  setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(seenView ? kanjiSeenItems() : KANJI_500.map(kanjiCardItem)));
+  refreshKanjiViewBar();
   const note = document.getElementById('kanji-view-note');
   note.innerHTML = seenView && KANJI_SEEN_NOT_CARDS.length ? 'Seen but not in Kanji Cards yet: <span class="seen-not">' + markSmallKana(KANJI_SEEN_NOT_CARDS.join('')) + '</span><br>First in line if the list grows or changes.' : '';
   const list = document.getElementById('kanji-view-list');
@@ -1020,6 +1040,11 @@ function showKanjiView(view) {
     list.appendChild(pill);
   });
   showScreen('kanji-view');
+}
+// The view's bar: its own kanji (12 Nov 2026 - the screen's onShow redrew it
+// with all 500, so Seen in materials showed the Kanji cards bar).
+function refreshKanjiViewBar() {
+  setupCatBar(document.getElementById('kanji-view-swatch'), getCategoryBandCountsKanji(activeKanjiView === 'seen' ? kanjiSeenItems() : KANJI_500.map(kanjiCardItem)));
 }
 function setJpText(el, text) { el.innerHTML = markSmallKana(text); }
 const kanjiSeenItems = () => (KANJI_SECTIONS['seen-all'] || { pool: [] }).pool;

@@ -407,12 +407,13 @@ function sbEnglishBeing(sel, endIdx, q) {
     if (a) {
       // Adjective + noun: "a (very) kind person", "a famous doctor".
       kind = 'job';
-      const aEn = beingAdjEn(a.jp, person), nEn = c.jp === 'ひと' ? 'person' : c.jp === 'まち' ? 'town' : String(c.en || '').split(' / ')[0];
+      // たかい やま is high, not expensive (BEING_THING_EN, 12 Nov 2026).
+      const aEn = (BEING_THING_EN[a.jp] || {})[c.jp] || beingAdjEn(a.jp, person), nEn = c.jp === 'ひと' ? 'person' : c.jp === 'まち' ? 'town' : String(c.en || '').split(' / ')[0];
       compEn = (/^[aeiou]/i.test(d ? 'very' : aEn) ? 'an ' : 'a ') + deg + mk(4, aEn) + ' ' + mk(5, nEn);
       if (!isNoun) notes.push(`${a.jp} describes a noun here — the last word wants to be a noun like ひと or まち`);
     } else if (/じん$/.test(c.jp)) { kind = 'nation'; compEn = deg + mk(5, c.en); }
     else if (isNoun) { kind = 'job'; compEn = deg + mk(5, beingArticle(c.jp === 'ひと' ? 'person' : c.jp === 'まち' ? 'town' : c.en)); }
-    else { kind = 'adj'; compEn = deg + mk(5, beingAdjEn(c.jp, person)); }
+    else { kind = 'adj'; compEn = deg + mk(5, (w0 && (BEING_THING_EN[c.jp] || {})[w0.jp]) || beingAdjEn(c.jp, person)); }
     // Which endings go with which words.
     const isI = !a && beingIsI(c.jp);
     if (isI && endIdx >= 1 && endIdx <= 3) notes.push(`${c.jp} is an い-word: it changes its own ending — ${beingIForm(c.jp, c.ro, beingEndIdx(true, e[2] === 'past', neg))[0]}です`);
