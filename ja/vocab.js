@@ -371,10 +371,10 @@ window.JP_DRILL_VOCAB = {
     chars: 'なん だれ どこ…',
     tagQuery: ['L2','question-location'],
     items: [
-      {jp:'ここ', romaji:'koko', en:'here', tags:['L2','question-location','taught','genki','genki-1-2'], dateAdded:'2026-08-01'},
+      {jp:'ここ', romaji:'koko', en:'here', tags:['L2','question-location','taught','genki','genki-1-2','linking'], dateAdded:'2026-08-01'},
       {jp:'いくら', romaji:'ikura', en:'how much', tags:['question-word','L2','question-location','taught','genki','genki-1-2'], dateAdded:'2026-08-01'},
-      {jp:'あそこ', romaji:'asoko', en:'over there', tags:['L2','question-location','taught','genki','genki-1-2'], dateAdded:'2026-08-01'},
-      {jp:'そこ', romaji:'soko', en:'there', tags:['L2','question-location','taught','genki','genki-1-2'], dateAdded:'2026-08-01'},
+      {jp:'あそこ', romaji:'asoko', en:'over there', tags:['L2','question-location','taught','genki','genki-1-2','linking'], dateAdded:'2026-08-01'},
+      {jp:'そこ', romaji:'soko', en:'there', tags:['L2','question-location','taught','genki','genki-1-2','linking'], dateAdded:'2026-08-01'},
       // なん (nan) is a distinct reading of 何 from なに (nani) used in the
       // Reference - Question words category - not the same word, kept
       // separate rather than tagged together.
@@ -892,12 +892,12 @@ window.JP_DRILL_VOCAB = {
     items: [
       {jp:'いつも', romaji:'itsumo', en:'always', tags:['L3','frequency-l3','taught','l3-1','frequency'], dateAdded:'2026-09-29'},
       {jp:'よく', romaji:'yoku', en:'often', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency'], dateAdded:'2026-09-29'},
-      {jp:'あまり', romaji:'amari', en:'not often / seldom (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency'], dateAdded:'2026-09-29'},
-      {jp:'ぜんぜん', romaji:'zenzen', en:'never / not at all (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency'], altForm:'全然', altIsStandard:true, dateAdded:'2026-09-29'},
-      {jp:'それから', romaji:'sorekara', en:'and then / after that', tags:['L3','frequency-l3','taught','l3-1'], dateAdded:'2026-09-29'},
-      {jp:'そして', romaji:'soshite', en:'and / and also', tags:['L3','frequency-l3','taught','l3-1'], dateAdded:'2026-09-29'},
-      {jp:'なにも', romaji:'nanimo', en:'nothing (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1'], altForm:'何も', altIsStandard:true, dateAdded:'2026-09-29'},
-      {jp:'だれにも', romaji:'dare ni mo', en:'to nobody (+ negative verb)', tags:['L3','frequency-l3','taught','l3-4'], altForm:'誰にも', altIsStandard:true, dateAdded:'2026-10-20'},
+      {jp:'あまり', romaji:'amari', en:'not often / seldom (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency','linking'], dateAdded:'2026-09-29'},
+      {jp:'ぜんぜん', romaji:'zenzen', en:'never / not at all (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency','linking'], altForm:'全然', altIsStandard:true, dateAdded:'2026-09-29'},
+      {jp:'それから', romaji:'sorekara', en:'and then / after that', tags:['L3','frequency-l3','taught','l3-1','linking'], dateAdded:'2026-09-29'},
+      {jp:'そして', romaji:'soshite', en:'and / and also', tags:['L3','frequency-l3','taught','l3-1','linking'], dateAdded:'2026-09-29'},
+      {jp:'なにも', romaji:'nanimo', en:'nothing (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','linking'], altForm:'何も', altIsStandard:true, dateAdded:'2026-09-29'},
+      {jp:'だれにも', romaji:'dare ni mo', en:'to nobody (+ negative verb)', tags:['L3','frequency-l3','taught','l3-4','linking'], altForm:'誰にも', altIsStandard:true, dateAdded:'2026-10-20'},
       {jp:'まいあさ', romaji:'maiasa', en:'every morning', tags:['L3','frequency-l3','taught','l3-1','time-l3'], altForm:'毎朝', altIsStandard:true, dateAdded:'2026-09-29'},
       {jp:'けさ', romaji:'kesa', en:'this morning', tags:['L3','frequency-l3','taught','l3-1','time-l3'], altForm:'今朝', altIsStandard:true, dateAdded:'2026-09-29'},
       {jp:'こんばん', romaji:'konban', en:'tonight / this evening', tags:['L3','frequency-l3','taught','l3-1','time-l3','genki','genki-1-3'], altForm:'今晩', altIsStandard:true, dateAdded:'2026-09-29'},
@@ -906,8 +906,8 @@ window.JP_DRILL_VOCAB = {
       {jp:'なん', romaji:'nan', en:'what (before です/だ, or counters like 何時)', tags:['genki','genki-1-1','taught','L3','frequency-l3','l3-1'], dateAdded:'2026-09-12'},
       {jp:'なに', romaji:'nani', en:'what (elsewhere — before を/が, standalone)', tags:['genki','genki-1-1','taught','L3','frequency-l3','l3-1','question-word'], dateAdded:'2026-09-12'},
       // Lesson 6 (2026-11-03): もう / まだ and time words
-      {jp:'もう', romaji:'mou', en:'already / (not) yet (+ ました)', tags:['L3','frequency-l3','time-l3','taught','l3-6'], dateAdded:'2026-11-03'},
-      {jp:'まだ', romaji:'mada', en:'not yet / still (いいえ、まだです)', tags:['L3','frequency-l3','time-l3','taught','l3-6'], dateAdded:'2026-11-03'},
+      {jp:'もう', romaji:'mou', en:'already / (not) yet (+ ました)', tags:['L3','frequency-l3','time-l3','taught','l3-6','linking'], dateAdded:'2026-11-03'},
+      {jp:'まだ', romaji:'mada', en:'not yet / still (いいえ、まだです)', tags:['L3','frequency-l3','time-l3','taught','l3-6','linking'], dateAdded:'2026-11-03'},
       {jp:'これから', romaji:'korekara', en:'from now / (just) about to', tags:['L3','frequency-l3','time-l3','taught','l3-6'], dateAdded:'2026-11-03'},
       {jp:'まいしゅう', romaji:'maishuu', en:'every week', tags:['L3','frequency-l3','time-l3','taught','l3-6'], altForm:'毎週', altIsStandard:true, dateAdded:'2026-11-03'},
       {jp:'まいつき', romaji:'maitsuki', en:'every month', tags:['L3','frequency-l3','time-l3','taught','l3-6'], altForm:'毎月', altIsStandard:true, dateAdded:'2026-11-03'},
@@ -3092,15 +3092,31 @@ window.JP_DRILL_GROUPS = {
     // "tomorrow".
     tagQuery: { any: ['frequency', ['time-l2', 'time-l3']] }, // L2 + L3 time words as one group (2026-10-07)
   },
+  // VERBS, ADJECTIVES, LINKING WORDS (13 Nov 2026, Andrew): Core grammar
+  // words had become four different things in one (verbs, adjectives,
+  // question and place words, the L3 frequency words) and too big to drill
+  // usefully. Verbs and Adjectives are now Groups of their own, across the
+  // levels; question words and time words already had theirs. What was left
+  // - words that join a sentence together rather than name things - is
+  // Linking words, by its own tag, so later ones join just by being tagged
+  // `linking`. (The key stays theme-core-grammar: settings may name it.)
+  'theme-verbs': {
+    show: 'groups',
+    label: 'Verbs',
+    chars: 'たべます いきます みます…',
+    tagQuery: { any: ['verbs-l2', 'verbs-l3', 'verbs-l4'] },
+  },
+  'theme-adjectives': {
+    show: 'groups',
+    label: 'Adjectives',
+    chars: 'おおきい げんき あかい…',
+    tagQuery: 'adjectives',
+  },
   'theme-core-grammar': {
     show: 'groups',
-    label: 'Core grammar words',
-    chars: 'きます あたらしい ここ…',
-    // + frequency-l3 (2026-10-01): いつも/よく/ぜんぜん/それから/そして/なにも
-    // are sentence-building words in exactly this sense. L3 verbs need no
-    // tag of their own here - all are L2 verbs tagged forward, so verbs-l2
-    // already covers them.
-    tagQuery: { any: [['verbs-l2', 'verbs-l3'], ['adjectives-l2', 'adjectives-l3'], 'question-location', 'frequency-l3'] }, // adjectives-l3 added 2026-10-13 // verbs-l3 added 2026-10-06; all verbs one group (2026-10-07)
+    label: 'Linking words',
+    chars: 'それから そして もう…',
+    tagQuery: 'linking',
   },
   // BUG FIX (2026-08-31) - this card used to be hidden entirely unless Trip
   // vocabulary was switched on (applyShowTripVocabVisibility), even though
