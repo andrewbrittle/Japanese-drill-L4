@@ -699,6 +699,9 @@ function pickDistractorItems(pool, correctItem, count) {
     // Same spelling, different word (いま "now" / いま "living room", かい,
     // なん): as an option it would also be a right answer, so never offered.
     if (candidate !== correctItem && candidate.jp === correctItem.jp) continue;
+    // Same meaning, different word (あか / あかい, both "red"): also a right
+    // answer, so never offered either (13 Nov 2026, the Colours group).
+    if (candidate !== correctItem && candidate.en === correctItem.en) continue;
     if (!seen.has(val)) {
       seen.add(val);
       candidates.push(candidate);
@@ -846,6 +849,15 @@ function showVocabTileSelection(categoryKey) {
       });
       refLinks.appendChild(row);
     }
+    // A group can explain itself (cat.about: a few short paragraphs, shown
+    // under the title - 13 Nov 2026, Japanese's Colours: which colours are
+    // い-adjectives and which only nouns).
+    (cat.about || []).forEach(text => {
+      const p = document.createElement('div');
+      p.className = 'settings-sub cat-about';
+      p.innerHTML = displayWordHtml(text);
+      refLinks.appendChild(p);
+    });
   }
   syncTileSoundControls(categoryKey);
   buildVocabTileGrid(categoryKey);
@@ -886,7 +898,11 @@ function setLatestWordsRange(range) {
 const COLOUR_HUES = {
   red: [229, 72, 77], blue: [77, 136, 229], yellow: [229, 195, 46], green: [77, 199, 113],
   brown: [160, 104, 77], purple: [155, 89, 208], pink: [229, 77, 155], orange: [229, 138, 77],
+  grey: [165, 165, 165], indigo: [88, 86, 214],
 };
+// A group whose tiles carry their colour on the edge: Colours, and any group
+// marked colourTiles (Japanese's L4 Colours, 13 Nov 2026).
+const isColourTileGroup = key => key === 'vocab-colours' || !!(VOCAB[key] && VOCAB[key].colourTiles);
 
 // Level-colour borders, for theme screens only (items pooled from several
 // source categories at once, so a tile's own level isn't otherwise visible).
@@ -1167,7 +1183,7 @@ function buildVocabTileGrid(categoryKey) {
     // selected regardless of whether it's actually one of the 20 - that's
     // the whole point (no clue which ones are really included).
     const isSelected = randomMode || selected.has(idx);
-    if (categoryKey === 'vocab-colours') {
+    if (isColourTileGroup(categoryKey)) {
       tile.style.borderWidth = '3px';
       tile.classList.add('colour-tile');
       if (!isSelected) {
@@ -1203,7 +1219,7 @@ function buildVocabTileGrid(categoryKey) {
 // its own hue/confidence style, theme tiles use their source level's colour,
 // everything else has no special resting border at all.
 function applyRestingTileBorder(categoryKey, item, tileEl) {
-  if (categoryKey === 'vocab-colours') {
+  if (isColourTileGroup(categoryKey)) {
     const scoreKey = item.jp + '|' + item.en;
     const borderColor = colourBorderStyle(item.en, displayScore(kanaScores[scoreKey]));
     if (borderColor) tileEl.style.borderColor = borderColor;

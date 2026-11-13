@@ -13,7 +13,29 @@
 
 // The badge over the question: what kind it is ("word reading", "small っ"),
 // or for kana and kanji, which group.
+// An adjective's kind, for its label and example (13 Nov 2026, Andrew: "it
+// would be useful to know in drilling that genki is a -na adjective"):
+// 'na' or 'i' for a word tagged adjectives (adj-na marks the な ones), else
+// nothing. The two behave differently - げんきな ひと, げんきじゃないです;
+// おおきい ひと, おおきくないです - which is what L4 Lesson 1 was about.
+function jaAdjKind(item) {
+  if (!item || !(item.tags || []).includes('adjectives')) return null;
+  return isNaAdj(item) ? 'na' : /い$/.test(item.jp) ? 'i' : null;
+}
+// Before a noun, and not: げんきな … · げんきじゃないです; おおきい … ·
+// おおきくないです (いい: よくないです).
+function jaAdjExample(jp, kind) {
+  if (kind === 'na') return `${jp}な … · ${jp}じゃないです`;
+  const neg = /いい$/.test(jp) ? jp.replace(/いい$/, 'よくない') : jp.replace(/い$/, 'くない');
+  return `${jp} … · ${neg}です`;
+}
+function jaAdjNoteHtml(q) {
+  return q && q.disp === 'word' && q.adjKind
+    ? `<div class="feedback-standard-note">${q.adjKind === 'na' ? 'な' : 'い'}-adjective: ${markSmallKana(jaAdjExample(q.char, q.adjKind))}</div>`
+    : '';
+}
 function jaBadge(q) {
+  if (q.disp === 'word' && q.adjKind) return q.adjKind === 'na' ? 'な-adjective' : 'い-adjective';
   return q.disp === 'number' ? 'numbers' : q.disp === 'word' ? 'word reading' : q.disp === 'time' ? 'time reading' : q.disp === 'counter' ? 'counter reading' : q.disp === 'verbform' ? (q.adj ? 'adjective forms' : 'verb forms') : q.disp === 'particle' ? 'particles' : q.disp === 'sokuon' ? 'small っ' : (BADGE_LABELS[q.groupKey] || q.groupKey);
 }
 function jaBadgeClass(q) {
@@ -43,7 +65,7 @@ function jaFeedbackExtra(q) {
     : (q.altAfterAnswer && q.altForm)
     ? `<div class="feedback-standard-note">Also seen as: ${markSmallKana(q.altForm)}</div>`
     : '';
-  return hint + standardNote;
+  return hint + standardNote + jaAdjNoteHtml(q);
 }
 
 // How the right answer is shown after a miss: in hiragana when a katakana
@@ -196,6 +218,7 @@ registerJaType({
       seenAs: item.seenAs,
       source: item.source,
       speakAs: item.speakAs,
+      adjKind: jaAdjKind(item),
     };
   },
   scoreKey: q => q.char + '|' + (q.answerEn || q.answer),

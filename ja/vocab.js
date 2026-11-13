@@ -245,11 +245,9 @@ window.JP_DRILL_VOCAB = {
   'vocab-colours': {
     level: 1,
     hasReference: true,
-    // Not from the textbook, but harmless and useful enough for everyone
-    // that it doesn't need gating - see buildMatchCategoryList's use of
-    // `note` for how this shows up as "Not covered in lessons" rather than
-    // the usual plain word count.
-    note: 'Not covered in lessons',
+    // (Its "Not covered in lessons" note went 13 Nov 2026: L4 Lesson 1
+    // taught the colours. The whole set, with the い-adjective forms, is
+    // the L4 group vocab-colours-l4.)
     label: 'Colours',
     chars: 'あか あお きいろ…',
     tagQuery: ['L1','colours'],
@@ -1149,8 +1147,8 @@ window.JP_DRILL_VOCAB = {
       {jp:'つめたい', romaji:'tsumetai', en:'cold (to the touch)', tags:['L3','adjectives-l3','taught','l3-3','L4','adjectives-l4','adjectives'], altForm:'冷たい', altIsStandard:true, dateAdded:'2026-10-13'},
       // Lesson 4 (2026-10-20). あかい / しろい from the gifts to avoid (red flowers, a white handkerchief).
       {jp:'すごい', romaji:'sugoi', en:'amazing / great', tags:['L3','adjectives-l3','taught','l3-4','L4','adjectives-l4','adjectives'], altForm:'凄い', dateAdded:'2026-10-20'},
-      {jp:'あかい', romaji:'akai', en:'red', tags:['L3','adjectives-l3','taught','l3-4','L4','adjectives-l4','adjectives'], altForm:'赤い', altIsStandard:true, dateAdded:'2026-10-20'},
-      {jp:'しろい', romaji:'shiroi', en:'white', tags:['L3','adjectives-l3','taught','l3-4','L4','adjectives-l4','adjectives'], altForm:'白い', altIsStandard:true, dateAdded:'2026-10-20'},
+      {jp:'あかい', romaji:'akai', en:'red', tags:['L3','adjectives-l3','taught','l3-4','L4','adjectives-l4','adjectives','colours'], altForm:'赤い', altIsStandard:true, dateAdded:'2026-10-20'},
+      {jp:'しろい', romaji:'shiroi', en:'white', tags:['L3','adjectives-l3','taught','l3-4','L4','adjectives-l4','adjectives','colours'], altForm:'白い', altIsStandard:true, dateAdded:'2026-10-20'},
     ],
   },
   // Lesson 3: inviting, arranging to meet, and set phrases for gifts.
@@ -1318,13 +1316,32 @@ window.JP_DRILL_VOCAB = {
       {jp:'やさしい', romaji:'yasashii', en:'easy / kind (people)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'易しい', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'ひくい', romaji:'hikui', en:'low, short (height)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'低い', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'たのしい', romaji:'tanoshii', en:'fun, enjoyable', tags:['L4','adjectives-l4','adjectives','taught','l4-preview'], altForm:'楽しい', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'くろい', romaji:'kuroi', en:'black', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'黒い', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'あおい', romaji:'aoi', en:'blue', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'青い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'くろい', romaji:'kuroi', en:'black', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'黒い', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'あおい', romaji:'aoi', en:'blue', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'青い', altIsStandard:true, dateAdded:'2026-11-04'},
       // Lesson 1 (2026-11-10): the rest of the class charts and colour sheet.
       {jp:'つまらない', romaji:'tsumaranai', en:'boring', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], dateAdded:'2026-11-10'},
-      {jp:'きいろい', romaji:'kiiroi', en:'yellow', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'黄色い', altIsStandard:true, dateAdded:'2026-11-10'},
-      {jp:'ちゃいろい', romaji:'chairoi', en:'brown', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'茶色い', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'きいろい', romaji:'kiiroi', en:'yellow', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'黄色い', altIsStandard:true, dateAdded:'2026-11-10'},
+      {jp:'ちゃいろい', romaji:'chairoi', en:'brown', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'茶色い', altIsStandard:true, dateAdded:'2026-11-10'},
     ],
+  },
+  // COLOURS, the whole set (13 Nov 2026, Andrew, after L4 Lesson 1): every
+  // word tagged colours, wherever it lives - the L1 colour nouns, the six
+  // い-adjective forms, グレー and あいいろ - side by side (sorted by the
+  // English, so あか and あかい sit together). Stores nothing itself; each
+  // word keeps its home and its score. `about` explains the split on the
+  // group's screen; colourTiles gives the tiles their colour edges.
+  'vocab-colours-l4': {
+    level: 4,
+    hasReference: true,
+    colourTiles: true,
+    label: 'Colours',
+    chars: 'あか あかい みどり…',
+    tagQuery: 'colours',
+    about: [
+      'Six colours are also い-adjectives: あか → あかい, あお → あおい, しろ → しろい, くろ → くろい, きいろ → きいろい, ちゃいろ → ちゃいろい. Before a noun: あかい くるま. On its own: くるまは あかいです.',
+      'The rest are nouns only: みどり, むらさき, オレンジ, ピンク, グレー, あいいろ. Before a noun they take の: みどりの かばん. On their own: かばんは みどりです.',
+    ],
+    items: [],
   },
   'vocab-general-l4': {
     level: 4,
@@ -1352,8 +1369,8 @@ window.JP_DRILL_VOCAB = {
       {jp:'ばんぐみ', romaji:'bangumi', en:'programme (TV, radio)', tags:['L4','general-l4','taught','l4-1'], altForm:'番組', altIsStandard:true, dateAdded:'2026-11-10'},
       {jp:'テスト', romaji:'tesuto', en:'test', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
       {jp:'いろ', romaji:'iro', en:'colour', tags:['L4','general-l4','taught','l4-1'], altForm:'色', altIsStandard:true, dateAdded:'2026-11-10'},
-      {jp:'グレー', romaji:'guree', en:'grey', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},
-      {jp:'あいいろ', romaji:'aiiro', en:'indigo', tags:['L4','general-l4','taught','l4-1'], altForm:'藍色', dateAdded:'2026-11-10'},
+      {jp:'グレー', romaji:'guree', en:'grey', tags:['L4','general-l4','taught','l4-1','colours'], dateAdded:'2026-11-10'},
+      {jp:'あいいろ', romaji:'aiiro', en:'indigo', tags:['L4','general-l4','taught','l4-1','colours'], altForm:'藍色', dateAdded:'2026-11-10'},
       {jp:'にじ', romaji:'niji', en:'rainbow', tags:['L4','general-l4','taught','l4-1'], altForm:'虹', altIsStandard:true, dateAdded:'2026-11-10'},
       {jp:'ばら', romaji:'bara', en:'rose', tags:['L4','general-l4','taught','l4-1'], altForm:'薔薇', dateAdded:'2026-11-10'},
       {jp:'パンダ', romaji:'panda', en:'panda', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-10'},

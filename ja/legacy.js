@@ -2760,6 +2760,7 @@ function chooseTypedJapanese(rawInput, q) {
   else if (isCorrect && asTyped !== String(q.char).replace(/\s/g, '')) note = `<div class="feedback-standard-note">Usually written: ${markSmallKana(usual)}</div>`;
   else if (q.altIsStandard && q.altForm) note = `<div class="feedback-standard-note">Normally shown as: ${markSmallKana(q.altForm)}</div>`;
   else if (q.altAfterAnswer && q.altForm) note = `<div class="feedback-standard-note">Also seen as: ${markSmallKana(q.altForm)}</div>`;
+  note += jaAdjNoteHtml(q); // an adjective's kind and example (13 Nov 2026)
   recordTypedAnswer(q, isCorrect ? 'exact' : nearly ? 'nearly' : 'wrong');
   const fb = document.getElementById('q-feedback');
   if (isCorrect) {
@@ -2824,6 +2825,7 @@ function chooseTyped(rawInput, answer, char) {
     : (currentQ && currentQ.altAfterAnswer && currentQ.altForm)
     ? `<div class="feedback-standard-note">Also seen as: ${markSmallKana(currentQ.altForm)}</div>`
     : '';
+  const adjNote = jaAdjNoteHtml(currentQ); // an adjective's kind and example (13 Nov 2026)
   recordTypedAnswer(currentQ, isCorrect ? 'exact' : nearly ? 'nearly' : 'wrong');
   revealListenWord(currentQ);
   // Show the accepted spelling either way, not just on a miss - per Andrew,
@@ -2832,15 +2834,15 @@ function chooseTyped(rawInput, answer, char) {
   // spelling difference (case, long vowels, si/shi-style variants, etc).
   if (isCorrect) {
     score++;
-    fb.innerHTML = `Correct! — accepted spelling: "${answer}"` + hint + standardNote;
+    fb.innerHTML = `Correct! — accepted spelling: "${answer}"` + hint + standardNote + adjNote;
     fb.className = 'feedback good';
   } else if (nearly) {
     score++;
-    fb.innerHTML = `Nearly! — check the spelling: "${answer}"` + hint + standardNote;
+    fb.innerHTML = `Nearly! — check the spelling: "${answer}"` + hint + standardNote + adjNote;
     fb.className = 'feedback nearly';
   } else {
     wrong++;
-    fb.innerHTML = `Not quite — the answer is "${answer}"` + hint + standardNote;
+    fb.innerHTML = `Not quite — the answer is "${answer}"` + hint + standardNote + adjNote;
     fb.className = 'feedback bad';
     const missedKey = char + '|' + answer;
     if (!missed.includes(missedKey)) {
