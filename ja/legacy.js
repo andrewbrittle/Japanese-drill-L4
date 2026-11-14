@@ -1858,12 +1858,11 @@ function jaClearSelection(lastSettingsScreen) {
     const picker = kanaPickers[lastSettingsScreen.split('-')[0]];
     if (picker) picker.clear();
   } else if (lastSettingsScreen === 'kanji-selection') {
+    // Random 20 included (14 Nov: it kept its "Deselect all" look after a
+    // drill - the word lists' old bug, fixed there 16 Oct).
     kanjiSelectedTiles[activeKanjiSection].clear();
-    const grid = document.getElementById('kanji-grid-' + activeKanjiSection);
-    if (grid) grid.querySelectorAll('.kana-ref-card.selected').forEach(t => t.classList.remove('selected'));
-    const btn = document.getElementById('kanji-selection-drill-btn');
-    if (btn) btn.disabled = true;
-    updateSelectAllKanjiLabel();
+    kanjiRandomMode[activeKanjiSection] = false;
+    syncKanjiTiles();
   }
 }
 

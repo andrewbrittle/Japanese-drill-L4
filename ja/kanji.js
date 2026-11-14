@@ -424,6 +424,8 @@ function updateSelectAllKanjiLabel() {
   const set = kanjiSelectedTiles[activeKanjiSection];
   const allSelected = set.size === total && !kanjiRandomMode[activeKanjiSection];
   document.getElementById('kanji-select-all-label').textContent = tx(allSelected ? 'tiles.deselectAll' : 'tiles.selectAll');
+  // As the word lists: gold only while it's the active choice (14 Nov).
+  document.getElementById('kanji-select-all-card').classList.toggle('selected', allSelected);
 }
 
 // Builds options by drawing 3 other real kanji from the given pool, rather
@@ -433,8 +435,14 @@ function updateSelectAllKanjiLabel() {
 function buildKanjiOptionsFromPool(item, pool) {
   // A small set (a part group of three) borrows its other choices from the 500.
   if (pool.length < 4 && KANJI_500.length) pool = pool.concat(shuffle(KANJI_500.map(kanjiCardItem)).slice(0, 12));
-  const candidates = pool.filter(w => !(w.char === item.char && w.answer === item.answer));
-  const distractorItems = shuffle(candidates).slice(0, 3);
+  // No two choices with the same meaning (14 Nov: 寒 "Cold (weather)" sat
+  // beside 寒い "cold"): compared without case or a bracketed note.
+  const sense = a => String(a || '').toLowerCase().replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+  const seen = new Set([sense(item.answer)]);
+  const distractorItems = [];
+  shuffle(pool.filter(w => !(w.char === item.char && w.answer === item.answer))).forEach(w => {
+    if (distractorItems.length < 3 && !seen.has(sense(w.answer))) { seen.add(sense(w.answer)); distractorItems.push(w); }
+  });
   const allItems = shuffle([item, ...distractorItems]);
   return allItems.map(w => ({
     en: w.answer,
