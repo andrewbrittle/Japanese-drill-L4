@@ -186,6 +186,15 @@ function renderKanaKanjiQuestion(q, ui) {
 // spoken by its reading where one is known.
 ['kanji', 'survival'].forEach(id => registerJaType({
   id, render: renderKanaKanjiQuestion, missedItem: false,
+  // As a flashcard: the kanji, then Kanji Cards' back - meaning, readings,
+  // example words (ja/kanji.js).
+  cardFront: (q, { charDisplay }) => {
+    charDisplay.style.fontFamily = JP_FONT;
+    const len = [...q.char].length;
+    charDisplay.style.fontSize = len <= 2 ? '100px' : len === 3 ? '72px' : '56px';
+    charDisplay.innerHTML = markSmallKana(q.char);
+  },
+  cardBack: q => kanjiCardBackHtml(q),
   scoreKey: q => kanjiScoreKey(q), // a single kanji: its Kanji Cards card (ja/kanji.js)
   speechText: q => KANJI_READINGS[q.char + '|' + q.answer] || q.char,
 }));
@@ -222,6 +231,15 @@ registerJaType({
     };
   },
   scoreKey: q => q.char + '|' + (q.answerEn || q.answer),
+  // A flashcard's back (14 Nov 2026): the other side and the reading, with
+  // the notes an answer brings (normally written, the な / い example).
+  cardBack: q => {
+    const main = vocabReversed
+      ? `<div class="say-answer jp-font">${markSmallKana(q.char)}</div>`
+      : `<div class="say-answer">${escapeHtmlText(q.answerEn)}</div>`;
+    const alt = q.altForm ? `<div class="feedback-standard-note">${q.altIsStandard ? 'Normally written' : 'Also seen as'}: ${markSmallKana(q.altForm)}</div>` : '';
+    return main + `<div class="card-reading">${escapeHtmlText(q.answerRomaji)}</div>` + alt + jaAdjNoteHtml(q);
+  },
   // Some words are ambiguous to a voice (骨: hone or kotsu), so they carry
   // the kana to say (speakAs).
   speechText: q => q.speakAs || q.char,

@@ -1894,6 +1894,16 @@ function jaRebuildMissed(missedSet) {
       all.push(withGroup);
     });
   });
+  // The 500 and Seen in materials (14 Nov 2026): their kanji aren't in DATA,
+  // so a miss there never came back. Look them up there too, once each.
+  const have = new Set(all.map(q => q.char + '|' + q.answer));
+  const cards = KANJI_500.map(kanjiCardItem), seenPool = kanjiSeenItems();
+  [[cards, cards], [seenPool, seenPool]].forEach(([items, pool]) => items.forEach(item => {
+    const key = item.char + '|' + item.answer;
+    if (!missedSet.has(key) || have.has(key)) return;
+    have.add(key);
+    all.push(Object.assign({}, item, { options: buildKanjiOptionsFromPool(item, pool) }));
+  }));
   return all;
 }
 
@@ -3277,6 +3287,9 @@ function handleDrillKeydown(e) {
   const drillScreen = document.getElementById('screen-drill');
   if (!drillScreen || !drillScreen.classList.contains('visible')) return;
   if (!answered) {
+    // Show answer (flashcards, 14 Nov 2026 - as the core's own handler).
+    const reveal = document.getElementById('say-reveal-btn');
+    if (reveal && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); reveal.click(); return; }
     const idx = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].indexOf(e.key);
     if (idx === -1) return;
     const opts = document.querySelectorAll('#q-options .opt');

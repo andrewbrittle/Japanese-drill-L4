@@ -333,6 +333,7 @@ function showKanjiSectionSelection(sectionKey) {
   if (titleEl) titleEl.textContent = 'Kanji — ' + KANJI_SECTIONS[activeKanjiSection].label;
   document.getElementById('kanji-selection-drill-btn').disabled = kanjiSelectedTiles[activeKanjiSection].size === 0;
   syncKanjiTiles();
+  syncKanjiCardModeCards();
 }
 
 function showKanjiSelection() { showKanjiSectionSelection(activeKanjiSection); }
@@ -442,6 +443,20 @@ function buildKanjiOptionsFromPool(item, pool) {
   }));
 }
 
+// Flashcards or Study for a kanji set (14 Nov 2026, from Kanji Cards): one
+// choice for every kanji screen, remembered while the app is open.
+let kanjiCardMode = null;
+function toggleKanjiCardMode(kind) {
+  kanjiCardMode = kanjiCardMode === kind ? null : kind;
+  syncKanjiCardModeCards();
+}
+function syncKanjiCardModeCards() {
+  [['kanji-cards-card', 'cards'], ['kanji-study-card', 'study']].forEach(([id, kind]) => {
+    const c = document.getElementById(id);
+    if (c) c.classList.toggle('selected', kanjiCardMode === kind);
+  });
+}
+
 function drillKanjiSelection() {
   kanjiRandomMode[activeKanjiSection] = false; // as the word lists: the hidden pick shows once you drill
   const section = KANJI_SECTIONS[activeKanjiSection];
@@ -450,7 +465,9 @@ function drillKanjiSelection() {
   const data = getKanjiSectionPool(activeKanjiSection);
   const customDeck = [...selectedIdx].sort((a, b) => a - b).map(idx => {
     const item = data[idx];
-    return Object.assign({ groupKey: section.dataKey }, item, { options: buildKanjiOptionsFromPool(item, data) });
+    const q = Object.assign({ groupKey: section.dataKey }, item, { options: buildKanjiOptionsFromPool(item, data) });
+    if (kanjiCardMode) q.cardMode = kanjiCardMode;
+    return q;
   });
   lastSettingsScreen = 'kanji-selection';
   startDrill(shuffle(customDeck));
@@ -915,6 +932,25 @@ function kanjiCardReading(card) {
   return first ? { romaji: first[1].replace(/[()]/g, ''), kana: kanjiKataToHira(first[0].replace(/[()]/g, '')) } : { romaji: '', kana: '' };
 }
 const kanjiCardRomaji = card => kanjiCardReading(card).romaji;
+
+// A kanji's flashcard back (14 Nov 2026, from Kanji Cards): the meaning and
+// its reading, then for one of the 500 its on and kun readings and example
+// words, as Cards shows them; for a whole-word card, its reading.
+function kanjiCardBackHtml(q) {
+  const card = q.cardN ? KANJI_CARD_BY_N[q.cardN] : (KANJI_CARD_BY_CHAR[q.char] && KANJI_CARD_BY_CHAR[q.char].m === q.answer ? KANJI_CARD_BY_CHAR[q.char] : null);
+  const key = q.char + '|' + q.answer;
+  const kana = KANJI_READINGS[key], ro = KANJI_ROMAJI[key] || (card ? kanjiCardRomaji(card) : '');
+  const esc = escapeHtmlText;
+  let html = `<div class="say-answer">${esc(q.answer)}</div>`;
+  if (kana || ro) html += `<div class="card-reading">${kana ? markSmallKana(kana) : ''}${kana && ro ? ' · ' : ''}${esc(ro || '')}</div>`;
+  if (!card) return html;
+  const rds = (list, label) => list && list.length
+    ? `<div class="card-sec"><div class="card-sec-t">${label}</div><div class="card-rds">${list.map(r => `<span class="card-rd">${markSmallKana(r[0])}<small>${esc(r[1])}</small></span>`).join('')}</div></div>` : '';
+  html += rds(card.on, "On'yomi") + rds(card.kun, "Kun'yomi");
+  if (card.w && card.w.length) html += `<div class="card-sec"><div class="card-sec-t">Words</div>${card.w.map(w =>
+    `<div class="card-word"><span class="card-wj">${w.kanji ? `<span class="card-wk">${markSmallKana(w.kanji)}</span>` : ''}${markSmallKana(w.jp)}<small>${esc(w.romaji)}</small></span><span class="card-we">${esc(w.en)}</span></div>`).join('')}</div>`;
+  return html;
+}
 // The colours, set by hand (11 Nov 2026): the first kanji the course shows
 // as kanji (the L4 Lesson 1 colour sheet), so they read as taught - each
 // kanji on its own is the colour's noun (赤 あか, as in 赤い / 赤ちゃん; 黄 き,
@@ -975,7 +1011,9 @@ const KANJI_VIEWS = { order: { label: 'In order', sets: [] }, part: { label: 'By
 // seen in passing (printed with readings); whole-word cards count too
 // (富士山, 東京, 暑い...). One set overall, not per lesson. Marked on tiles
 // everywhere, as in Kanji Cards: a dot if pointed out, a ring if in passing.
-const KANJI_SEEN = (window.JP_KANJI_500 && window.JP_KANJI_500.seen) || { pointed: [], passing: [], words: [] };
+// The list itself: ja/kanji-seen.js (since 14 Nov 2026; before, Kanji Cards'
+// seen.js copied into kanji-500.js - still read if the new file is missing).
+const KANJI_SEEN = window.JP_KANJI_SEEN || (window.JP_KANJI_500 && window.JP_KANJI_500.seen) || { pointed: [], passing: [], words: [] };
 function kanjiSeenKind(item) {
   if (item.cardN) return KANJI_SEEN.pointed.includes(item.char) ? 'pointed' : KANJI_SEEN.passing.includes(item.char) ? 'passing' : '';
   return KANJI_SEEN.words.includes(item.char) ? 'passing' : '';
@@ -1049,3 +1087,39 @@ function refreshKanjiViewBar() {
 }
 function setJpText(el, text) { el.innerHTML = markSmallKana(text); }
 const kanjiSeenItems = () => (KANJI_SECTIONS['seen-all'] || { pool: [] }).pool;
+
+// WEAKEST, UNTESTED, SEARCH (14 Nov 2026, from Kanji Cards): a set made on
+// the spot from the 500, opened with every kanji in it picked.
+//   weak     - the 20 you've tried with the lowest scores (fading counted)
+//   untested - 20 you've never tried, at random
+//   search   - every card whose meaning has a word starting with what you
+//              typed ("fire", "go"), or the kanji itself
+function showKanjiPick(kind) {
+  const msg = document.getElementById('kanji-search-msg');
+  if (msg) msg.textContent = '';
+  const items = KANJI_500.map(kanjiCardItem);
+  let pool = [], label = '';
+  if (kind === 'weak') {
+    pool = items.filter(i => kanaScores[kanjiScoreKey(i)]).sort((a, b) => displayScore(kanaScores[kanjiScoreKey(a)]) - displayScore(kanaScores[kanjiScoreKey(b)])).slice(0, 20);
+    label = 'Weakest 20';
+    if (!pool.length && msg) msg.textContent = "You haven't tried any of the 500 yet.";
+  } else if (kind === 'untested') {
+    pool = shuffle(items.filter(i => !kanaScores[kanjiScoreKey(i)])).slice(0, 20);
+    label = 'Untested 20';
+    if (!pool.length && msg) msg.textContent = "You've tried every one of the 500.";
+  } else {
+    const input = document.getElementById('kanji-search-input');
+    const raw = (input ? input.value : '').trim();
+    if (!raw) return;
+    const words = raw.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    pool = items.filter(i => i.char === raw || (words.length && words.every(w => i.answer.toLowerCase().split(/[^a-z0-9]+/).some(m => m.startsWith(w)))));
+    label = 'Search: ' + raw;
+    if (!pool.length && msg) msg.textContent = 'No kanji found for "' + raw + '".';
+  }
+  if (!pool.length) return;
+  const key = 'k500-' + kind;
+  KANJI_SECTIONS[key] = { label, dataKey: 'kanji-500', pool, dyn: true };
+  kanjiSelectedTiles[key] = new Set(pool.map((_, i) => i));
+  kanjiRandomMode[key] = false;
+  showKanjiSectionSelection(key);
+}
