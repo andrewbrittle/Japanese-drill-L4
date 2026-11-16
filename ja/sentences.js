@@ -3,6 +3,34 @@
 // gifts, invitations...), their questions and answers, and Being (X is Y).
 // The daily card, reading passages, desk sheets and the builder all draw
 // on it. Loaded before ja/legacy.js.
+//
+// SENTENCE OF THE DAY (2026-10-06) - builds a short sentence or a
+// question-and-answer pair from TAUGHT vocab only, using fixed patterns
+// whose slots each carry their own rules (tense, particles, which places
+// and times make sense together). Words are looked up by kana among taught
+// items (l3TaughtItem) so romaji always matches the drills; any word that
+// isn't found simply drops out of its pool. English is written per pattern
+// rather than derived from glosses, which aren't sentence-ready.
+//
+// Grammar used = what the course has covered: は topic, を object, に
+// destination / time / person met, で place of action / transport, と "with"
+// and "and", や "things like", の possession, から/まで with times,
+// frequency words (negative verb after あまり/ぜんぜん), ます / ません /
+// ました / ませんでした, です, and question words なに/どこ/だれ/いつ/なんじ.
+// Lesson 2 (2026-10-06) added どんな ("what kind of"), place で + verb
+// questions (どこ で…か / PLACE で なに を しますか), and my-family vs
+// someone-else's-family words (see SG_FAMILY / SG_MY_FAMILY).
+//
+// Kana is written with a space between every word AND before each particle
+// (ともだち は がっこう に いきます) so it lines up word-for-word with the
+// romaji - Andrew's request while continuous kana is still hard to parse.
+//
+// GROWING IT: each lesson, add the new taught words to the lists below
+// (verb objects/places, SG_DEST, SG_TIMES, SG_JOBS...) with any rule they
+// need, then generate a few thousand sentences in a headless browser
+// (sgRand can be swapped for a seeded generator) and read/scan them
+// before release - see the handover note. Untaught words are skipped
+// automatically, so adding ahead of the course is harmless.
 
 const SG_TIMES = {
   // tenses: which verb tenses the word can go with. span: 'day' (ordinary

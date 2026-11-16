@@ -404,6 +404,7 @@ function resolveVocabCategory(key) {
     hasReference: true,
     noMeaningMode: false,
     isTheme: true,
+    about: theme.about, // a group's own explanation (16 Nov 2026: Portuguese's Colours)
   };
   return THEME_CACHE[key];
 }
@@ -920,7 +921,7 @@ const COLOUR_HUES = {
 };
 // A group whose tiles carry their colour on the edge: Colours, and any group
 // marked colourTiles (Japanese's L4 Colours, 13 Nov 2026).
-const isColourTileGroup = key => key === 'vocab-colours' || !!(VOCAB[key] && VOCAB[key].colourTiles);
+const isColourTileGroup = key => key === 'vocab-colours' || !!(VOCAB[key] && VOCAB[key].colourTiles) || !!(THEMES[key] && THEMES[key].colourTiles);
 
 // Level-colour borders, for theme screens only (items pooled from several
 // source categories at once, so a tile's own level isn't otherwise visible).
@@ -1632,8 +1633,13 @@ function drillMissed() {
   const missedSet = new Set(missed);
   // Questions the app builds again itself (APP.rebuildMissed - Japanese's
   // kana and kanji), then the ones kept as they were asked.
-  const rebuilt = APP.rebuildMissed ? APP.rebuildMissed(missedSet) : [];
-  const again = [...rebuilt, ...missedItems.filter(q => missedSet.has(q.char + '|' + q.answer))];
+  // A question kept as it was asked wins: its key can also match something
+  // the app would rebuild (16 Nov 2026: the word に "at" missed in Time words
+  // brought back the kana に too - both are に|ni - so it came up twice).
+  const kept = missedItems.filter(q => missedSet.has(q.char + '|' + q.answer));
+  const keptKeys = new Set(kept.map(q => q.char + '|' + q.answer));
+  const rebuilt = (APP.rebuildMissed ? APP.rebuildMissed(missedSet) : []).filter(q => !keptKeys.has(q.char + '|' + q.answer));
+  const again = [...rebuilt, ...kept];
   if (!again.length) return; // never an empty drill
   // Missed flashcards come back as flashcards (a rebuilt question starts plain).
   const cardMode = (deck.find(q => q.cardMode) || {}).cardMode;
