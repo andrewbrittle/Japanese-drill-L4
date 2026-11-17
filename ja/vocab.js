@@ -892,7 +892,7 @@ window.JP_DRILL_VOCAB = {
     items: [
       {jp:'いつも', romaji:'itsumo', en:'always', tags:['L3','frequency-l3','taught','l3-1','frequency'], dateAdded:'2026-09-29'},
       {jp:'よく', romaji:'yoku', en:'often', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency'], dateAdded:'2026-09-29'},
-      {jp:'あまり', romaji:'amari', en:'not often / seldom (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency','linking'], dateAdded:'2026-09-29'},
+      {jp:'あまり', romaji:'amari', en:'not very / not often (+ negative)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency','linking'], dateAdded:'2026-09-29'},
       {jp:'ぜんぜん', romaji:'zenzen', en:'never / not at all (+ negative verb)', tags:['L3','frequency-l3','taught','l3-1','genki','genki-1-3','frequency','linking'], altForm:'全然', altIsStandard:true, dateAdded:'2026-09-29'},
       {jp:'それから', romaji:'sorekara', en:'and then / after that', tags:['L3','frequency-l3','taught','l3-1','linking'], dateAdded:'2026-09-29'},
       {jp:'そして', romaji:'soshite', en:'and / and also', tags:['L3','frequency-l3','taught','l3-1','linking'], dateAdded:'2026-09-29'},
@@ -1305,7 +1305,7 @@ window.JP_DRILL_VOCAB = {
     items: [
       {jp:'ハンサム', romaji:'hansamu', en:'handsome', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], dateAdded:'2026-11-04'},
       {jp:'しずか', romaji:'shizuka', en:'quiet', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'静か', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'にぎやか', romaji:'nigiyaka', en:'lively, busy (of a place)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], dateAdded:'2026-11-04'},
+      {jp:'にぎやか', romaji:'nigiyaka', en:'lively, busy (of a place)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'賑やか', dateAdded:'2026-11-04'},
       {jp:'ゆうめい', romaji:'yuumei', en:'famous', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'有名', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'しんせつ', romaji:'shinsetsu', en:'kind, helpful', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'親切', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'げんき', romaji:'genki', en:'well, energetic', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-1'], altForm:'元気', altIsStandard:true, dateAdded:'2026-11-04'},
@@ -1382,6 +1382,18 @@ window.JP_DRILL_VOCAB = {
       {jp:'けっこうです', romaji:'kekkou desu', en:'no, thank you (I\'m fine)', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
       {jp:'もう いっぱい', romaji:'mou ippai', en:'another cup / glass', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
       {jp:'もう ひとつ', romaji:'mou hitotsu', en:'another one', tags:['L4','general-l4','phrases-l4','taught','l4-1'], dateAdded:'2026-11-10'},
+      // Lesson 2 (2026-11-17): negative adjectives, とても / あまり. Nearly
+      // all its words were taught already; new: the fill-in sheet's
+      // しけん / きゅうりょう / ゆめ, the Q&A's ビル and クラス, にほんじん from
+      // the negative chart, どらやき from the とても / あまり pictures.
+      // おにぎり (the Q&A) moves from untaught to taught.
+      {jp:'しけん', romaji:'shiken', en:'exam', tags:['L4','general-l4','taught','l4-2'], altForm:'試験', altIsStandard:true, dateAdded:'2026-11-17'},
+      {jp:'きゅうりょう', romaji:'kyuuryou', en:'salary, pay', tags:['L4','general-l4','taught','l4-2'], altForm:'給料', altIsStandard:true, dateAdded:'2026-11-17'},
+      {jp:'ゆめ', romaji:'yume', en:'dream', tags:['L4','general-l4','taught','l4-2'], altForm:'夢', altIsStandard:true, dateAdded:'2026-11-17'},
+      {jp:'ビル', romaji:'biru', en:'building (office block)', tags:['L4','general-l4','taught','l4-2'], dateAdded:'2026-11-17'},
+      {jp:'クラス', romaji:'kurasu', en:'class', tags:['L4','general-l4','taught','l4-2'], dateAdded:'2026-11-17'},
+      {jp:'にほんじん', romaji:'nihonjin', en:'Japanese (person)', tags:['L4','general-l4','taught','l4-2'], altForm:'日本人', altIsStandard:true, dateAdded:'2026-11-17'},
+      {jp:'どらやき', romaji:'dorayaki', en:'dorayaki (pancakes with sweet bean filling)', tags:['L4','general-l4','taught','l4-2'], dateAdded:'2026-11-17'},
     ],
   },
   // みず (water) moved out to Level 2's General vocabulary in Week 6, now
@@ -1536,7 +1548,7 @@ window.JP_DRILL_VOCAB = {
       {jp:'なべ', romaji:'nabe', en:'nabe / hot pot', tags:['food-drink','untaught','curated','food-type','te-food','tourist'], source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},
       {jp:'たこ', romaji:'tako', en:'octopus', tags:['food-drink','taught','curated','food-type','L3','food-drink-l3','l3-1','te-food','tourist'], dateAdded:'2026-08-01'},
       {jp:'おこのみやき', romaji:'okonomiyaki', en:'okonomiyaki (savoury pancake)', tags:['food-drink','untaught','curated','food-type','te-food','tourist'], source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},
-      {jp:'おにぎり', romaji:'onigiri', en:'onigiri / rice ball', tags:['food-drink','untaught','curated','food-type','te-food','tourist'], source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},
+      {jp:'おにぎり', romaji:'onigiri', en:'onigiri / rice ball', tags:['food-drink','taught','curated','food-type','te-food','tourist','L4','general-l4','l4-2'], dateAdded:'2026-08-01'},
       {jp:'ウーロンちゃ', romaji:'uuroncha', en:'oolong tea', tags:['food-drink','untaught','curated','drink','te-food','tourist'], source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},
       {jp:'オレンジジュース', romaji:'orenji juusu', en:'orange juice', tags:['food-drink','untaught','curated','drink','te-food','tourist'], altForm:'おれんじじゅーす', source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},
       {jp:'おやこどん', romaji:'oyakodon', en:'oyakodon (chicken & egg rice bowl)', tags:['food-drink','untaught','curated','food-type','te-food','tourist'], source: {location: 'Curated - added as a useful word (no specific sighting logged)'}, dateAdded:'2026-08-01'},

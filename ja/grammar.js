@@ -270,7 +270,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "An occasion takes に as well: たんじょうびに, クリスマスに, ははのひに. So one sentence can have two に — one for when, one for who."],
     ] },
     "adjectives-l4": { title: "Adjectives — い-words and な-words", blocks: [
-      ["note", "<strong>Preview</strong> — added before the class covers it. Japanese has two kinds of adjective, and the difference is how they end."],
+      ["note", "Level 4 Lessons 1 and 2. Japanese has two kinds of adjective, and the difference is how they end."],
       ["two", "い-adjectives", "end in い: おおきい, おもしろい, たかい, おいしい", "な-adjectives", "add な before a noun: しずか, きれい, ゆうめい, しんせつ"],
       ["heading", "\"X is …\" — both just add です"],
       ["ex", "この まちは しずかです。", "Kono machi wa shizuka desu.", "This town is quiet."],
@@ -279,6 +279,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "な-words work like nouns: じゃありません. い-words change their own ending: drop い, add <strong>くないです</strong>."],
       ["two", "しずか<strong>じゃありません</strong>", "shizuka ja arimasen — isn't quiet", "たか<strong>くないです</strong>", "takakunai desu — isn't high"],
       ["two", "きれい<strong>じゃありません</strong>", "kirei ja arimasen — isn't pretty", "おもしろ<strong>くないです</strong>", "omoshirokunai desu — isn't interesting"],
+      ["note", "<strong>ではありません</strong> means the same as じゃありません — a little more formal, and what you see written: ゆうめいではありません."],
       ["note", "Watch out: <strong>きれい</strong> and <strong>ゆうめい</strong> end in い but are な-words — きれいじゃありません, never ✗ きれくないです. And <strong>いい</strong> is irregular: いいです → <strong>よくないです</strong>."],
       ["heading", "Before a noun"],
       ["two", "しずか<strong>な</strong> まち", "a quiet town", "おもしろい ひと", "an interesting person"],
@@ -288,7 +289,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "Coming later in the course: い-words take <strong>かったです</strong> (たかかったです — was expensive) and <strong>くなかったです</strong>; な-words take でした / じゃありませんでした, like nouns. The app already uses them — the Adjective forms drill on the dice page has all five forms."],
     ] },
     "adj-extras-l4": { title: "とても / あまり, どう / どんな, 〜が", blocks: [
-      ["note", "<strong>Preview</strong> — three small words that come with adjectives."],
+      ["note", "Three small words that come with adjectives. とても and あまり were Lesson 2; どんな was Lesson 1; どう and 〜が are still a <strong>preview</strong>."],
       ["heading", "とても (very) and あまり (not very)"],
       ["ex", "にほんごは とても おもしろいです。", "Nihongo wa totemo omoshiroi desu.", "Japanese is very interesting."],
       ["ex", "きょうは あまり さむくないです。", "Kyou wa amari samukunai desu.", "It isn't very cold today."],

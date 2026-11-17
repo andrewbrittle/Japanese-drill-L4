@@ -645,6 +645,8 @@ const SCORE_KEY_RENAMES = [
   ['ぷーる|pool', 'プール|pool'],
   ['すーぱー|supermarket', 'スーパー|supermarket'],
   ['しゃーうっどのもり|Sherwood Forest', 'シャーウッドの森|Sherwood Forest'],
+  // L4 Lesson 2 (17 Nov 2026): あまり is "not very" with adjectives as well.
+  ['あまり|not often / seldom (+ negative verb)', 'あまり|not very / not often (+ negative)'],
 ];
 SCORE_KEY_RENAMES.forEach(([oldKey, newKey]) => {
   if (oldKey in kanaScores && !(newKey in kanaScores)) {

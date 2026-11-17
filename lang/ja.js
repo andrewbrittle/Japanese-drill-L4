@@ -389,7 +389,10 @@ function verbForms(item) {
 
 // The い-adjective stem the endings join: おもしろ(い), よ(い) for いい / かっこいい.
 function adjIStem(jp, ro) {
-  if (/いい$/.test(jp)) return [jp.slice(0, -2) + 'よ', ro.replace(/ii$/, 'yo')];
+  // Only いい itself and the words built on it change to よ (よくない,
+  // かっこよくない). かわいい just ends in いい: かわいくない (17 Nov 2026 - it
+  // had been coming out ✗ かわよくない).
+  if (jp === 'いい' || /(かっこ|が)いい$/.test(jp)) return [jp.slice(0, -2) + 'よ', ro.replace(/ii$/, 'yo')];
   return [jp.slice(0, -1), ro.replace(/i$/, '')];
 }
 

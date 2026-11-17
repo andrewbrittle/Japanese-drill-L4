@@ -1164,7 +1164,7 @@ const BEING_THINGS = [
   { objs: ['やま'], adjs: ['たかい', 'ひくい', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい'], adjNoun: true },
   { objs: ['ふじさん'], adjs: ['たかい', 'きれい', 'ゆうめい', 'おおきい'], noun: 'やま', place: true },
   { objs: ['はな', 'ばら'], adjs: ['きれい', 'かわいい', 'すてき', 'あかい', 'しろい', 'きいろい'], adjNoun: true, colours: true },
-  { objs: ['たてもの'], adjs: ['たかい', 'ふるい', 'あたらしい', 'おおきい', 'ちいさい', 'ゆうめい', 'きれい'], adjNoun: true },
+  { objs: ['たてもの', 'ビル'], adjs: ['たかい', 'ふるい', 'あたらしい', 'おおきい', 'ちいさい', 'ゆうめい', 'きれい'], adjNoun: true },
   { objs: ['へや'], adjs: ['きれい', 'おおきい', 'ちいさい', 'しずか', 'あたらしい', 'ふるい', 'さむい', 'あつい'], adjNoun: true },
   { objs: ['まつり'], adjs: ['にぎやか', 'おもしろい', 'ゆうめい', 'すごい', 'いい'], adjNoun: true },
   { objs: ['くに'], adjs: ['おおきい', 'ちいさい', 'あつい', 'さむい', 'きれい', 'ゆうめい'], adjNoun: true },
@@ -1172,9 +1172,16 @@ const BEING_THINGS = [
   // L4 (Lesson 8 preview, 2026-11-04): places, food, study and work.
   { objs: ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター', 'まち'], adjs: ['にぎやか', 'しずか', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい', 'ふるい', 'あたらしい', 'いい', 'さむい', 'あつい'], place: true },
   { objs: ['えき', 'こうえん', 'レストラン', 'デパート', 'がっこう'], adjs: ['にぎやか', 'しずか', 'きれい', 'べんり', 'おおきい', 'ちいさい', 'あたらしい', 'ふるい', 'ゆうめい'] },
-  { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの', 'おかし'], adjs: ['おいしい', 'たかい', 'やすい'] },
-  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'つまらない', 'たのしい'] },
-  { objs: ['テスト'], adjs: ['むずかしい', 'やさしい', 'ながい', 'みじかい'], adjNoun: true },
+  { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの', 'おかし', 'りょうり', 'おにぎり', 'やきとり', 'どらやき'], adjs: ['おいしい', 'たかい', 'やすい'] },
+  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと', 'クラス'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'つまらない', 'たのしい'] },
+  { objs: ['テスト', 'しけん'], adjs: ['むずかしい', 'やさしい', 'ながい', 'みじかい'], adjNoun: true },
+  // L4 Lesson 2 (2026-11-17): the things the class asked about.
+  { objs: ['パソコン', 'けいたい'], adjs: ['べんり', 'あたらしい', 'ふるい', 'おおきい', 'ちいさい', 'たかい', 'やすい'], adjNoun: true },
+  { objs: ['じしょ', 'ペン'], adjs: ['いい', 'あたらしい', 'ふるい', 'おおきい', 'ちいさい', 'たかい', 'やすい'], adjNoun: true },
+  { objs: ['ちかてつ', 'しんかんせん'], adjs: ['べんり', 'きれい', 'たかい', 'やすい', 'あたらしい', 'ふるい'] },
+  { objs: ['ほっかいどう'], adjs: ['さむい', 'おおきい', 'きれい', 'ゆうめい'], place: true },
+  { objs: ['きゅうりょう'], adjs: ['たかい', 'やすい', 'いい'] },
+  { objs: ['ペット'], adjs: ['かわいい', 'おおきい', 'ちいさい', 'げんき'] },
 ];
 
 const BEING_PEOPLE_ADJS = ['おもしろい', 'かっこいい', 'きれい', 'すてき', 'かわいい', 'すごい', 'しんせつ', 'げんき', 'ひま', 'いそがしい', 'ハンサム', 'ゆうめい'];
@@ -1194,7 +1201,7 @@ const BEING_DEGREE = { とても: { ro: 'totemo', en: 'very' }, あまり: { ro:
 
 // English for an adjective (first meaning, before any comma or slash).
 // Topics whose English isn't "the" + the word list's first meaning.
-const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town', ふじさん: 'Mount Fuji', くに: 'the country' };
+const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town', ふじさん: 'Mount Fuji', くに: 'the country', きゅうりょう: 'the salary', りょうり: 'the food' };
 
 function beingTopicEn(o) {
   if (BEING_TOPIC_EN[o]) return BEING_TOPIC_EN[o];
@@ -1211,7 +1218,7 @@ const beingAdjEn = (jp, person) => (person && BEING_PEOPLE_EN[jp]) || adjEnWord(
 
 // Describing a thing: words whose first English meaning is the wrong one for
 // it - a mountain is たかい (high), not expensive.
-const BEING_THING_EN = { たかい: { やま: 'high', ふじさん: 'high', たてもの: 'tall' } };
+const BEING_THING_EN = { たかい: { やま: 'high', ふじさん: 'high', たてもの: 'tall', ビル: 'tall', きゅうりょう: 'high' }, やすい: { きゅうりょう: 'low' } };
 const beingThingAdjEn = (jp, thing) => (BEING_THING_EN[jp] || {})[thing] || beingAdjEn(jp);
 
 const beingEnWord = it => String(it.en || '').split(' / ')[0].replace(/\s*\(.*\)$/, '').trim();

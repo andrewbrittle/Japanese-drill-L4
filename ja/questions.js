@@ -16,18 +16,19 @@
 // An adjective's kind, for its label and example (13 Nov 2026, Andrew: "it
 // would be useful to know in drilling that genki is a -na adjective"):
 // 'na' or 'i' for a word tagged adjectives (adj-na marks the な ones), else
-// nothing. The two behave differently - げんきな ひと, げんきじゃないです;
+// nothing. The two behave differently - げんきな ひと, げんきじゃ ありません;
 // おおきい ひと, おおきくないです - which is what L4 Lesson 1 was about.
 function jaAdjKind(item) {
   if (!item || !(item.tags || []).includes('adjectives')) return null;
   return isNaAdj(item) ? 'na' : /い$/.test(item.jp) ? 'i' : null;
 }
-// Before a noun, and not: げんきな … · げんきじゃないです; おおきい … ·
+// Before a noun, and not: げんきな … · げんきじゃ ありません; おおきい … ·
 // おおきくないです (いい: よくないです).
+// (17 Nov 2026: じゃありません, as Lesson 2 teaches it, and the い-word's
+// stem from LANG.forms.adjIStem - かわいい had come out ✗ かわよくない.)
 function jaAdjExample(jp, kind) {
-  if (kind === 'na') return `${jp}な … · ${jp}じゃないです`;
-  const neg = /いい$/.test(jp) ? jp.replace(/いい$/, 'よくない') : jp.replace(/い$/, 'くない');
-  return `${jp} … · ${neg}です`;
+  if (kind === 'na') return `${jp}な … · ${jp}じゃ ありません`;
+  return `${jp} … · ${LANG.forms.adjIStem(jp, '')[0]}くないです`;
 }
 function jaAdjNoteHtml(q) {
   return q && q.disp === 'word' && q.adjKind

@@ -566,7 +566,7 @@ function adjFormKanji(item, form) {
   if (!item.altForm || form === 'attr') return [];
   const f = adjForms(item)[form][0];
   if (isNaAdj(item)) return [item.altForm + f.slice(item.jp.length)];
-  if (/いい$/.test(item.jp) || !/い$/.test(item.altForm)) return [];
+  if (adjIStem(item.jp, '')[0].endsWith('よ') || !/い$/.test(item.altForm)) return [];
   return [item.altForm.slice(0, -1) + f.slice(item.jp.length - 1)];
 }
 
