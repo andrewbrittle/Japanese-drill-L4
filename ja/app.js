@@ -38,6 +38,7 @@ window.APP = {
     'kanji-view': { home: 'kanji-index', onShow: () => refreshKanjiViewBar() },
     'counter-quiz-selection': { home: 'numbers', onShow: () => buildCounterQuizSelectionList() },
     'desk-sheets': { home: 'build' },
+    'read-sentence': { home: 'build' },
     'study-guide': { home: 'grammar' },
     'sentence-builder': { home: 'build' },
   },

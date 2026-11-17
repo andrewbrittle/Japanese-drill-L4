@@ -183,6 +183,7 @@ function renderBuildPage() {
   // (2026-10-23, Andrew) The references first, a fine line, then the two
   // ways to practise - the builder (free) and the challenge (tested), with
   // the challenge's part scores under it.
+  card('Sentences to read', null, showReadSentence, 'A sentence or short exchange like the daily card\'s — another at a tap, romaji and English optional');
   [4, 3, 2].forEach(lvl => ((GRAMMAR.hubs[lvl] || {}).entries || []).filter(e => e.top).forEach(e =>
     card(e.label, lvl, e.card ? () => showGrammarCard(e.card) : () => { const fn = window[e.fn]; if (typeof fn === 'function') fn(); })));
   card('Desk sheets', null, showDeskSheets, 'Printable word lists for putting sentences together yourself');

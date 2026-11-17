@@ -82,6 +82,49 @@ function renderProverbSentence() {
   el.querySelectorAll('.sg-line').forEach(l => { l.onclick = () => speakJapanese(l.dataset.say); });
 }
 
+// SENTENCES TO READ (2026-11-17, Andrew): the same generator as the daily
+// card (sgGenerate), on its own page from さくぶん, with Show romaji / Show
+// English switches for this copy only - remembered on this device - so the
+// kana can be read on its own. The daily card always shows all three.
+const READ_SENTENCE_KEY = APP.storagePrefix + 'ReadSentence';
+let readSentenceLines = null, readSentenceOpts = { ro: true, en: true };
+try { Object.assign(readSentenceOpts, JSON.parse(localStorage.getItem(READ_SENTENCE_KEY) || '{}')); } catch (e) { /* defaults */ }
+
+function showReadSentence() {
+  newReadSentence();
+  showScreen('read-sentence');
+  window.scrollTo(0, 0);
+}
+
+function newReadSentence() {
+  const last = readSentenceLines && readSentenceLines[0].jp;
+  let lines = null;
+  for (let i = 0; i < 10; i++) { lines = sgGenerate(); if (lines && lines[0].jp !== last) break; }
+  readSentenceLines = lines;
+  renderReadSentence();
+}
+
+function toggleReadSentence(which) {
+  readSentenceOpts[which] = !readSentenceOpts[which];
+  try { localStorage.setItem(READ_SENTENCE_KEY, JSON.stringify(readSentenceOpts)); } catch (e) { /* this visit only */ }
+  renderReadSentence();
+}
+
+function renderReadSentence() {
+  const el = document.getElementById('read-sentence'), bt = document.getElementById('read-sentence-buttons');
+  if (!el || !bt) return;
+  const lines = readSentenceLines;
+  el.innerHTML = !lines ? '<div class="sg-en">No sentence could be made from the words taught so far.</div>'
+    : '<div class="proverb-sentence-label">' + (lines.length > 1 ? 'A short exchange' : 'A sentence to read') + '</div>'
+      + lines.map(l => `<div class="sg-line" data-say="${sayParticles(l.jp)}"><div class="sg-jp">${markSmallKana(l.jp)}</div>`
+        + (readSentenceOpts.ro ? `<div class="sg-ro">${l.ro}</div>` : '') + (readSentenceOpts.en ? `<div class="sg-en">${l.en}</div>` : '') + '</div>').join('');
+  el.querySelectorAll('.sg-line').forEach(l => { l.onclick = () => speakJapanese(l.dataset.say); });
+  const btn = (text, fn, main) => `<button type="button" class="ds-btn${main ? ' ds-btn-main' : ''}" onclick="${fn}">${text}</button>`;
+  bt.innerHTML = btn('Another one', 'newReadSentence()', true)
+    + btn(readSentenceOpts.ro ? tx('sb.hideRomaji') : tx('sb.showRomaji'), "toggleReadSentence('ro')")
+    + btn(readSentenceOpts.en ? tx('sb.hideEnglish') : tx('sb.showEnglish'), "toggleReadSentence('en')");
+}
+
 // Each panel gets its own colour from the slot palette, picked at random
 // every time (2026-10-22), so the card looks a little different each day.
 const DAILY_COLOURS = ['--slot-1', '--slot-2', '--slot-3', '--slot-4', '--slot-5', '--slot-6'];
