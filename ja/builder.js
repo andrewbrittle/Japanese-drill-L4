@@ -35,6 +35,9 @@ function sbNewTargetBeing() {
 // Answer it targets. Doing / Going / Giving: the statement about you, asked
 // about one part. Being: "Xは どうですか" (how is it?) or "Xは どんな まちですか"
 // (what kind of town?), answered without the topic - saying it as well is fine.
+// And (L4 Lesson 2, 17 Nov 2026) the class's yes / no question, "Xは たかい
+// ですか": answered with that adjective, yes or no as you like - はい、たかいです
+// or いいえ、(あまり) たかくないです. The はい / いいえ is shown, not built.
 function sbNewTargetAnswer() {
   if (sbMode !== 'being') {
     for (let i = 0; i < 40; i++) { const t = sbNewTarget({ answer: true }); if (t) return t; }
@@ -47,6 +50,7 @@ function sbNewTargetAnswer() {
   }
   if (!w) return null;
   w.tense = 'hab'; // the question is ですか, so the answer is now (it could come out でした)
+  if (!w.adj && !SB_COLOURS.includes(w.comp.jp) && sgChance(0.5)) w.yn = true;
   return sbBeingAnswerTarget(w);
 }
 
@@ -59,7 +63,9 @@ function sbBeingAnswerTarget(w) {
   const top = w.subj.segs[0];
   const tj = l3cJp(top), tro = top.ro;
   const be = /^the \S.*s$/i.test(w.topicEn) && !/(ss|us)$/i.test(w.topicEn) ? 'are' : 'is';
-  const question = w.adj
+  const question = w.yn
+    ? { jp: `${tj} ${w.comp.jp}ですか。`, romaji: sgCap(`${tro} ${w.comp.ro} desu ka?`), en: `${sgCap(be)} ${w.topicEn.replace(/^The /, 'the ')} ${w.comp.en}?` }
+    : w.adj
     ? { jp: `${tj} どんな ${w.comp.jp}ですか。`, romaji: sgCap(`${tro} donna ${w.comp.ro} desu ka?`), en: `What kind of ${w.comp.en} ${be} ${w.topicEn}?` }
     : { jp: `${tj} どうですか。`, romaji: sgCap(`${tro} dou desu ka?`), en: `How ${be} ${w.topicEn}?` };
   const slots = {};
@@ -67,7 +73,10 @@ function sbBeingAnswerTarget(w) {
   if (w.adj) { const it = l3TaughtItem(w.adj.jp); slots[4] = { word: w.adj.jp, ro: w.adj.ro, en: w.adj.en, key: it ? it.jp + '|' + it.en : null }; }
   { const it = l3TaughtItem(w.comp.jp); slots[5] = { word: w.comp.jp, ro: w.comp.ro, en: w.comp.en, key: it ? it.jp + '|' + it.en : null }; }
   slots[6] = { word: 'です', ro: 'desu', en: 'is / am / are', key: null, end: ex.endIdx, q: false };
-  return { slots, en: l3cEnPlain(ex.enM), jp: ex.jp, romaji: ex.romaji, meImplied: false, optional0: tj.replace(/は$/, ''), say: ex.parts.map(p => p.jp).join(''), being: w.kind, question, beingW: w };
+  // A yes / no answer starts はい、 or いいえ、 - shown and said, not built.
+  const yn = w.yn ? (w.neg ? ['いいえ、', 'Iie, ', 'No, '] : ['はい、', 'Hai, ', 'Yes, ']) : ['', '', ''];
+  const en = l3cEnPlain(ex.enM);
+  return { slots, en: yn[2] + (yn[2] ? en.replace(/^The /, 'the ') : en), jp: yn[0] + ex.jp, romaji: yn[1] + (yn[1] ? ex.romaji.charAt(0).toLowerCase() + ex.romaji.slice(1) : ex.romaji), meImplied: false, optional0: tj.replace(/は$/, ''), say: yn[0] + ex.parts.map(p => p.jp).join(''), being: w.kind, question, beingW: w };
 }
 
 // Being's Answer it is yours to answer (Andrew, 11 Nov): "How is London?" or
@@ -95,6 +104,7 @@ function sbBeingAdopt(S) {
   const a = w.adj ? n(S[4]) : n(S[5]), deg = n(S[2]);
   if (!a || !sbBeingAnswerAdjs(w).includes(a)) return;
   if (w.adj && n(S[5]) !== sbNorm(w.comp.jp)) return;
+  if (w.yn && a !== sbNorm(w.comp.jp)) return; // yes / no: about the adjective asked
   // The describing word fits, so it's yours. What goes with it follows it:
   // とても / あまり if they can go with it (not with a colour), and the
   // ending that suits - so if the rest doesn't hang together, what's marked
