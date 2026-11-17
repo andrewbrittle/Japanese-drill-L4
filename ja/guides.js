@@ -262,9 +262,13 @@ function renderStudyGuide() {
   closeFold();
   body.innerHTML = html;
   sgMarkWideTables(body);
-  body.querySelectorAll('.sg-w').forEach(el => {
-    const w = STUDY_GUIDES.words[el.dataset.k];
+  const blocks = [...body.querySelectorAll('.sg-w')];
+  blocks.forEach((el, i) => {
+    let w = STUDY_GUIDES.words[el.dataset.k];
     if (!w) return;
+    // ありません straight after じゃ / では is "isn't", not "there isn't" (17 Nov 2026).
+    const prev = blocks[i - 1] && STUDY_GUIDES.words[blocks[i - 1].dataset.k];
+    if (w.base === 'あります' && /^ありません(でした)?$/.test(w.jp) && prev && /(じゃ|では)$/.test(prev.jp)) w = Object.assign({}, w, { copula: true });
     attachTilePeek(el, { jp: w.jp, romaji: w.r || '', en: w.e || '', guideWord: w, speakAs: w.kind === 'particle' ? ({ 'は': 'わ', 'へ': 'え' })[w.jp] : undefined });
   });
 }
@@ -276,6 +280,24 @@ function studyGuidePeekFill(b, item) {
     + '<div class="peek-hint"><span class="peek-arrow">↑</span> slide here for the meaning</div>';
 }
 
+// What a verb or adjective form means as it stands (17 Nov 2026, Andrew):
+// おもしろくないです is "isn't interesting", not the dictionary form's
+// "interesting / fun" - which stays, with the dictionary form, below.
+function sgFormEn(w) {
+  if (w.copula) return /でした$/.test(w.jp) ? "wasn't (with じゃ / では)" : "isn't (with じゃ / では)";
+  if (!w.end || !w.base || !w.e) return '';
+  const F = LANG.forms;
+  if (w.kind === 'adj') {
+    const a = F.adjEnWord(w.e);
+    return { い: a, いです: a, くない: "isn't " + a, くないです: "isn't " + a, かった: 'was ' + a, かったです: 'was ' + a, くなかった: "wasn't " + a, くなかったです: "wasn't " + a }[w.end] || '';
+  }
+  if (w.kind === 'verb') {
+    const v = F.verbEnglishForms(w.e);
+    return { ます: v.nonPastAff, ません: v.nonPastNeg, ました: v.pastAff, ませんでした: v.pastNeg, ましょう: v.lets, ましょうか: 'shall we ' + v.nonPastAff + '?', ませんか: v.invite, たい: v.taiAff, たいです: v.taiAff, たくない: v.taiNeg, たくないです: v.taiNeg, たかった: v.taiPast, たかったです: v.taiPast }[w.end] || '';
+  }
+  return '';
+}
+
 // The full version (slide and let go): romaji, English, what the particle
 // or ending does, and for a verb or adjective form, its dictionary form.
 function showStudyGuideWord(w) {
@@ -284,11 +306,14 @@ function showStudyGuideWord(w) {
   if (!overlay || !body) return;
   const kindLabel = { particle: 'Particle', ending: 'Ending', name: 'Name' }[w.kind] || '';
   let h = `<div class="vf-title" data-say="${sgEsc(w.kind === 'particle' && ({ 'は': 'わ', 'へ': 'え' })[w.jp] || w.jp)}">${sgJp(w.jp)}</div>`;
-  h += `<div class="vf-title-sub">${sgEsc(w.r || '')}${w.e ? ' · ' + sgEsc(w.e) : ''}</div>`;
-  if (w.end && w.base) {
+  const formEn = sgFormEn(w);
+  h += `<div class="vf-title-sub">${sgEsc(w.r || '')}${formEn || w.e ? ' · ' + sgEsc(formEn || w.e) : ''}</div>`;
+  if (w.copula) {
+    h += `<div class="vf-note">After じゃ or では, ありません makes "isn't": しずかじゃ ありません — isn't quiet. (On its own, ありません is "there isn't".)</div>`;
+  } else if (w.end && w.base) {
     h += `<div class="vf-section">${sgJp(w.stem)}<span class="sg-end">${sgJp(w.end)}</span></div>`;
     h += `<div class="vf-note"><strong>${sgJp(w.end)}</strong> — ${sgEsc(w.g || '')}</div>`;
-    h += `<div class="vf-note">Dictionary form: ${sgJp(w.base)}</div>`;
+    h += `<div class="vf-note">Dictionary form: ${sgJp(w.base)}${formEn && w.e ? ' — ' + sgEsc(w.e) : ''}</div>`;
   } else if (w.g) {
     if (kindLabel) h += `<div class="vf-section">${kindLabel}</div>`;
     h += `<div class="vf-note">${sgEsc(w.g)}</div>`;
@@ -296,7 +321,7 @@ function showStudyGuideWord(w) {
     h += `<div class="vf-section">${kindLabel}</div>`;
   }
   // A verb the app knows: its forms window is one tap away.
-  const base = w.kind === 'verb' ? (w.base || w.jp) : null;
+  const base = w.kind === 'verb' && !w.copula ? (w.base || w.jp) : null;
   const vItem = base ? sgFindVocabItem(base) : null;
   if (vItem && typeof isVerbItem === 'function' && isVerbItem(vItem)) {
     h += '<button type="button" class="ds-btn sg-forms-btn" id="sg-forms-btn">All its forms</button>';
