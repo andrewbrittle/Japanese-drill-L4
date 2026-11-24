@@ -24,6 +24,8 @@ window.JP_KANJI_SEEN = {
     '名', '東', '京', '国', '町', '花',
     // L4 Lesson 2 (17 Nov): the handout's Japanese copy (readings over them).
     '賑', '静', '綺', '麗', '仕', '事', '友',
+    // L4 Lesson 3 (24 Nov).
+    '安', '高', '家', '母', '生', '活', '田', '中',
   ],
   words: [
     // L4 Lesson 1 (10 Nov).
@@ -31,5 +33,7 @@ window.JP_KANJI_SEEN = {
     '易しい', '忙しい', '親切', '元気', '有名', '会社', '日本語',
     // L4 Lesson 2 (17 Nov).
     '賑やか', '静か', '暇', '綺麗', '仕事', '友だち', '日本人',
+    // L4 Lesson 3 (24 Nov).
+    '生活', '安い', '高い', '家', '母', '車',
   ],
 };

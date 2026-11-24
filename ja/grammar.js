@@ -289,7 +289,7 @@ window.JP_DRILL_GRAMMAR = {
       ["note", "Coming later in the course: い-words take <strong>かったです</strong> (たかかったです — was expensive) and <strong>くなかったです</strong>; な-words take でした / じゃありませんでした, like nouns. The app already uses them — the Adjective forms drill on the dice page has all five forms."],
     ] },
     "adj-extras-l4": { title: "とても / あまり, どう / どんな, 〜が", blocks: [
-      ["note", "Three small words that come with adjectives. とても and あまり were Lesson 2; どんな was Lesson 1; どう and 〜が are still a <strong>preview</strong>."],
+      ["note", "Small words that come with adjectives: どんな was Lesson 1; とても and あまり Lesson 2; どう, 〜が and そして Lesson 3."],
       ["heading", "とても (very) and あまり (not very)"],
       ["ex", "にほんごは とても おもしろいです。", "Nihongo wa totemo omoshiroi desu.", "Japanese is very interesting."],
       ["ex", "きょうは あまり さむくないです。", "Kyou wa amari samukunai desu.", "It isn't very cold today."],
@@ -302,6 +302,7 @@ window.JP_DRILL_GRAMMAR = {
       ["ex", "にほんの たべものは おいしいですが、たかいです。", "Nihon no tabemono wa oishii desu ga, takai desu.", "Japanese food is delicious, but expensive."],
       ["ex", "しごとは いそがしいですが、おもしろいです。", "Shigoto wa isogashii desu ga, omoshiroi desu.", "Work is busy, but interesting."],
       ["note", "そして joins two things that go the same way: きれいです。そして、しずかです。 (It's pretty. And it's quiet.)"],
+      ["note", "So: good and good (or bad and bad) → そして, a new sentence. Good and bad → が, one sentence. Answering どうですか with two adjectives is the class's favourite: べんりです。そして きれいです。 / たかいですが、いいです。"],
     ] },
     "word-parts": { title: "Words built from parts", blocks: [
       ["note", "Lots of Japanese words are two words you already know, joined. Spot the parts and a new word often explains itself."],

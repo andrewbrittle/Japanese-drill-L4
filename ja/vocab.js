@@ -1315,7 +1315,7 @@ window.JP_DRILL_VOCAB = {
       {jp:'むずかしい', romaji:'muzukashii', en:'difficult', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'難しい', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'やさしい', romaji:'yasashii', en:'easy / kind (people)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'易しい', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'ひくい', romaji:'hikui', en:'low, short (height)', tags:['L4','adjectives-l4','adjectives','taught','l4-1'], altForm:'低い', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'たのしい', romaji:'tanoshii', en:'fun, enjoyable', tags:['L4','adjectives-l4','adjectives','taught','l4-preview'], altForm:'楽しい', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'たのしい', romaji:'tanoshii', en:'fun, enjoyable', tags:['L4','adjectives-l4','adjectives','taught','l4-3'], altForm:'楽しい', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'くろい', romaji:'kuroi', en:'black', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'黒い', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'あおい', romaji:'aoi', en:'blue', tags:['L4','adjectives-l4','adjectives','taught','l4-1','colours'], altForm:'青い', altIsStandard:true, dateAdded:'2026-11-04'},
       // Lesson 1 (2026-11-10): the rest of the class charts and colour sheet.
@@ -1353,11 +1353,11 @@ window.JP_DRILL_VOCAB = {
       {jp:'ひと', romaji:'hito', en:'person', tags:['L4','general-l4','taught','l4-1'], altForm:'人', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'さくら', romaji:'sakura', en:'cherry blossom', tags:['L4','general-l4','taught','l4-1'], altForm:'桜', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'ところ', romaji:'tokoro', en:'place', tags:['L4','general-l4','taught','l4-1'], altForm:'所', altIsStandard:true, dateAdded:'2026-11-04'},
-      {jp:'せいかつ', romaji:'seikatsu', en:'(daily) life', tags:['L4','general-l4','taught','l4-preview'], altForm:'生活', altIsStandard:true, dateAdded:'2026-11-04'},
+      {jp:'せいかつ', romaji:'seikatsu', en:'(daily) life', tags:['L4','general-l4','taught','l4-3'], altForm:'生活', altIsStandard:true, dateAdded:'2026-11-04'},
       {jp:'とても', romaji:'totemo', en:'very', tags:['L4','general-l4','taught','l4-1'], dateAdded:'2026-11-04'},
-      {jp:'〜が', romaji:'~ga', en:'but (〜ですが、〜です)', tags:['L4','general-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'そろそろ しつれいします', romaji:'sorosoro shitsurei shimasu', en:'I should be going (politely leaving)', tags:['L4','general-l4','phrases-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
-      {jp:'また いらっしゃって ください', romaji:'mata irasshatte kudasai', en:'please come again', tags:['L4','general-l4','phrases-l4','taught','l4-preview'], dateAdded:'2026-11-04'},
+      {jp:'〜が', romaji:'~ga', en:'but (〜ですが、〜です)', tags:['L4','general-l4','taught','l4-3'], dateAdded:'2026-11-04'},
+      {jp:'そろそろ しつれいします', romaji:'sorosoro shitsurei shimasu', en:'I should be going (politely leaving)', tags:['L4','general-l4','phrases-l4','taught','l4-3'], dateAdded:'2026-11-04'},
+      {jp:'また いらっしゃって ください', romaji:'mata irasshatte kudasai', en:'please come again', tags:['L4','general-l4','phrases-l4','taught','l4-3'], dateAdded:'2026-11-04'},
       // Lesson 1 (2026-11-10): これ (taught early on, now in the class's
       // これは おおきい かばんです), nouns from the adjective charts, the colour
       // sheet, the practices and the listening; the tea-offering phrases.
@@ -1394,6 +1394,17 @@ window.JP_DRILL_VOCAB = {
       {jp:'クラス', romaji:'kurasu', en:'class', tags:['L4','general-l4','taught','l4-2'], dateAdded:'2026-11-17'},
       {jp:'にほんじん', romaji:'nihonjin', en:'Japanese (person)', tags:['L4','general-l4','taught','l4-2'], altForm:'日本人', altIsStandard:true, dateAdded:'2026-11-17'},
       {jp:'どらやき', romaji:'dorayaki', en:'dorayaki (pancakes with sweet bean filling)', tags:['L4','general-l4','taught','l4-2'], dateAdded:'2026-11-17'},
+      // Lesson 3 (2026-11-24): 〜が (but) and そして, どう, the question words
+      // (どれ now taught), the leaving dialogue. The preview's たのしい,
+      // せいかつ, 〜が and both leaving phrases are l4-3 now (were l4-preview).
+      {jp:'たいへん', romaji:'taihen', en:'hard, tough (a lot of work)', tags:['L4','adjectives-l4','adjectives','adj-na','taught','l4-3'], altForm:'大変', altIsStandard:true, dateAdded:'2026-11-24'},
+      {jp:'りょう', romaji:'ryou', en:'dormitory, company housing', tags:['L4','general-l4','taught','l4-3'], altForm:'寮', altIsStandard:true, dateAdded:'2026-11-24'},
+      {jp:'ロボット', romaji:'robotto', en:'robot', tags:['L4','general-l4','taught','l4-3'], dateAdded:'2026-11-24'},
+      {jp:'ケース', romaji:'keesu', en:'case (a phone case)', tags:['L4','general-l4','taught','l4-3'], dateAdded:'2026-11-24'},
+      {jp:'Jポップ', romaji:'jei poppu', en:'J-pop', tags:['L4','general-l4','taught','l4-3'], dateAdded:'2026-11-24'},
+      {jp:'れんきゅう', romaji:'renkyuu', en:'holidays in a row, a long weekend', tags:['L4','general-l4','taught','l4-3'], altForm:'連休', altIsStandard:true, dateAdded:'2026-11-24'},
+      {jp:'もう いっぱい', romaji:'mou ippai', en:'another cup, one more (drink)', tags:['L4','general-l4','phrases-l4','taught','l4-3'], dateAdded:'2026-11-24'},
+      {jp:'なら', romaji:'nara', en:'Nara (city)', tags:['L4','general-l4','taught','l4-3'], altForm:'奈良', altIsStandard:true, dateAdded:'2026-11-24'},
     ],
   },
   // みず (water) moved out to Level 2's General vocabulary in Week 6, now
@@ -2891,7 +2902,7 @@ window.JP_DRILL_VOCAB = {
       {jp:'なぜ', romaji:'naze', en:'why (more formal)', tags:['question-word','untaught','encountered'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
       {jp:'どう', romaji:'dou', en:'how', tags:['question-word','taught','encountered','L4','general-l4','l4-1'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
       {jp:'どっち', romaji:'dotchi', en:'which way / which one (of two)', tags:['question-word','untaught','encountered'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
-      {jp:'どれ', romaji:'dore', en:'which one (of three or more)', tags:['question-word','untaught','encountered','genki','genki-1-2'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
+      {jp:'どれ', romaji:'dore', en:'which one (of three or more)', tags:['question-word','taught','encountered','genki','genki-1-2','L4','general-l4','l4-3'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
       {jp:'どうやって', romaji:'dou yatte', en:'how (do you do it) / how does it work', tags:['question-word','untaught','encountered'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
       {jp:'どんな', romaji:'donna', en:'what kind of', tags:['question-word','taught','L3','frequency-l3','l3-2'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},
       {jp:'なにが', romaji:'nani ga', en:'what (as the subject)', tags:['question-word','untaught','encountered'], source:{location:'Instagram (@tokyowords.jp)', date:'2026-08-20', file:'Screenshot_20260820-122400.jpg'}, dateAdded:'2026-08-22'},

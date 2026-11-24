@@ -845,7 +845,7 @@ function sgAdjSentence() {
 // 〜ですが、〜です: one good thing and one bad thing about the same topic.
 const SG_BUT_GOOD = ['おいしい', 'おもしろい', 'きれい', 'べんり', 'たのしい', 'やすい', 'しずか', 'にぎやか', 'あたらしい', 'ゆうめい', 'いい', 'すてき', 'かわいい'];
 
-const SG_BUT_BAD = ['たかい', 'むずかしい', 'ふるい', 'ちいさい', 'さむい', 'あつい', 'いそがしい'];
+const SG_BUT_BAD = ['たかい', 'むずかしい', 'ふるい', 'ちいさい', 'さむい', 'あつい', 'いそがしい', 'たいへん'];
 
 // Never "new, but old": opposites can't be joined with が.
 const SG_BUT_OPPOSITES = [['あたらしい', 'ふるい'], ['おおきい', 'ちいさい'], ['たかい', 'やすい'], ['しずか', 'にぎやか'], ['むずかしい', 'やさしい'], ['さむい', 'あつい'], ['いい', 'わるい']];
@@ -1173,7 +1173,11 @@ const BEING_THINGS = [
   { objs: ['とうきょう', 'きょうと', 'おおさか', 'ロンドン', 'マンチェスター', 'まち'], adjs: ['にぎやか', 'しずか', 'きれい', 'ゆうめい', 'おおきい', 'ちいさい', 'ふるい', 'あたらしい', 'いい', 'さむい', 'あつい'], place: true },
   { objs: ['えき', 'こうえん', 'レストラン', 'デパート', 'がっこう'], adjs: ['にぎやか', 'しずか', 'きれい', 'べんり', 'おおきい', 'ちいさい', 'あたらしい', 'ふるい', 'ゆうめい'] },
   { objs: ['すし', 'ケーキ', 'カレー', 'ピザ', 'パン', 'たべもの', 'おかし', 'りょうり', 'おにぎり', 'やきとり', 'どらやき'], adjs: ['おいしい', 'たかい', 'やすい'] },
-  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと', 'クラス'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'つまらない', 'たのしい'] },
+  { objs: ['にほんご', 'えいご', 'しゅくだい', 'しごと', 'クラス'], adjs: ['むずかしい', 'やさしい', 'おもしろい', 'つまらない', 'たのしい', 'たいへん'] },
+  // L4 Lesson 3 (2026-11-24): the class's どうですか topics.
+  { objs: ['せいかつ'], adjs: ['たのしい', 'いそがしい', 'たいへん', 'おもしろい'] },
+  { objs: ['りょう'], adjs: ['あたらしい', 'ふるい', 'きれい', 'しずか', 'にぎやか', 'おおきい', 'ちいさい', 'べんり'] },
+  { objs: ['ロボット'], adjs: ['おもしろい', 'たかい', 'べんり', 'おおきい', 'ちいさい', 'あたらしい'], adjNoun: true },
   { objs: ['テスト', 'しけん'], adjs: ['むずかしい', 'やさしい', 'ながい', 'みじかい'], adjNoun: true },
   // L4 Lesson 2 (2026-11-17): the things the class asked about.
   { objs: ['パソコン', 'けいたい'], adjs: ['べんり', 'あたらしい', 'ふるい', 'おおきい', 'ちいさい', 'たかい', 'やすい'], adjNoun: true },
@@ -1201,7 +1205,7 @@ const BEING_DEGREE = { とても: { ro: 'totemo', en: 'very' }, あまり: { ro:
 
 // English for an adjective (first meaning, before any comma or slash).
 // Topics whose English isn't "the" + the word list's first meaning.
-const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town', ふじさん: 'Mount Fuji', くに: 'the country', きゅうりょう: 'the salary', りょうり: 'the food' };
+const BEING_TOPIC_EN = { にほんご: 'Japanese', えいご: 'English', しごと: 'work', しゅくだい: 'the homework', まち: 'the town', ふじさん: 'Mount Fuji', くに: 'the country', きゅうりょう: 'the salary', りょうり: 'the food', せいかつ: 'life', りょう: 'the dormitory' };
 
 function beingTopicEn(o) {
   if (BEING_TOPIC_EN[o]) return BEING_TOPIC_EN[o];
