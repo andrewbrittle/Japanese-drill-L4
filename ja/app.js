@@ -130,7 +130,7 @@ window.APP = {
   },
   onTileDrill: (key, cat) => { drillByMeaning = cat.noMeaningMode ? false : !!vocabTileDrillMode[key]; },
   // Screens: what happens on leaving one, which tab is lit, the すうじ tab.
-  beforeShowScreen: id => { if (typeof sgReaderClose === 'function') { sgReaderClose(); tpClose(); } if (id === 'settings' && typeof voicesFill === 'function') voicesFill(); jaBeforeShowScreen(id); },
+  beforeShowScreen: id => { if (typeof sgReaderClose === 'function') sgReaderClose(); if (id === 'settings' && typeof voicesFill === 'function') voicesFill(); jaBeforeShowScreen(id); },
   pillFor: id => jaPillFor(id),
   onShowScreen: id => jaOnShowScreen(id),
   // A drill started with no deck is kana, from the kana settings; Drill
@@ -153,6 +153,8 @@ window.APP = {
   peekFill: (b, item) => item.guideWord ? studyGuidePeekFill(b, item) : jaPeekFill(b, item),
   peekSlide: item => item.guideWord ? () => showStudyGuideWord(item.guideWord) : isVerbItem(item) ? () => showVerbFormsPopup(item) : null,
   latestWordsDefault: '1w',
+  // Play through (core/playthrough.js): more time per kana, for the drawing.
+  playThrough: { perLetter: 120 },
   // Private word lists (the Genki file): its format, and what a word must have.
   // The single kanji share their score with Kanji Cards (same site, so the
   // same storage): every 'card:<n>' key lives in Cards' store (core.js,

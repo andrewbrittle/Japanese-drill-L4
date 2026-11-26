@@ -1491,6 +1491,7 @@ function showScreen(id) {
   // Anything an app does on leaving a screen (APP.beforeShowScreen -
   // Japanese: stop the sentence-order playback, turn sideways).
   if (APP.beforeShowScreen) APP.beforeShowScreen(id);
+  if (typeof tpClose === 'function') tpClose();   // Play through (core/playthrough.js)
   if (id === 'match-settings' || (APP.screens[id] && APP.screens[id].vocabRoot)) lastVocabRoot = id;
   navRecord(id);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));

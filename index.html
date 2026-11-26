@@ -1585,23 +1585,23 @@
   .voice-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: center; margin-top: 10px; }
   .voice-row label { grid-column: 1 / -1; font-size: 13px; color: var(--text-muted); }
   .voice-row select { min-width: 0; width: 100%; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; font-size: 15px; font-family: inherit; }
-  .sg-read-open { display: block; margin: 0.2rem 0 0.6rem; }
-  .sg-reading-on .sg-read-open, .tp-on .sg-read-open { visibility: hidden; }
-  #screen-vocab-tile-selection.tp-on { padding-bottom: 7rem; }
-  #vocab-tile-grid .kana-ref-card.tp-current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .play-open { display: block; margin: 0.2rem 0 0.6rem; }
+  .sg-reading-on .play-open, .play-on .play-open { visibility: hidden; }
+  #screen-vocab-tile-selection.play-on { padding-bottom: 7rem; }
+  #vocab-tile-grid .kana-ref-card.play-current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
   .sg-reading-on .sg-body [data-u] { cursor: pointer; }
   .sg-body .sg-reading { background: var(--accent-dim); border-radius: 6px; box-shadow: 0 0 0 5px var(--accent-dim); }
   .sg-table tr.sg-reading { box-shadow: none; }
   .sg-r.sg-speaking { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 5px; }
   #screen-study-guide.sg-reading-on { padding-bottom: 7rem; }
-  .sg-read-bar { display: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 900; width: min(560px, calc(100% - 24px)); background: var(--surface2); border: 1px solid var(--border-hover); border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.35); padding: 6px 8px; }
-  .sg-read-bar.show { display: block; }
-  .sg-read-msg { font-size: 13px; color: var(--text-muted); text-align: center; padding: 4px 6px 2px; }
-  .sg-read-btns { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
-  .sg-read-btns button { flex: 1 1 0; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 10px; color: var(--text-muted); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 700; padding: 0; }
-  .sg-read-btns button:active { background: var(--accent-dim); }
-  .sg-read-btns .sg-read-play { color: var(--accent); flex-grow: 1.4; }
-  .sg-read-btns .sg-read-speed { font-size: 13px; }
+  .play-bar { display: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 900; width: min(560px, calc(100% - 24px)); background: var(--surface2); border: 1px solid var(--border-hover); border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.35); padding: 6px 8px; }
+  .play-bar.show { display: block; }
+  .play-msg { font-size: 13px; color: var(--text-muted); text-align: center; padding: 4px 6px 2px; }
+  .play-btns { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
+  .play-btns button { flex: 1 1 0; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 10px; color: var(--text-muted); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 700; padding: 0; }
+  .play-btns button:active { background: var(--accent-dim); }
+  .play-btns .play-play { color: var(--accent); flex-grow: 1.4; }
+  .play-btns .play-speed { font-size: 13px; }
   .vf-note { font-size: 12px; color: var(--text-dim); margin: 0.5rem 0 0.9rem; line-height: 1.4; }
   /* Kana stroke-order bubble (2026-10-16, styles from the Kanji Strokes app). */
   .tile-peek-bubble.peek-kana { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -1833,7 +1833,7 @@
 
     <div style="text-align:center; font-size:12px; color:var(--accent); margin-top:0.75rem;">Any problems: Andrew 07973 835165</div>
     <div style="text-align:center; font-size:11px; color:var(--text-dim); margin-top:0.5rem;">Kana stroke order from <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener" style="color:inherit;">KanjiVG</a> © Ulrich Apel, CC BY-SA 3.0.</div>
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261126.003</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">L4 · v261126.004</div>
   </div>
 
   <!-- Katakana settings screen -->
@@ -2071,7 +2071,6 @@
       <div class="toggle"></div>
     </div>
     <div class="settings-sub" id="vocab-tile-selection-sub">Tap a word to select it for drilling.</div>
-    <button type="button" class="ds-btn ds-btn-main sg-read-open" onclick="tpOpen()">Play through</button>
 
     <div class="tile-select-actions-row">
       <div class="group-card" id="vocab-tile-select-all-card" onclick="toggleSelectAllVocabTiles()" style="cursor:pointer;">
@@ -2089,17 +2088,6 @@
     </div>
 
     <div id="vocab-tile-grid"></div>
-    <!-- Play through (26 Nov 2026) - see ja/guides.js. -->
-    <div class="sg-read-bar" id="tp-bar">
-      <div class="sg-read-msg" id="tp-msg" style="display:none"></div>
-      <div class="sg-read-btns">
-        <button type="button" onclick="tpStep(-1)" aria-label="Previous word" title="Previous word"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg></button>
-        <button type="button" class="sg-read-play" id="tp-play" onclick="tpToggle()" aria-label="Play"></button>
-        <button type="button" onclick="tpStep(1)" aria-label="Next word" title="Next word"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 5 16 12 9 19"/></svg></button>
-        <button type="button" class="sg-read-speed" id="tp-speed" onclick="tpSpeedNext()" aria-label="Speed" title="Speed">1×</button>
-        <button type="button" onclick="tpClose()" aria-label="Stop" title="Stop"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
-      </div>
-    </div>
 
     <div class="group-card" id="vocab-tile-drill-mode-card" onclick="toggleVocabTileDrillMode()" style="cursor:pointer;">
       <div class="group-info">
@@ -2648,19 +2636,19 @@
   <div class="screen" id="screen-study-guide">
     <div class="settings-title" id="study-guide-title">Study guide</div>
     <div class="settings-sub">Hold any Japanese word for its romaji; slide towards the bubble and let go for the meaning.</div>
-    <button type="button" class="ds-btn ds-btn-main sg-read-open" onclick="sgReaderOpen()">Read it to me</button>
+    <button type="button" class="ds-btn ds-btn-main play-open" onclick="sgReaderOpen()">Read it to me</button>
     <div class="sg-body" id="study-guide-body"></div>
     <button class="btn-secondary" onclick="navBack()">← Back</button>
     <!-- Read aloud (26 Nov 2026) - see ja/guides.js. Tap a line to read from it. -->
-    <div class="sg-read-bar" id="sg-read-bar">
-      <div class="sg-read-msg" id="sg-read-msg" style="display:none"></div>
-      <div class="sg-read-btns">
+    <div class="play-bar" id="play-bar">
+      <div class="play-msg" id="play-msg" style="display:none"></div>
+      <div class="play-btns">
         <button type="button" onclick="sgReaderSection(-1)" aria-label="Previous part" title="Previous part"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="5" x2="5" y2="19"/><polyline points="19 5 11 12 19 19"/></svg></button>
         <button type="button" onclick="sgReaderStep(-1)" aria-label="Previous line" title="Previous line"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg></button>
-        <button type="button" class="sg-read-play" id="sg-read-play" onclick="sgReaderToggle()" aria-label="Play"></button>
+        <button type="button" class="play-play" id="play-play" onclick="sgReaderToggle()" aria-label="Play"></button>
         <button type="button" onclick="sgReaderStep(1)" aria-label="Next line" title="Next line"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 5 16 12 9 19"/></svg></button>
         <button type="button" onclick="sgReaderSection(1)" aria-label="Next part" title="Next part"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 5 13 12 5 19"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-        <button type="button" class="sg-read-speed" id="sg-read-speed" onclick="sgReaderSpeed()" aria-label="Speed" title="Speed">1×</button>
+        <button type="button" class="play-speed" id="play-speed" onclick="sgReaderSpeed()" aria-label="Speed" title="Speed">1×</button>
         <button type="button" onclick="sgReaderClose()" aria-label="Stop reading" title="Stop reading"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       </div>
     </div>
@@ -2703,33 +2691,34 @@
 </main>
 
 <!-- The course vocabulary (2026-10-08) - must load before the app script below. -->
-<script src="ja/vocab.js?v=261126.003"></script>
-<script src="ja/grammar.js?v=261126.003"></script>
-<script src="ja/kana-strokes.js?v=261126.003"></script>
+<script src="ja/vocab.js?v=261126.004"></script>
+<script src="ja/grammar.js?v=261126.004"></script>
+<script src="ja/kana-strokes.js?v=261126.004"></script>
 <script type="module">
-import ja from './lang/ja.js?v=261126.003';
+import ja from './lang/ja.js?v=261126.004';
 window.LANG = ja;
 </script>
-<script defer src="ui/en.js?v=261126.003"></script>
-<script defer src="core/text.js?v=261126.003"></script>
-<script defer src="ja/app.js?v=261126.003"></script>
-<script defer src="core/core.js?v=261126.003"></script>
-<script defer src="core/picker.js?v=261126.003"></script>
-<script defer src="core/questions.js?v=261126.003"></script>
-<script defer src="ja/numbers.js?v=261126.003"></script>
-<script defer src="ja/forms.js?v=261126.003"></script>
-<script defer src="ja/notes.js?v=261126.003"></script>
-<script defer src="ja/reading.js?v=261126.003"></script>
-<script defer src="ja/sentences.js?v=261126.003"></script>
-<script defer src="core/builder.js?v=261126.003"></script>
-<script defer src="ja/builder.js?v=261126.003"></script>
-<script defer src="ja/daily.js?v=261126.003"></script>
-<script defer src="ja/guides.js?v=261126.003"></script>
-<script defer src="ja/kana.js?v=261126.003"></script>
-<script defer src="ja/kanji-500.js?v=261126.003"></script>
-<script defer src="ja/kanji-seen.js?v=261126.003"></script>
-<script defer src="ja/kanji.js?v=261126.003"></script>
-<script defer src="ja/legacy.js?v=261126.003"></script>
-<script defer src="ja/questions.js?v=261126.003"></script>
+<script defer src="ui/en.js?v=261126.004"></script>
+<script defer src="core/text.js?v=261126.004"></script>
+<script defer src="ja/app.js?v=261126.004"></script>
+<script defer src="core/core.js?v=261126.004"></script>
+<script defer src="core/playthrough.js?v=261126.004"></script>
+<script defer src="core/picker.js?v=261126.004"></script>
+<script defer src="core/questions.js?v=261126.004"></script>
+<script defer src="ja/numbers.js?v=261126.004"></script>
+<script defer src="ja/forms.js?v=261126.004"></script>
+<script defer src="ja/notes.js?v=261126.004"></script>
+<script defer src="ja/reading.js?v=261126.004"></script>
+<script defer src="ja/sentences.js?v=261126.004"></script>
+<script defer src="core/builder.js?v=261126.004"></script>
+<script defer src="ja/builder.js?v=261126.004"></script>
+<script defer src="ja/daily.js?v=261126.004"></script>
+<script defer src="ja/guides.js?v=261126.004"></script>
+<script defer src="ja/kana.js?v=261126.004"></script>
+<script defer src="ja/kanji-500.js?v=261126.004"></script>
+<script defer src="ja/kanji-seen.js?v=261126.004"></script>
+<script defer src="ja/kanji.js?v=261126.004"></script>
+<script defer src="ja/legacy.js?v=261126.004"></script>
+<script defer src="ja/questions.js?v=261126.004"></script>
 </body>
 </html>
