@@ -8,7 +8,7 @@ window.APP = {
   // are found as they are. Never change it.
   storagePrefix: 'jpL4',
   backupName: 'japanese-drill-backup',
-  latestChangelog: '2026-11-24-L4',
+  latestChangelog: '2026-11-26-L4',
 
   vocabTabLabel: 'ことば',
   vocabPills: [],
@@ -130,7 +130,7 @@ window.APP = {
   },
   onTileDrill: (key, cat) => { drillByMeaning = cat.noMeaningMode ? false : !!vocabTileDrillMode[key]; },
   // Screens: what happens on leaving one, which tab is lit, the すうじ tab.
-  beforeShowScreen: id => jaBeforeShowScreen(id),
+  beforeShowScreen: id => { if (typeof sgReaderClose === 'function') sgReaderClose(); jaBeforeShowScreen(id); },
   pillFor: id => jaPillFor(id),
   onShowScreen: id => jaOnShowScreen(id),
   // A drill started with no deck is kana, from the kana settings; Drill

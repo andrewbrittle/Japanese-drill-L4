@@ -140,7 +140,7 @@ function sgJp(s) {
 
 const SG_TRAIL = /^[。、？！?!）)\].,:;]+/;
 
-function sgRunsHtml(runs) {
+function sgRunsHtml(runs, u) {
   const W = STUDY_GUIDES.words;
   // Punctuation right after a Japanese run (a closing bracket, a full stop)
   // is moved onto that run's last block, so it can't start a line alone.
@@ -153,7 +153,8 @@ function sgRunsHtml(runs) {
       runs[i][0] = x.slice(m.length);
     }
   }
-  return runs.map(([x, f]) => {
+  SG_READ.joinJa = null;
+  const out = runs.map(([x, f]) => {
     let h;
     if (typeof x === 'string') h = sgEsc(x);
     else {
@@ -183,8 +184,13 @@ function sgRunsHtml(runs) {
     }
     if (f && f.includes('b')) h = `<strong>${h}</strong>`;
     if (f && f.includes('i')) h = `<em>${h}</em>`;
+    // Read aloud: each run of a line the reader can read is one piece it
+    // says (English or Japanese), and lights while it's being said.
+    if (u != null) { const n = sgReadSeg(u, x); if (n != null) h = `<span class="sg-r" data-s="${n}">${h}</span>`; }
     return h;
   }).join('');
+  SG_READ.joinJa = null;
+  return out;
 }
 
 function sgRunsText(runs) {
@@ -197,6 +203,9 @@ function renderStudyGuide() {
   const body = document.getElementById('study-guide-body');
   if (!g || !body || !STUDY_GUIDES) return;
   document.getElementById('study-guide-title').textContent = g.title;
+  sgReaderClose();
+  SG_READ.units = []; SG_READ.segs = [];
+  const unit = heading => { SG_READ.units.push({ heading, segs: [] }); return SG_READ.units.length - 1; };
   // Blocks to HTML. Lists gather into <ul>/<ol>; everything under the
   // Answers heading folds away, one fold per sub-heading.
   let html = '';
@@ -213,7 +222,8 @@ function renderStudyGuide() {
     if (b.t === 'h2') {
       closeFold();
       inAnswers = /^answers\b/i.test(sgRunsText(b.runs).trim());
-      html += `<h3 class="sg-h2">${sgRunsHtml(b.runs)}</h3>`;
+      const u = unit(2);
+      html += `<h3 class="sg-h2" data-u="${u}">${sgRunsHtml(b.runs, u)}</h3>`;
       return;
     }
     if (b.t === 'h3') {
@@ -223,7 +233,8 @@ function renderStudyGuide() {
         foldOpen = true;
       } else {
         closeList();
-        html += `<h4 class="sg-h3">${sgRunsHtml(b.runs)}</h4>`;
+        const u = unit(3);
+        html += `<h4 class="sg-h3" data-u="${u}">${sgRunsHtml(b.runs, u)}</h4>`;
       }
       return;
     }
@@ -234,7 +245,8 @@ function renderStudyGuide() {
     if (b.t === 'ul2') {
       if (!list) { html += '<ul class="sg-list"><li class="sg-li-empty">'; list = 'ul'; }
       if (!sub) { html += '<ul class="sg-sub">'; sub = true; }
-      html += `<li>${sgRunsHtml(b.runs)}</li>`;
+      const u = unit(0);
+      html += `<li data-u="${u}">${sgRunsHtml(b.runs, u)}</li>`;
       return;
     }
     if (b.t === 'ul' || b.t === 'ol') {
@@ -242,22 +254,26 @@ function renderStudyGuide() {
       const tag = b.t === 'ol' ? 'ol' : 'ul';
       if (list !== tag) { closeList(); html += `<${tag} class="sg-list${tag === 'ol' ? ' sg-ol' : ''}">`; list = tag; }
       else { if (sub) { html += '</ul>'; sub = false; } html += '</li>'; }
-      html += `<li>${sgRunsHtml(b.runs)}`;
+      const u = unit(0);
+      html += `<li data-u="${u}">${sgRunsHtml(b.runs, u)}`;
       return;
     }
     closeList();
     if (b.t === 'table') {
-      html += '<div class="sg-table-wrap"><table class="sg-table">' + b.rows.map((row, i) =>
-        '<tr>' + row.map(c => {
+      html += '<div class="sg-table-wrap"><table class="sg-table">' + b.rows.map((row, i) => {
+        const u = unit(0);
+        return `<tr data-u="${u}">` + row.map(c => {
           // A short cell that's all Japanese (えいがを みませんか) stays on one
           // line, as in the PDF; a whole sentence still wraps between words.
           const tag = i ? 'td' : 'th', txt = sgRunsText(c).trim();
           const jpOnly = !/[A-Za-z]/.test(txt) && txt.length <= 12;
-          return `<${tag}${jpOnly ? ' class="sg-td-jp"' : ''}>${sgRunsHtml(c)}</${tag}>`;
-        }).join('') + '</tr>').join('') + '</table></div>';
+          return `<${tag}${jpOnly ? ' class="sg-td-jp"' : ''}>${sgRunsHtml(c, u)}</${tag}>`;
+        }).join('') + '</tr>';
+      }).join('') + '</table></div>';
       return;
     }
-    html += `<p class="sg-p">${sgRunsHtml(b.runs)}</p>`;
+    const u = unit(0);
+    html += `<p class="sg-p" data-u="${u}">${sgRunsHtml(b.runs, u)}</p>`;
   });
   closeFold();
   body.innerHTML = html;
@@ -357,3 +373,338 @@ window.addEventListener('resize', () => {
   const body = document.getElementById('study-guide-body');
   if (body && body.offsetParent) sgMarkWideTables(body);
 });
+
+// --- Read aloud (26 Nov 2026, Andrew) ---------------------------------------
+// The guide read to you while you read along: hearing each word as you see
+// it keeps the reading going past the kana you're still slow on. For
+// reading at the screen, not for listening with it off: the bar's buttons
+// and the lit line are the point, and the device's voice stops when the
+// screen locks anyway (the screen is kept awake while it reads).
+//
+// The guide is read line by line - a paragraph, a list item, a heading, a
+// table row - each line lit, and within it the piece being said (English
+// in an English voice, Japanese in the Japanese voice: one voice can't read
+// both). Lines in a folded answer are skipped until it's opened. Word by
+// word lighting was ruled out: browsers only report where a voice is for
+// some voices, and Japanese has no spaces to find the words by.
+//
+// One short utterance at a time, never pause()/resume(): Chrome's pause is
+// unreliable on Android and it cuts long speech off. So Pause stops and
+// remembers the line, and Play starts that line again. Holding a word (its
+// romaji bubble speaks it) pauses the reading; tapping a line reads from
+// there. Nothing is scored or stored except the speed.
+
+// joinJa: the piece just added, while only spaces have followed it - the
+// next piece in the same language joins it, so この パソコンは あたらしいです
+// is said in one breath with its own intonation, not as three words, and an
+// English sentence with a word in italics isn't cut in three.
+const SG_READ = { units: [], segs: [], joinJa: null };   // filled by renderStudyGuide
+const SG_READ_SPEED_KEY = APP.storagePrefix + 'GuideReadSpeed';
+const SG_READ_SPEEDS = [1, 0.85, 0.7, 1.15];
+let sgRead = null;   // { pos, playing, gen, el, segKey, utter, lock } while the bar is open
+
+// One piece to say: which line, and its text and language. Returns its
+// number, or null for nothing to say (a lone 〜, a dash).
+function sgReadSeg(u, x) {
+  const W = STUDY_GUIDES.words;
+  let lang, text;
+  if (typeof x === 'string') {
+    if (!x.trim()) return null;   // a space: the piece before can carry on past it
+    lang = 'en';
+    text = x.replace(/_{2,}/g, ' blank ').replace(/[→·]/g, ', ').replace(/\s\/\s/g, ' or ').replace(/[…✖✗★○◎△〜]/g, ' ')
+      .replace(/(^|\s)[-–—](?=\w)/g, '$1').replace(/\s+/g, ' ').trim();
+  } else {
+    lang = 'ja';
+    // A particle on its own is said as a particle: は "wa", へ "e".
+    const one = x.length === 1 && typeof x[0] === 'string' && W[x[0]];
+    if (one && one.kind === 'particle' && ({ 'は': 'わ', 'へ': 'え' })[one.jp]) text = ({ 'は': 'わ', 'へ': 'え' })[one.jp];
+    else text = x.map(it => typeof it === 'string' ? (W[it] || {}).jp || '' : it.t).join('');
+    text = text.replace(/[〜~…]/g, ' ').trim();
+  }
+  if (!/[\p{L}\p{N}]/u.test(text)) { SG_READ.joinJa = null; return null; }
+  const j = SG_READ.joinJa;
+  if (j != null && SG_READ.segs[j].lang === lang) { SG_READ.segs[j].text += ' ' + text; return j; }
+  SG_READ.segs.push({ u, lang, text });
+  const n = SG_READ.segs.length - 1;
+  SG_READ.units[u].segs.push(n);
+  SG_READ.joinJa = n;
+  return n;
+}
+
+function sgReadSpeed() {
+  try { const v = parseFloat(localStorage.getItem(SG_READ_SPEED_KEY)); if (SG_READ_SPEEDS.includes(v)) return v; } catch (e) { /* private mode */ }
+  return 1;
+}
+
+// English: a British voice on the device if there is one, the device's own
+// English voice otherwise. Japanese: the app's usual voice (LANG.pickVoice).
+function sgReadVoice(lang) {
+  const voices = SPEECH_SUPPORTED ? window.speechSynthesis.getVoices() : [];
+  if (lang === 'ja') return LANG.pickVoice(voices).voice;
+  const en = voices.filter(v => /^en/i.test(v.lang || ''));
+  const gb = en.filter(v => /^en[-_]gb/i.test(v.lang));
+  return gb.find(v => v.localService) || gb[0] || en.find(v => v.default) || en.find(v => v.localService) || en[0] || null;
+}
+
+function sgReadUnitEl(u) {
+  const body = document.getElementById('study-guide-body');
+  return body ? body.querySelector(`[data-u="${u}"]`) : null;
+}
+// A line can be read if it has something to say and isn't inside a closed
+// answer fold.
+function sgReadable(u) {
+  const un = SG_READ.units[u], el = sgReadUnitEl(u);
+  return !!(un && un.segs.length && el && !el.closest('details:not([open])'));
+}
+function sgReadFind(from, step) {
+  for (let u = from; u >= 0 && u < SG_READ.units.length; u += step) if (sgReadable(u)) return u;
+  return -1;
+}
+
+function sgReaderOpen() {
+  if (!SG_READ.units.length) return;
+  if (!sgRead) {
+    sgRead = { pos: sgReadFind(0, 1), playing: false, gen: 0, el: null, segKey: null, utter: null, lock: null };
+    document.getElementById('screen-study-guide').classList.add('sg-reading-on');
+    document.getElementById('sg-read-bar').classList.add('show');
+  }
+  sgReaderSync();
+  sgReaderPlay();
+}
+
+function sgReaderClose() {
+  if (!sgRead) return;
+  sgReaderPause();
+  sgReadLight(null, null);
+  sgRead = null;
+  const sc = document.getElementById('screen-study-guide');
+  if (sc) sc.classList.remove('sg-reading-on');
+  const bar = document.getElementById('sg-read-bar');
+  if (bar) bar.classList.remove('show');
+}
+
+function sgReaderMsg(text) {
+  const m = document.getElementById('sg-read-msg');
+  if (m) { m.textContent = text || ''; m.style.display = text ? '' : 'none'; }
+}
+
+function sgReaderSync() {
+  if (!sgRead) return;
+  const btn = document.getElementById('sg-read-play');
+  if (btn) {
+    btn.innerHTML = sgRead.playing ? SG_ICON.pause : SG_ICON.play;
+    btn.setAttribute('aria-label', sgRead.playing ? 'Pause' : 'Play');
+  }
+  const sp = document.getElementById('sg-read-speed');
+  if (sp) sp.textContent = sgReadSpeed() + '×';
+}
+
+// Light the line being read, and the piece of it being said.
+function sgReadLight(u, segN) {
+  if (!sgRead) return;
+  const el = u == null ? null : sgReadUnitEl(u);
+  if (sgRead.el !== el) {
+    if (sgRead.el) sgRead.el.classList.remove('sg-reading');
+    if (el) { el.classList.add('sg-reading'); sgReadScrollTo(el); }
+    sgRead.el = el;
+  }
+  // A joined Japanese piece is several spans with the same number.
+  const key = el && segN != null ? u + ':' + segN : null;
+  if (sgRead.segKey !== key) {
+    document.querySelectorAll('#study-guide-body .sg-speaking').forEach(x => x.classList.remove('sg-speaking'));
+    if (key) el.querySelectorAll(`.sg-r[data-s="${segN}"]`).forEach(x => x.classList.add('sg-speaking'));
+    sgRead.segKey = key;
+  }
+}
+// Keep the line in view, above the bar - only moving the page when the
+// line is near an edge, so it doesn't jump about while you read.
+function sgReadScrollTo(el) {
+  const r = el.getBoundingClientRect();
+  const bar = document.getElementById('sg-read-bar');
+  const bottom = window.innerHeight - (bar ? bar.offsetHeight : 0) - 24;
+  if (r.top < 70 || r.bottom > bottom) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+async function sgReadWake(on) {
+  if (!sgRead) return;
+  try {
+    if (on && !sgRead.lock && navigator.wakeLock) {
+      sgRead.lock = await navigator.wakeLock.request('screen');
+      if (!sgRead || !sgRead.playing) { sgRead && sgRead.lock && sgRead.lock.release(); if (sgRead) sgRead.lock = null; }
+    } else if (!on && sgRead.lock) { const l = sgRead.lock; sgRead.lock = null; l.release(); }
+  } catch (e) { /* no wake lock here - the screen may dim on its own */ }
+}
+
+function sgReaderPlay() {
+  if (!sgRead) return;
+  if (!soundAllowed()) { sgReaderMsg('Sound is off: tap the speaker at the top to turn it on.'); return; }
+  if (sgRead.pos < 0 || !sgReadable(sgRead.pos)) sgRead.pos = sgReadFind(Math.max(sgRead.pos, 0), 1);
+  if (sgRead.pos < 0) { sgRead.pos = sgReadFind(0, 1); sgReaderMsg('End of the guide.'); sgReadLight(sgRead.pos, null); return; }
+  sgReaderMsg('');
+  sgRead.playing = true;
+  sgReaderSync();
+  sgReadWake(true);
+  sgReadStartAt(sgRead.pos);
+}
+
+function sgReaderPause() {
+  if (!sgRead) return;
+  sgRead.gen++;
+  const was = sgRead.playing;
+  sgRead.playing = false;
+  sgRead.utter = null;
+  if (was) cancelSpeechIfBusy();
+  sgReadWake(false);
+  sgReadLight(sgRead.pos, null);
+  sgReaderSync();
+}
+
+function sgReaderToggle() {
+  if (!sgRead) return;
+  if (sgRead.playing) sgReaderPause(); else sgReaderPlay();
+}
+
+// Go to a line: reading carries on from it if it was reading.
+function sgReaderGo(u) {
+  if (!sgRead || u < 0) return;
+  sgRead.pos = u;
+  sgReaderMsg('');
+  if (sgRead.playing) sgReadStartAt(u);
+  else sgReadLight(u, null);
+}
+function sgReaderStep(step) {
+  if (!sgRead) return;
+  sgReaderGo(sgReadFind(sgRead.pos + step, step));
+}
+// The next heading, or back to the start of this part (and on to the one
+// before when already at its heading).
+function sgReaderSection(step) {
+  if (!sgRead) return;
+  let u = sgRead.pos;
+  if (step > 0) {
+    for (u = u + 1; u < SG_READ.units.length; u++) if (SG_READ.units[u].heading && sgReadable(u)) break;
+  } else {
+    for (u = u - 1; u >= 0; u--) if (SG_READ.units[u].heading && sgReadable(u)) break;
+  }
+  if (u >= 0 && u < SG_READ.units.length) sgReaderGo(u);
+}
+
+function sgReaderSpeed() {
+  const i = SG_READ_SPEEDS.indexOf(sgReadSpeed());
+  try { localStorage.setItem(SG_READ_SPEED_KEY, String(SG_READ_SPEEDS[(i + 1) % SG_READ_SPEEDS.length])); } catch (e) { /* private mode */ }
+  sgReaderSync();
+}
+
+// Say a line, piece by piece (English split at its sentences), then the
+// next readable line. Every step checks it's still the current reading
+// (gen), so a tap elsewhere never has two readings running at once.
+function sgReadStartAt(u) {
+  const gen = ++sgRead.gen;
+  const ss = window.speechSynthesis;
+  const busy = ss.speaking || ss.pending;
+  cancelSpeechIfBusy();
+  // Safari can drop speech queued straight after cancel().
+  setTimeout(() => sgReadLine(u, gen), busy ? 120 : 0);
+}
+
+function sgReadLine(u, gen) {
+  if (!sgRead || gen !== sgRead.gen) return;
+  if (!sgReadable(u)) {
+    const nx = sgReadFind(u + 1, 1);
+    if (nx < 0) return sgReadDone();
+    return sgReadLine(nx, gen);
+  }
+  sgRead.pos = u;
+  const parts = [];
+  SG_READ.units[u].segs.forEach(n => {
+    const s = SG_READ.segs[n];
+    if (s.lang === 'en') s.text.split(/(?<=[.!?:;])\s+/).forEach(t => { if (/[\p{L}\p{N}]/u.test(t)) parts.push({ n, lang: 'en', text: t }); });
+    else parts.push({ n, lang: 'ja', text: s.text });
+  });
+  sgReadLight(u, null);
+  sgReadPart(u, parts, 0, gen, false);
+}
+
+function sgReadPart(u, parts, k, gen, retried) {
+  if (!sgRead || gen !== sgRead.gen) return;
+  if (k >= parts.length) {
+    const nx = sgReadFind(u + 1, 1);
+    if (nx < 0) return sgReadDone();
+    setTimeout(() => sgReadLine(nx, gen), 200);
+    return;
+  }
+  if (!soundAllowed()) { sgReaderPause(); sgReaderMsg('Sound is off: tap the speaker at the top to turn it on.'); return; }
+  const p = parts[k];
+  sgReadLight(u, p.n);
+  const utter = new SpeechSynthesisUtterance(p.text);
+  const v = sgReadVoice(p.lang);
+  utter.lang = p.lang === 'ja' ? LANG.code : (v && v.lang) || 'en-GB';
+  if (v) utter.voice = v;
+  utter.rate = (p.lang === 'ja' ? (LANG.rate || 0.9) : 1) * sgReadSpeed();
+  sgRead.utter = utter;   // kept, or some browsers lose its end event
+  let started = false, done = false, quietSince = 0;
+  const next = () => {
+    if (done) return; done = true; clearInterval(watch);
+    if (!sgRead || gen !== sgRead.gen) return;
+    // A held word's bubble is speaking it: stop here, carry on with Play.
+    if (document.querySelector('#study-guide-body .sg-w.tile-peeking')) return sgReaderPause();
+    sgReadPart(u, parts, k + 1, gen, false);
+  };
+  utter.onstart = () => { started = true; };
+  utter.onend = next;
+  utter.onerror = e => {
+    if (done) return;
+    // Cut off by other speech (a held word) or by sound being turned off.
+    if (e && (e.error === 'interrupted' || e.error === 'canceled')) { done = true; clearInterval(watch); if (sgRead && gen === sgRead.gen) sgReaderPause(); return; }
+    next();
+  };
+  // Android browsers sometimes lose the end event, or never start: watch
+  // the speech itself. Not started in 2.5 s - clear it and try once more.
+  const t0 = Date.now();
+  const watch = setInterval(() => {
+    if (done || !sgRead || gen !== sgRead.gen) { clearInterval(watch); return; }
+    const ss = window.speechSynthesis;
+    if (ss.speaking && !ss.paused) { started = true; quietSince = 0; return; }
+    if (started) {
+      if (!quietSince) quietSince = Date.now();
+      else if (Date.now() - quietSince > 1200) next();
+    } else if (Date.now() - t0 > 2500) {
+      done = true; clearInterval(watch);
+      try { ss.cancel(); ss.resume(); } catch (e2) { /* speech unavailable */ }
+      if (retried) { sgReaderPause(); sgReaderMsg("The voice didn't start. Tap play to try again."); }
+      else setTimeout(() => sgReadPart(u, parts, k, gen, true), 150);
+    }
+  }, 400);
+  window.speechSynthesis.speak(utter);
+}
+
+function sgReadDone() {
+  if (!sgRead) return;
+  sgReaderPause();
+  sgRead.pos = sgReadFind(0, 1);
+  sgReadLight(null, null);
+  sgReaderMsg('End of the guide. Play starts it again.');
+}
+
+const SG_ICON = {
+  play: '<svg viewBox="0 0 24 24" width="22" height="22"><polygon points="7,4 20,12 7,20" fill="currentColor"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/></svg>',
+};
+
+// Tap a line while the bar is open: read from there. Not a fold's title,
+// and not the tap that ends holding a word.
+document.addEventListener('click', e => {
+  if (!sgRead) return;
+  const body = document.getElementById('study-guide-body');
+  if (!body || !body.contains(e.target) || e.target.closest('summary')) return;
+  if (typeof tilePeekSuppressClickUntil !== 'undefined' && Date.now() < tilePeekSuppressClickUntil) return;
+  const el = e.target.closest('[data-u]');
+  if (!el) return;
+  const u = +el.dataset.u;
+  if (!sgReadable(u)) return;
+  sgRead.pos = u;
+  sgReaderMsg('');
+  if (sgRead.playing) sgReadStartAt(u); else sgReaderPlay();
+});
+// Away from the app: stop (the voice is cut off anyway), keep the place.
+document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') sgReaderPause(); });
