@@ -441,10 +441,60 @@ function sgReadSpeed() {
 function sgReadVoice(lang) {
   const voices = SPEECH_SUPPORTED ? window.speechSynthesis.getVoices() : [];
   if (lang === 'ja') return LANG.pickVoice(voices).voice;
-  const en = voices.filter(v => /^en/i.test(v.lang || ''));
-  const gb = en.filter(v => /^en[-_]gb/i.test(v.lang));
-  return gb.find(v => v.localService) || gb[0] || en.find(v => v.default) || en.find(v => v.localService) || en[0] || null;
+  const want = chosenVoiceName('en');
+  return (want && voices.find(v => v.name === want)) || sgEnVoices(voices)[0] || null;
 }
+// English voices, best first: British, then the rest (ranked as for
+// Japanese - downloaded Premium / Enhanced first, novelty voices last).
+function sgEnVoices(voices) {
+  return [...LANG.rankVoices(voices, /^en[-_]gb/i, /Google|Daniel|Serena|Kate|Stephanie|Arthur|Martha/), ...LANG.rankVoices(voices, /^en(?![-_]gb)/i, /Google|Samantha/)];
+}
+
+// --- Settings > Voices (26 Nov 2026) ---
+// Browsers don't use the voices chosen in the computer's own settings (on a
+// Mac, Chrome picked a robotic Japanese voice and an old English one), so
+// each device can choose here: the Japanese voice (word tiles and guides)
+// and the English one (reading guides aloud). Kept on this device only;
+// Automatic is the best-sounding on offer.
+const VOICE_KEYS = { ja: APP.storagePrefix + 'VoiceJa', en: APP.storagePrefix + 'VoiceEn' };
+function chosenVoiceName(lang) {
+  try { return localStorage.getItem(VOICE_KEYS[lang]) || ''; } catch (e) { return ''; }
+}
+function voicesFill() {
+  if (!SPEECH_SUPPORTED) { const c = document.getElementById('voices-card'); if (c) c.style.display = 'none'; return; }
+  const voices = window.speechSynthesis.getVoices();
+  [['ja', LANG.rankVoices(voices, /^ja/i, /Kyoko|Google/)], ['en', sgEnVoices(voices)]].forEach(([lang, list]) => {
+    const sel = document.getElementById('voice-' + lang);
+    if (!sel) return;
+    const want = chosenVoiceName(lang);
+    const auto = list[0];
+    const seen = new Set();
+    sel.innerHTML = `<option value="">Automatic${auto ? ' (' + sgEsc(auto.name) + ')' : ''}</option>` + list.filter(v => !seen.has(v.name) && seen.add(v.name))
+      .map(v => `<option value="${sgEsc(v.name)}"${v.name === want ? ' selected' : ''}>${sgEsc(v.name)} · ${sgEsc(v.lang)}</option>`).join('');
+    if (want && !list.some(v => v.name === want)) sel.value = '';
+  });
+}
+function voiceSet(lang) {
+  const sel = document.getElementById('voice-' + lang);
+  try { if (sel.value) localStorage.setItem(VOICE_KEYS[lang], sel.value); else localStorage.removeItem(VOICE_KEYS[lang]); } catch (e) { /* private mode */ }
+  voiceTry(lang);
+}
+function voiceTry(lang) {
+  const msg = document.getElementById('voices-msg');
+  if (!soundAllowed()) { if (msg) msg.textContent = 'Sound is off: tap the speaker at the top to turn it on.'; return; }
+  if (msg) msg.textContent = '';
+  cancelSpeechIfBusy();
+  const u = new SpeechSynthesisUtterance(lang === 'ja' ? 'これは にほんごの こえです。' : 'This is the voice that reads the guides.');
+  const v = sgReadVoice(lang);
+  u.lang = lang === 'ja' ? LANG.code : (v && v.lang) || 'en-GB';
+  if (v) u.voice = v;
+  u.rate = lang === 'ja' ? (LANG.rate || 0.9) : 1;
+  setTimeout(() => window.speechSynthesis.speak(u), 60);
+}
+if (SPEECH_SUPPORTED && window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener('voiceschanged', () => {
+  const sc = document.getElementById('screen-settings');
+  if (sc && sc.classList.contains('active')) voicesFill();
+});
 
 function sgReadUnitEl(u) {
   const body = document.getElementById('study-guide-body');

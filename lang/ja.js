@@ -44,8 +44,18 @@ function displayHtml(text) {
   return [...String(text)].map(ch => SMALL_KANA.has(ch) ? '<span class="small-kana">' + ch + '</span>' : (ESC[ch] || ch)).join('');
 }
 
+// The voice chosen in Settings > Voices on this device (ja/guides.js), or
+// else the best-sounding one on offer: a downloaded Premium / Enhanced
+// voice, then Kyoko, then Google's, never the novelty ones a Mac lists
+// (Eddy, Grandpa, ...). Browsers ignore the system's chosen voice.
+const NOVELTY_VOICES = /^(Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Junior|Ralph|Fred|Kathy)\b/;
+function rankVoices(voices, langRe, prefer) {
+  const score = v => (/Premium|プレミアム/.test(v.name) ? 0 : /Enhanced|拡張/.test(v.name) ? 1 : prefer.test(v.name) ? 2 : NOVELTY_VOICES.test(v.name) ? 9 : 5);
+  return voices.filter(v => v.lang && langRe.test(v.lang)).map((v, i) => [score(v), i, v]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(x => x[2]);
+}
 function pickVoice(voices) {
-  const v = voices.find(x => x.lang && x.lang.toLowerCase().startsWith('ja'));
+  const want = typeof chosenVoiceName === 'function' ? chosenVoiceName('ja') : '';
+  const v = (want && voices.find(x => x.name === want)) || rankVoices(voices, /^ja/i, /Kyoko|Google/)[0];
   return { voice: v || null, fallback: false };
 }
 
@@ -427,6 +437,7 @@ export default {
   normalise,
   compareTyped,
   pickVoice,
+  rankVoices,
   forms: { VERB_FORM_KEYS, VERB_FORM_LABELS, ENGLISH_IRREGULAR_PAST, ENGLISH_DOUBLED_PAST, englishPastWord, verbEnglishForms, verbForms, adjIStem, ADJ_FORM_KEYS, ADJ_FORM_LABELS, adjEnWord, PARTICLE_SET, PARTICLE_ROMAJI },
   numbers: { HIRA_TO_ROMA, numReadingToRomaji, numToJapanese, HOUR_KANA, HOUR_ROMAJI, MINUTE_ONES_KANA, MINUTE_ONES_SUFFIX_KANA, MINUTE_ONES_ROMAJI, MINUTE_ONES_SUFFIX_ROMAJI, MINUTE_TENS_KANA, MINUTE_TENS_ROMAJI, MINUTE_TENS_KANA_CONTRACTED, MINUTE_TENS_ROMAJI_CONTRACTED, minuteToKana, minuteToRomaji, timeToKana, timeToRomaji, COUNTER_ITEM_UNITS, COUNTER_TENS_JP, COUNTER_TENS_ROMAJI, COUNTER_TENS_MULT_JP, COUNTER_TENS_MULT_ROMAJI, COUNTER_COMPOUND_ONES_OVERRIDE, counterReading },
 };
