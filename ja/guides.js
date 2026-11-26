@@ -575,15 +575,17 @@ function sgReadScrollTo(el) {
   if (r.top < 70 || r.bottom > bottom) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
-async function sgReadWake(on) {
-  if (!sgRead) return;
+// Keep the screen on while reading or playing (r: sgRead or tp).
+async function sgWake(r, on) {
+  if (!r) return;
   try {
-    if (on && !sgRead.lock && navigator.wakeLock) {
-      sgRead.lock = await navigator.wakeLock.request('screen');
-      if (!sgRead || !sgRead.playing) { sgRead && sgRead.lock && sgRead.lock.release(); if (sgRead) sgRead.lock = null; }
-    } else if (!on && sgRead.lock) { const l = sgRead.lock; sgRead.lock = null; l.release(); }
+    if (on && !r.lock && navigator.wakeLock) {
+      const lock = await navigator.wakeLock.request('screen');
+      if (r.playing && !r.lock) r.lock = lock; else lock.release();
+    } else if (!on && r.lock) { const l = r.lock; r.lock = null; l.release(); }
   } catch (e) { /* no wake lock here - the screen may dim on its own */ }
 }
+function sgReadWake(on) { return sgWake(sgRead, on); }
 
 function sgReaderPlay() {
   if (!sgRead) return;
@@ -758,3 +760,187 @@ document.addEventListener('click', e => {
 });
 // Away from the app: stop (the voice is cut off anyway), keep the place.
 document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') sgReaderPause(); });
+
+// --- Play through a word list (26 Nov 2026, Andrew) ---------------------------
+// On a word list's tiles: each word in turn lit, its bubble up (the kana
+// drawn, the romaji, the English) and the word said - then the next. For
+// watching at the screen, like Read it to me: reading the kana, then hearing
+// it. Pace (Andrew's guess from the guide reader, 3-4 s a word): a short
+// pause to try reading it, the word said, then the bubble held for a while
+// once both the voice and the drawing have finished - longer words get
+// longer by themselves, plus a little per kana. The speed button stretches
+// or shrinks the pauses (not the voice). Stops at the end of the list.
+// Paused, the step buttons (or a tap on a tile) show and say one word at a
+// time. While the bar is open a tap on a tile means "from here", not
+// "select for a drill". Nothing is scored or stored except the speed.
+
+const TP_SPEED_KEY = APP.storagePrefix + 'TilePlaySpeed';
+const TP_LEAD_MS = 750, TP_HOLD_MS = 1600, TP_PER_KANA_MS = 120;
+let tp = null;   // { pos, playing, gen, tile, utter, lock } while the bar is open
+
+function tpSpeed() {
+  try { const v = parseFloat(localStorage.getItem(TP_SPEED_KEY)); if (SG_READ_SPEEDS.includes(v)) return v; } catch (e) { /* private mode */ }
+  return 1;
+}
+function tpTiles() { return [...document.querySelectorAll('#vocab-tile-grid .kana-ref-card')]; }
+function tpItems() { return vocabTileCategory ? resolveVocabCategory(vocabTileCategory).items : []; }
+
+function tpOpen() {
+  if (!tpTiles().length) return;
+  if (!tp) {
+    tp = { pos: 0, playing: false, gen: 0, tile: null, utter: null, lock: null };
+    document.getElementById('screen-vocab-tile-selection').classList.add('tp-on');
+    document.getElementById('tp-bar').classList.add('show');
+  }
+  tpSync();
+  tpPlay();
+}
+
+function tpClose() {
+  if (!tp) return;
+  tpPause();
+  tpUnlight();
+  tp = null;
+  const sc = document.getElementById('screen-vocab-tile-selection');
+  if (sc) sc.classList.remove('tp-on');
+  const bar = document.getElementById('tp-bar');
+  if (bar) bar.classList.remove('show');
+}
+
+function tpMsg(text) {
+  const m = document.getElementById('tp-msg');
+  if (m) { m.textContent = text || ''; m.style.display = text ? '' : 'none'; }
+}
+function tpSync() {
+  if (!tp) return;
+  const btn = document.getElementById('tp-play');
+  if (btn) { btn.innerHTML = tp.playing ? SG_ICON.pause : SG_ICON.play; btn.setAttribute('aria-label', tp.playing ? 'Pause' : 'Play'); }
+  const sp = document.getElementById('tp-speed');
+  if (sp) sp.textContent = tpSpeed() + '×';
+}
+
+function tpUnlight() {
+  if (tp && tp.tile) tp.tile.classList.remove('tp-current');
+  if (tp) tp.tile = null;
+  if (document.getElementById('tile-peek-bubble') && !document.querySelector('#vocab-tile-grid .tile-peeking')) hideTilePeekBubble();
+}
+
+// Light word i, put its bubble up and say it. Returns a promise for the
+// bubble's drawing having finished (or at once when there's nothing drawn).
+function tpShow(i, speak, onSaid) {
+  const tiles = tpTiles(), item = tpItems()[i], tile = tiles[i];
+  if (!tile || !item) return Promise.resolve();
+  tpUnlight();
+  tp.pos = i; tp.tile = tile;
+  tile.classList.add('tp-current');
+  // Room above the tile for its bubble, and clear of the bar: the page
+  // jumps (no smooth scroll) so the bubble lands next to the tile.
+  const r = tile.getBoundingClientRect();
+  const bar = document.getElementById('tp-bar');
+  const bottom = window.innerHeight - (bar ? bar.offsetHeight : 0) - 24;
+  if (r.top < 150 || r.bottom > bottom) tile.scrollIntoView({ block: 'center' });
+  const b = showTilePeekBubble(tile, item);
+  if (speak) tpSay(item, onSaid); else if (onSaid) onSaid();
+  return Promise.resolve(b && b.drawn).catch(() => {});
+}
+
+function tpSay(item, done) {
+  if (!SPEECH_SUPPORTED || !soundAllowed()) { if (done) setTimeout(done, 600); return; }
+  const gen = tp.gen;
+  cancelSpeechIfBusy();
+  const u = new SpeechSynthesisUtterance(item.speakAs || item.jp);
+  u.lang = LANG.code;
+  const v = LANG.pickVoice(window.speechSynthesis.getVoices()).voice;
+  if (v) u.voice = v;
+  u.rate = LANG.rate || 0.9;
+  tp.utter = u;
+  let fin = false;
+  const finish = () => { if (fin) return; fin = true; clearTimeout(cap); if (done && tp && gen === tp.gen) done(); };
+  u.onend = finish;
+  u.onerror = e => {
+    // Cut off by holding a word (its own bubble speaks it): stop here.
+    if (e && (e.error === 'interrupted' || e.error === 'canceled')) { fin = true; clearTimeout(cap); if (tp && gen === tp.gen) tpPause(); return; }
+    finish();
+  };
+  // Never wait forever on a lost end event.
+  const cap = setTimeout(finish, 5000);
+  setTimeout(() => { if (tp && gen === tp.gen) window.speechSynthesis.speak(u); }, 60);
+}
+
+function tpPlay() {
+  if (!tp) return;
+  if (tp.pos >= tpTiles().length) tp.pos = 0;
+  tpMsg(soundAllowed() ? '' : 'Sound is off: the words are shown but not said.');
+  tp.playing = true;
+  tpSync();
+  sgWake(tp, true);
+  tpRun(tp.pos, ++tp.gen);
+}
+
+function tpPause() {
+  if (!tp) return;
+  tp.gen++;
+  const was = tp.playing;
+  tp.playing = false;
+  if (was) cancelSpeechIfBusy();
+  sgWake(tp, false);
+  tpSync();
+}
+
+function tpToggle() { if (tp) { if (tp.playing) tpPause(); else tpPlay(); } }
+
+const tpWait = ms => new Promise(r => setTimeout(r, ms));
+async function tpRun(i, gen) {
+  const live = () => tp && gen === tp.gen && tp.playing;
+  const n = tpTiles().length;
+  while (live() && i < n) {
+    // Holding a word yourself takes over: stop here.
+    if (document.querySelector('#vocab-tile-grid .tile-peeking')) return tpPause();
+    const s = tpSpeed();
+    let said;
+    const saidP = new Promise(r => { said = r; });
+    const drawn = tpShow(i, false);
+    await tpWait(TP_LEAD_MS / s);
+    if (!live()) return;
+    tpSay(tpItems()[i], said);
+    await Promise.all([saidP, drawn]);
+    if (!live()) return;
+    const kana = [...(tpItems()[i].jp || '')].filter(c => /[぀-ヿ一-龯]/.test(c)).length;
+    await tpWait((TP_HOLD_MS + TP_PER_KANA_MS * kana) / s);
+    if (!live()) return;
+    i++;
+    if (i < n) {
+      if (document.querySelector('#vocab-tile-grid .tile-peeking')) return tpPause();
+      hideTilePeekBubble(); await tpWait(150);
+    }
+  }
+  if (live()) { tpPause(); tp.pos = 0; tpMsg('End of the list. Play starts it again.'); }
+}
+
+// A word: from here if playing, or shown and said on its own if paused.
+function tpGo(i) {
+  if (!tp) return;
+  const n = tpTiles().length;
+  if (i < 0 || i >= n) return;
+  tpMsg('');
+  if (tp.playing) { tp.gen++; cancelSpeechIfBusy(); tp.pos = i; tpRun(i, tp.gen); }
+  else { tp.gen++; tpShow(i, true); }
+}
+function tpStep(step) { if (tp) tpGo(tp.pos + step); }
+function tpSpeedNext() {
+  const i = SG_READ_SPEEDS.indexOf(tpSpeed());
+  try { localStorage.setItem(TP_SPEED_KEY, String(SG_READ_SPEEDS[(i + 1) % SG_READ_SPEEDS.length])); } catch (e) { /* private mode */ }
+  tpSync();
+}
+
+// While the bar is open a tap on a tile is "this word" (caught before the
+// tile's own select-for-drill tap).
+document.addEventListener('click', e => {
+  if (!tp) return;
+  const tile = e.target.closest && e.target.closest('#vocab-tile-grid .kana-ref-card');
+  if (!tile) return;
+  e.stopPropagation(); e.preventDefault();
+  if (Date.now() < tilePeekSuppressClickUntil) return;
+  tpGo(tpTiles().indexOf(tile));
+}, true);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') tpPause(); });

@@ -1084,7 +1084,9 @@ function showTilePeekBubble(tile, item) {
     const dx = (left + bw / 2) - (r.left + r.width / 2), dy = (top + bh / 2) - (r.top + r.height / 2);
     arrow.textContent = Math.abs(dy) >= Math.abs(dx) ? (dy < 0 ? '↑' : '↓') : (dx < 0 ? '←' : '→');
   }
-  if (afterPlaced) afterPlaced();
+  // b.drawn: the app's after-step's result (Japanese: a promise for the
+  // kana having been drawn - Play through waits for it).
+  if (afterPlaced) b.drawn = afterPlaced();
   return b;
 }
 function hideTilePeekBubble() {
